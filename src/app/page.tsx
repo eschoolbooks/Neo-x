@@ -8,7 +8,7 @@ import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ESchoolBookLogo } from '@/components/icons';
-import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users, Zap } from 'lucide-react';
+import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap } from 'lucide-react';
 import CountUp from 'react-countup';
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
@@ -83,6 +83,7 @@ export default function Home() {
           </a>
           <div className="hidden md:flex items-center gap-8">
             <a href="#vision" className="hover:text-primary transition-colors">Our Vision</a>
+            <a href="#ema-project" className="hover:text-primary transition-colors">AI Project</a>
             <a href="#impact" className="hover:text-primary transition-colors">Impact</a>
             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
@@ -168,21 +169,6 @@ export default function Home() {
             </div>
         </section>
 
-        {/* Impact Section */}
-        <section id="impact" className="py-20 lg:py-32">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Impact, By the Numbers</h2>
-                <p className="max-w-2xl mx-auto text-muted-foreground mb-16">
-                    Every contribution, big or small, helps us grow our reach and transform more lives.
-                </p>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <StatCard icon={<Users className="w-12 h-12" />} value={15} label="Passionate Team Members" />
-                    <StatCard icon={<Book className="w-12 h-12" />} value={5000} suffix="+" label="Free Textbooks Provided" />
-                    <StatCard icon={<Leaf className="w-12 h-12" />} value={1000} suffix="+" label="Trees Saved" />
-                </div>
-            </div>
-        </section>
-
         {/* Vision Section */}
         <section id="vision" className="py-20 lg:py-32 bg-card/30">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -197,6 +183,89 @@ export default function Home() {
                     <FeatureCard icon={<Leaf className="w-10 h-10"/>} title="Sustainable Edge" description="By reducing the demand for printed textbooks, we champion an eco-friendly approach, saving countless trees." delay={0.2} />
                     <FeatureCard icon={<Heart className="w-10 h-10"/>} title="Empowering Students" description="Currently serving Kerala students, we are dedicated to fostering a love for learning and creating a generation of confident individuals." delay={0.4} />
                  </div>
+            </div>
+        </section>
+
+        {/* AI EMA Project Section */}
+        <section id="ema-project" className="py-20 lg:py-32">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+                        Introducing <span className="text-primary">Project EMA</span>
+                    </h2>
+                    <p className="max-w-3xl mx-auto text-muted-foreground">
+                        Project EMA (Educational Mentor Assistant) is our groundbreaking AI initiative to provide personalized tutoring for every student, making quality education accessible 24/7.
+                    </p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.7 }}
+                    >
+                        <Image 
+                            src="https://placehold.co/600x500.png" 
+                            alt="AI EMA Project illustration" 
+                            width={600} 
+                            height={500} 
+                            className="rounded-xl shadow-2xl" 
+                            data-ai-hint="futuristic robot education" 
+                        />
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: 50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.7, delay: 0.2 }}
+                    >
+                        <h3 className="text-2xl font-bold mb-6">The Future of Learning, Personalized.</h3>
+                        <ul className="space-y-6">
+                            <li className="flex items-start">
+                                <div className="flex-shrink-0">
+                                    <CheckCircle className="h-7 w-7 text-accent" />
+                                </div>
+                                <div className="ml-4">
+                                    <h4 className="text-lg font-semibold text-foreground">Personalized Learning Paths</h4>
+                                    <p className="text-muted-foreground mt-1">AI adapts to each student's pace and style, offering tailored exercises and explanations to ensure no one is left behind.</p>
+                                </div>
+                            </li>
+                            <li className="flex items-start">
+                                 <div className="flex-shrink-0">
+                                    <CheckCircle className="h-7 w-7 text-accent" />
+                                </div>
+                                <div className="ml-4">
+                                    <h4 className="text-lg font-semibold text-foreground">24/7 Tutoring Support</h4>
+                                    <p className="text-muted-foreground mt-1">Learning support is available anytime, anywhere. EMA provides instant help with homework, concepts, and exam preparation.</p>
+                                </div>
+                            </li>
+                            <li className="flex items-start">
+                                 <div className="flex-shrink-0">
+                                    <CheckCircle className="h-7 w-7 text-accent" />
+                                </div>
+                                <div className="ml-4">
+                                    <h4 className="text-lg font-semibold text-foreground">Interactive & Engaging</h4>
+                                    <p className="text-muted-foreground mt-1">Goes beyond static PDFs with interactive quizzes, gamified lessons, and instant feedback to make learning genuinely fun.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </motion.div>
+                </div>
+            </div>
+        </section>
+
+        {/* Impact Section */}
+        <section id="impact" className="py-20 lg:py-32">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Impact, By the Numbers</h2>
+                <p className="max-w-2xl mx-auto text-muted-foreground mb-16">
+                    Every contribution, big or small, helps us grow our reach and transform more lives.
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <StatCard icon={<Users className="w-12 h-12" />} value={15} label="Passionate Team Members" />
+                    <StatCard icon={<Book className="w-12 h-12" />} value={5000} suffix="+" label="Free Textbooks Provided" />
+                    <StatCard icon={<Leaf className="w-12 h-12" />} value={1000} suffix="+" label="Trees Saved" />
+                </div>
             </div>
         </section>
 
