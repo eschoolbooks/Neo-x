@@ -162,7 +162,7 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex items-center gap-2">
-            <Image src="https://placehold.co/40x40.png" alt="E-SchoolBooks Logo" width={40} height={40} className="rounded-full" data-ai-hint="logo"/>
+            <Image src="https://i.imgur.com/4z1FvJg.png" alt="E-SchoolBooks Logo" width={40} height={40} className="rounded-full"/>
             <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
@@ -191,7 +191,7 @@ export default function Home() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
             >
-                <Image src="https://placehold.co/128x128.png" alt="E-SchoolBooks Logo" width={128} height={128} className="rounded-full mx-auto mb-6 animate-float" data-ai-hint="logo"/>
+                <Image src="https://i.imgur.com/4z1FvJg.png" alt="E-SchoolBooks Logo" width={128} height={128} className="rounded-full mx-auto mb-6 animate-float"/>
             </motion.div>
             <motion.h1 
                 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6"
@@ -562,7 +562,7 @@ export default function Home() {
         {/* Contact Section */}
         <footer id="contact" className="py-16 bg-background border-t border-border/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <Image src="https://placehold.co/80x80.png" alt="E-SchoolBooks Logo" width={80} height={80} className="rounded-full mx-auto mb-4" data-ai-hint="logo"/>
+                <Image src="https://i.imgur.com/4z1FvJg.png" alt="E-SchoolBooks Logo" width={80} height={80} className="rounded-full mx-auto mb-4"/>
                 <h2 className="text-2xl font-bold mb-2">Join Us on This Journey</h2>
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
