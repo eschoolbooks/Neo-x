@@ -10,7 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { ESchoolBookLogo } from '@/components/icons';
 import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap, BrainCircuit, FileUp, Lightbulb, LoaderCircle, X, GraduationCap, Sparkles } from 'lucide-react';
 import CountUp from 'react-countup';
-import { predictExam, PredictExamOutput } from '@/ai/flows/predictExamFlow';
+import { predictExam } from '@/ai/flows/predictExamFlow';
+import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
