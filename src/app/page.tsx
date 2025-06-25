@@ -7,7 +7,6 @@ import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ESchoolBookLogo } from '@/components/icons';
 import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap, BrainCircuit, FileUp, Lightbulb, LoaderCircle, X, GraduationCap, Sparkles } from 'lucide-react';
 import CountUp from 'react-countup';
 import { predictExam } from '@/ai/flows/predictExamFlow';
@@ -163,7 +162,7 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex items-center gap-2">
-            <ESchoolBookLogo className="h-10 w-10 text-primary" />
+            <Image src="https://placehold.co/40x40.png" alt="E-SchoolBooks Logo" width={40} height={40} className="rounded-full" data-ai-hint="logo"/>
             <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
@@ -192,7 +191,7 @@ export default function Home() {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.8, ease: "easeOut" }}
             >
-                <ESchoolBookLogo className="h-32 w-32 text-primary mx-auto mb-6 animate-float" />
+                <Image src="https://placehold.co/128x128.png" alt="E-SchoolBooks Logo" width={128} height={128} className="rounded-full mx-auto mb-6 animate-float" data-ai-hint="logo"/>
             </motion.div>
             <motion.h1 
                 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6"
@@ -563,7 +562,7 @@ export default function Home() {
         {/* Contact Section */}
         <footer id="contact" className="py-16 bg-background border-t border-border/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <ESchoolBookLogo className="h-20 w-20 text-primary mx-auto mb-4" />
+                <Image src="https://placehold.co/80x80.png" alt="E-SchoolBooks Logo" width={80} height={80} className="rounded-full mx-auto mb-4" data-ai-hint="logo"/>
                 <h2 className="text-2xl font-bold mb-2">Join Us on This Journey</h2>
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
