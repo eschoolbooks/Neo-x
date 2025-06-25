@@ -1,15 +1,20 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { SVGProps } from 'react';
 import Image from 'next/image';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { ESchoolBookLogo } from '@/components/icons';
-import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap } from 'lucide-react';
+import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap, BrainCircuit, FileUp, Lightbulb, LoaderCircle, X, GraduationCap, Sparkles } from 'lucide-react';
 import CountUp from 'react-countup';
+import { predictExam, PredictExamOutput } from '@/ai/flows/predictExamFlow';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { Progress } from '@/components/ui/progress';
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
   const controls = useAnimation();
@@ -73,6 +78,85 @@ const FeatureCard = ({ icon, title, description, delay = 0 }: { icon: React.Reac
 };
 
 export default function Home() {
+    const [examType, setExamType] = useState('Plus 2');
+    const [textbooks, setTextbooks] = useState<File[]>([]);
+    const [questionPapers, setQuestionPapers] = useState<File[]>([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const [prediction, setPrediction] = useState<PredictExamOutput | null>(null);
+    const { toast } = useToast();
+    const resultsRef = useRef<HTMLDivElement>(null);
+
+    const fileToDataUri = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'textbooks' | 'questionPapers') => {
+        const newFiles = Array.from(e.target.files || []);
+        if (fileType === 'textbooks') {
+            setTextbooks(prev => [...prev, ...newFiles]);
+        } else {
+            setQuestionPapers(prev => [...prev, ...newFiles]);
+        }
+    };
+
+    const handleRemoveFile = (index: number, fileType: 'textbooks' | 'questionPapers') => {
+        if (fileType === 'textbooks') {
+            setTextbooks(prev => prev.filter((_, i) => i !== index));
+        } else {
+            setQuestionPapers(prev => prev.filter((_, i) => i !== index));
+        }
+    };
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (textbooks.length === 0 && questionPapers.length === 0) {
+            toast({
+                title: 'No files uploaded',
+                description: 'Please upload at least one textbook or question paper.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        setIsLoading(true);
+        setError(null);
+        setPrediction(null);
+
+        try {
+            const textbookPdfs = await Promise.all(textbooks.map(fileToDataUri));
+            const questionPaperPdfs = await Promise.all(questionPapers.map(fileToDataUri));
+
+            const result = await predictExam({
+                examType,
+                textbookPdfs,
+                questionPapers: questionPaperPdfs,
+            });
+
+            setPrediction(result);
+            setTimeout(() => {
+                resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, 100);
+
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+            setError(errorMessage);
+            toast({
+                title: 'Prediction Failed',
+                description: errorMessage,
+                variant: 'destructive',
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
   return (
     <div className="bg-background text-foreground overflow-x-hidden">
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
@@ -83,7 +167,7 @@ export default function Home() {
           </a>
           <div className="hidden md:flex items-center gap-8">
             <a href="#vision" className="hover:text-primary transition-colors">Our Vision</a>
-            <a href="#ema-project" className="hover:text-primary transition-colors">AI Project</a>
+            <a href="#ema-project" className="hover:text-primary transition-colors">AI Projects</a>
             <a href="#impact" className="hover:text-primary transition-colors">Impact</a>
             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
@@ -186,18 +270,20 @@ export default function Home() {
             </div>
         </section>
 
-        {/* AI EMA Project Section */}
+        {/* AI Projects Section */}
         <section id="ema-project" className="py-20 lg:py-32">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                        Introducing <span className="text-primary">Project EMA</span>
+                        Our AI Initiatives
                     </h2>
-                    <p className="max-w-3xl mx-auto text-muted-foreground">
-                        Project EMA (Educational Mentor Assistant) is our groundbreaking AI initiative to provide personalized tutoring for every student, making quality education accessible 24/7.
+                     <p className="max-w-3xl mx-auto text-muted-foreground">
+                        We are leveraging Artificial Intelligence to create groundbreaking tools that personalize and revolutionize the learning experience for every student.
                     </p>
                 </div>
-                <div className="grid md:grid-cols-2 gap-12 items-center">
+                
+                {/* Project EMA */}
+                <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
                     <motion.div
                         initial={{ opacity: 0, x: -50 }}
                         whileInView={{ opacity: 1, x: 0 }}
@@ -219,7 +305,8 @@ export default function Home() {
                         viewport={{ once: true, amount: 0.5 }}
                         transition={{ duration: 0.7, delay: 0.2 }}
                     >
-                        <h3 className="text-2xl font-bold mb-6">The Future of Learning, Personalized.</h3>
+                        <h3 className="text-2xl font-bold mb-2">Project EMA: Your Personal Tutor</h3>
+                        <p className="text-primary mb-6 font-semibold">Educational Mentor Assistant</p>
                         <ul className="space-y-6">
                             <li className="flex items-start">
                                 <div className="flex-shrink-0">
@@ -227,7 +314,7 @@ export default function Home() {
                                 </div>
                                 <div className="ml-4">
                                     <h4 className="text-lg font-semibold text-foreground">Personalized Learning Paths</h4>
-                                    <p className="text-muted-foreground mt-1">AI adapts to each student's pace and style, offering tailored exercises and explanations to ensure no one is left behind.</p>
+                                    <p className="text-muted-foreground mt-1">AI adapts to each student's pace and style, offering tailored exercises and explanations.</p>
                                 </div>
                             </li>
                             <li className="flex items-start">
@@ -236,7 +323,7 @@ export default function Home() {
                                 </div>
                                 <div className="ml-4">
                                     <h4 className="text-lg font-semibold text-foreground">24/7 Tutoring Support</h4>
-                                    <p className="text-muted-foreground mt-1">Learning support is available anytime, anywhere. EMA provides instant help with homework, concepts, and exam preparation.</p>
+                                    <p className="text-muted-foreground mt-1">Instant help with homework, concepts, and exam preparation, anytime, anywhere.</p>
                                 </div>
                             </li>
                             <li className="flex items-start">
@@ -245,7 +332,7 @@ export default function Home() {
                                 </div>
                                 <div className="ml-4">
                                     <h4 className="text-lg font-semibold text-foreground">Interactive & Engaging</h4>
-                                    <p className="text-muted-foreground mt-1">Goes beyond static PDFs with interactive quizzes, gamified lessons, and instant feedback to make learning genuinely fun.</p>
+                                    <p className="text-muted-foreground mt-1">Goes beyond static PDFs with interactive quizzes and gamified lessons.</p>
                                 </div>
                             </li>
                         </ul>
@@ -253,6 +340,162 @@ export default function Home() {
                 </div>
             </div>
         </section>
+
+        {/* Neo X AI Exam Forecaster Section */}
+        <section id="neo-x" className="py-20 lg:py-32 bg-card/30">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-2">
+                        Meet <span className="text-primary">Neo X</span>
+                    </h2>
+                     <p className="text-lg text-muted-foreground mb-4">Your AI Exam Forecaster</p>
+                    <p className="max-w-3xl mx-auto text-muted-foreground">
+                        Upload previous year's question papers and textbook PDFs. Neo X will analyze them, identify patterns, and predict the most likely topics for your upcoming exams.
+                    </p>
+                </div>
+
+                <Card className="max-w-4xl mx-auto shadow-2xl">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <BrainCircuit className="text-primary" />
+                            Create New Exam Prediction
+                        </CardTitle>
+                        <CardDescription>The more documents you provide, the more accurate the prediction.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleSubmit} className="space-y-8">
+                            {/* File Uploads */}
+                            <div className="grid md:grid-cols-2 gap-6">
+                                <div className="space-y-2">
+                                    <Label htmlFor="textbooks" className="text-lg font-semibold">Textbooks (PDF)</Label>
+                                    <div className="flex items-center justify-center w-full">
+                                        <label htmlFor="textbooks-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                                                <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                            </div>
+                                            <input id="textbooks-input" type="file" className="hidden" multiple accept=".pdf" onChange={(e) => handleFileChange(e, 'textbooks')} />
+                                        </label>
+                                    </div>
+                                    <div className="space-y-1 pt-2">
+                                        {textbooks.map((file, index) => (
+                                            <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
+                                                <span>{file.name}</span>
+                                                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(index, 'textbooks')}><X className="h-4 w-4" /></Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="question-papers" className="text-lg font-semibold">Question Papers (PDF)</Label>
+                                    <div className="flex items-center justify-center w-full">
+                                        <label htmlFor="question-papers-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted">
+                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                                                <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                            </div>
+                                            <input id="question-papers-input" type="file" className="hidden" multiple accept=".pdf" onChange={(e) => handleFileChange(e, 'questionPapers')} />
+                                        </label>
+                                    </div>
+                                     <div className="space-y-1 pt-2">
+                                        {questionPapers.map((file, index) => (
+                                            <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
+                                                <span>{file.name}</span>
+                                                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(index, 'questionPapers')}><X className="h-4 w-4" /></Button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Exam Type Selection */}
+                            <div className="space-y-3">
+                                <Label className="text-lg font-semibold">Select Exam Type</Label>
+                                <RadioGroup value={examType} onValueChange={setExamType} className="flex flex-wrap gap-4">
+                                    {['Plus 2', 'PSC', 'NEET', 'JEE', 'Custom'].map(type => (
+                                        <div key={type} className="flex items-center space-x-2">
+                                            <RadioGroupItem value={type} id={`r-${type}`} />
+                                            <Label htmlFor={`r-${type}`}>{type}</Label>
+                                        </div>
+                                    ))}
+                                </RadioGroup>
+                            </div>
+
+                            {/* Submit Button */}
+                            <div>
+                                <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+                                    {isLoading ? (
+                                        <>
+                                            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
+                                            Analyzing...
+                                        </>
+                                    ) : (
+                                        'Predict My Exam'
+                                    )}
+                                </Button>
+                            </div>
+                        </form>
+                    </CardContent>
+                </Card>
+
+                {/* Results Section */}
+                <div ref={resultsRef}>
+                    {prediction && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5 }}
+                          className="mt-12"
+                        >
+                            <Card className="shadow-2xl">
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-3 text-2xl">
+                                        <Sparkles className="text-primary"/>
+                                        Prediction Results for {examType}
+                                    </CardTitle>
+                                    <CardDescription>Here are the topics and recommendations generated by Neo X.</CardDescription>
+                                </CardHeader>
+                                <CardContent className="grid md:grid-cols-2 gap-8">
+                                    {/* Predicted Topics */}
+                                    <div className="space-y-4">
+                                        <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
+                                        <div className="space-y-4">
+                                            {prediction.predictedTopics.map((item, index) => (
+                                                <Card key={index} className="bg-background">
+                                                    <CardHeader className='pb-2'>
+                                                        <CardTitle className="text-lg">{item.topic}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-sm text-muted-foreground mb-3">{item.reason}</p>
+                                                        <div className='flex items-center gap-2'>
+                                                            <Progress value={item.confidence || 0} className="h-2" />
+                                                            <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {/* Study Recommendations */}
+                                    <div className="space-y-4">
+                                        <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
+                                        <ul className="space-y-3">
+                                            {prediction.studyRecommendations.map((rec, index) => (
+                                                <li key={index} className="flex items-start gap-3">
+                                                    <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
+                                                    <span className="text-muted-foreground">{rec}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </motion.div>
+                    )}
+                </div>
+            </div>
+        </section>
+
 
         {/* Impact Section */}
         <section id="impact" className="py-20 lg:py-32">
