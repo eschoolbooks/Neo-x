@@ -10,32 +10,29 @@ export function ESchoolBookLogo(props: SVGProps<SVGSVGElement>) {
       {...props}
     >
         {/* Rays */}
-        <g transform="translate(50, 50)" stroke="currentColor" strokeWidth="4" strokeLinecap="round">
-          <line y1="-32" y2="-42" transform="rotate(0)" />
-          <line y1="-32" y2="-42" transform="rotate(30)" />
-          <line y1="-32" y2="-42" transform="rotate(60)" />
-          <line y1="-32" y2="-42" transform="rotate(90)" />
-          <line y1="-32" y2="-42" transform="rotate(120)" />
-          <line y1="-32" y2="-42" transform="rotate(150)" />
-          <line y1="-32" y2="-42" transform="rotate(180)" />
-          <line y1="-32" y2="-42" transform="rotate(210)" />
-          <line y1="-32" y2="-42" transform="rotate(240)" />
-          <line y1="-32" y2="-42" transform="rotate(270)" />
-          <line y1="-32" y2="-42" transform="rotate(300)" />
-          <line y1="-32" y2="-42" transform="rotate(330)" />
+        <g transform="translate(50, 50)" stroke="currentColor" strokeWidth="6" strokeLinecap="round">
+            <line y1="-40" y2="-48" transform="rotate(0)" />
+            <line y1="-40" y2="-48" transform="rotate(45)" />
+            <line y1="-40" y2="-48" transform="rotate(90)" />
+            <line y1="-40" y2="-48" transform="rotate(135)" />
+            <line y1="-40" y2="-48" transform="rotate(180)" />
+            <line y1="-40" y2="-48" transform="rotate(225)" />
+            <line y1="-40" y2="-48" transform="rotate(270)" />
+            <line y1="-40" y2="-48" transform="rotate(315)" />
         </g>
         
         {/* Book */}
-        <g transform="translate(0, 5)" stroke="currentColor" fill="none" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
-          {/* Book outline */}
-          <path d="M30,25 h40 v30 c0,15 -20,15 -40,0 V25 Z" />
-          {/* Spine */}
-          <line x1="50" y1="25" x2="50" y2="58" />
-          {/* Face */}
-          <circle cx="43" cy="40" r="2" fill="currentColor" stroke="none" />
-          <circle cx="57" cy="40" r="2" fill="currentColor" stroke="none" />
-          {/* Smile */}
-          <path d="M43,48 q7,7 14,0" strokeWidth="4" />
+        <g transform="translate(0, 0)" stroke="currentColor" fill="none" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M25,30 Q50,25 75,30 V 70 Q50,75 25,70 V 30 Z" fill="hsl(var(--background))" />
+            <path d="M50,27.5 V 72.5" />
+            
+            {/* Face */}
+            <g fill="currentColor" stroke="none">
+                <circle cx="41" cy="48" r="2.5" />
+                <circle cx="59" cy="48" r="2.5" />
+            </g>
+            {/* Smile */}
+            <path d="M42,57 q8,8 16,0" strokeWidth="4" />
         </g>
     </svg>
   );
