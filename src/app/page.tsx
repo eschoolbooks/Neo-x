@@ -7,7 +7,7 @@ import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap, BrainCircuit, FileUp, Lightbulb, LoaderCircle, X, GraduationCap, Sparkles } from 'lucide-react';
+import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap, BrainCircuit, FileUp, Lightbulb, LoaderCircle, X, GraduationCap, Sparkles, MessageCircle } from 'lucide-react';
 import CountUp from 'react-countup';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
@@ -15,6 +15,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
+import { Chat } from '@/components/chat';
+import { chatWithNeo, type ChatWithNeoInput } from '@/ai/flows/chatFlow';
+
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
   const controls = useAnimation();
@@ -86,6 +89,13 @@ export default function Home() {
     const [prediction, setPrediction] = useState<PredictExamOutput | null>(null);
     const { toast } = useToast();
     const resultsRef = useRef<HTMLDivElement>(null);
+    const [isChatOpen, setIsChatOpen] = useState(false);
+    const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', content: string}[]>([]);
+    const [isChatting, setIsChatting] = useState(false);
+    
+    // Persist data URIs for chat
+    const [textbookDataUris, setTextbookDataUris] = useState<string[]>([]);
+    const [questionPaperDataUris, setQuestionPaperDataUris] = useState<string[]>([]);
 
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -96,20 +106,26 @@ export default function Home() {
         });
     };
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, fileType: 'textbooks' | 'questionPapers') => {
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'textbooks' | 'questionPapers') => {
         const newFiles = Array.from(e.target.files || []);
         if (fileType === 'textbooks') {
             setTextbooks(prev => [...prev, ...newFiles]);
+            const uris = await Promise.all(newFiles.map(fileToDataUri));
+            setTextbookDataUris(prev => [...prev, ...uris]);
         } else {
             setQuestionPapers(prev => [...prev, ...newFiles]);
+            const uris = await Promise.all(newFiles.map(fileToDataUri));
+            setQuestionPaperDataUris(prev => [...prev, ...uris]);
         }
     };
 
     const handleRemoveFile = (index: number, fileType: 'textbooks' | 'questionPapers') => {
         if (fileType === 'textbooks') {
             setTextbooks(prev => prev.filter((_, i) => i !== index));
+            setTextbookDataUris(prev => prev.filter((_, i) => i !== index));
         } else {
             setQuestionPapers(prev => prev.filter((_, i) => i !== index));
+            setQuestionPaperDataUris(prev => prev.filter((_, i) => i !== index));
         }
     };
 
@@ -129,13 +145,10 @@ export default function Home() {
         setPrediction(null);
 
         try {
-            const textbookPdfs = await Promise.all(textbooks.map(fileToDataUri));
-            const questionPaperPdfs = await Promise.all(questionPapers.map(fileToDataUri));
-
             const result = await predictExam({
                 examType,
-                textbookPdfs,
-                questionPapers: questionPaperPdfs,
+                textbookPdfs: textbookDataUris,
+                questionPapers: questionPaperDataUris,
             });
 
             setPrediction(result);
@@ -155,6 +168,37 @@ export default function Home() {
             setIsLoading(false);
         }
     };
+
+    const handleChatSubmit = async (query: string) => {
+      const newUserMessage = { role: 'user', content: query };
+      const newHistory = [...chatHistory, newUserMessage];
+      setChatHistory(newHistory);
+      setIsChatting(true);
+
+      try {
+        const input: ChatWithNeoInput = {
+          query,
+          history: chatHistory,
+          textbookPdfs: textbookDataUris,
+          questionPapers: questionPaperDataUris
+        };
+        const result = await chatWithNeo(input);
+        const newModelMessage = { role: 'model', content: result.response };
+        setChatHistory([...newHistory, newModelMessage]);
+
+      } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        const errorResponseMessage = {role: 'model', content: `Sorry, I ran into an error: ${errorMessage}`};
+        setChatHistory([...newHistory, errorResponseMessage]);
+         toast({
+            title: 'Chat Error',
+            description: errorMessage,
+            variant: 'destructive',
+        });
+      } finally {
+        setIsChatting(false);
+      }
+    }
 
 
   return (
@@ -577,6 +621,31 @@ export default function Home() {
             </div>
         </footer>
       </main>
+
+       {/* Chat FAB */}
+       <div className="fixed bottom-6 right-6 z-50">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 1 }}
+          >
+            <Button size="lg" className="rounded-full w-16 h-16 shadow-lg" onClick={() => setIsChatOpen(true)}>
+              <MessageCircle className="h-8 w-8" />
+            </Button>
+          </motion.div>
+        </div>
+
+      {/* Chat Window */}
+      <Chat 
+        isOpen={isChatOpen}
+        onClose={() => setIsChatOpen(false)}
+        messages={chatHistory}
+        onSendMessage={handleChatSubmit}
+        isSending={isChatting}
+        title="Chat with Neo X"
+        description={textbooks.length > 0 || questionPapers.length > 0 ? "Ask me anything about the uploaded documents!" : "Upload some documents to start chatting."}
+        logoUrl="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8"
+      />
     </div>
   );
 }
