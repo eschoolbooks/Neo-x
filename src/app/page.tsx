@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { SVGProps } from 'react';
 import Image from 'next/image';
-import { motion, useAnimation } from 'framer-motion';
+import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -81,6 +81,28 @@ const FeatureCard = ({ icon, title, description, delay = 0 }: { icon: React.Reac
     );
 };
 
+const slideVariants = {
+  enter: (direction: number) => {
+    return {
+      x: direction > 0 ? 1000 : -1000,
+      opacity: 0,
+    };
+  },
+  center: {
+    zIndex: 1,
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => {
+    return {
+      zIndex: 0,
+      x: direction < 0 ? 1000 : -1000,
+      opacity: 0,
+    };
+  },
+};
+
+
 export default function Home() {
     const [examType, setExamType] = useState('Plus 2');
     const [textbooks, setTextbooks] = useState<File[]>([]);
@@ -97,6 +119,43 @@ export default function Home() {
     // Persist data URIs for chat
     const [textbookDataUris, setTextbookDataUris] = useState<string[]>([]);
     const [questionPaperDataUris, setQuestionPaperDataUris] = useState<string[]>([]);
+
+    const [currentSlide, setCurrentSlide] = useState(0);
+
+    const slides = [
+      {
+        logo: "https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8",
+        title: <>Lighten Their Bags.<br /><span className="text-primary">Brighten Their Future.</span></>,
+        subtitle: "We're on a mission to save students from back pain and save nature through digital books. Join us in rewriting the future of education.",
+        buttons: [
+          { text: "Support Our Mission", href: "#donate", variant: "default", icon: <ArrowRight className="ml-2 h-5 w-5" /> },
+        ],
+      },
+      {
+        logo: "https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8",
+        title: <span className="text-primary">Taking Education beyond Boundaries</span>,
+        subtitle: "A mission to make students able to self-learn, choose their own future, and build a great nation by helping today's generation find their pathway.",
+        buttons: [
+          { text: "Support Our Mission", href: "#donate", variant: "default" },
+          { text: "Join Our Mission", href: "#contact", variant: "secondary" },
+        ],
+      },
+    ];
+
+    const [[page, direction], setPage] = useState([0, 0]);
+    const slideIndex = page % slides.length;
+
+    const paginate = (newDirection: number) => {
+      setPage([page + newDirection, newDirection]);
+    };
+    
+    useEffect(() => {
+        const interval = setInterval(() => {
+            paginate(1);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, [page]);
+
 
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -226,48 +285,78 @@ export default function Home() {
 
       <main>
         {/* Hero Section */}
-        <section className="relative min-h-screen flex items-center justify-center pt-20">
+        <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-950/20 to-background opacity-50"></div>
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <motion.div
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.8, ease: "easeOut" }}
-            >
-                <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="E-SchoolBooks Logo" width={128} height={128} className="rounded-full mx-auto mb-6 animate-float"/>
-            </motion.div>
-            <motion.h1 
-                className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              Lighten Their Bags.
-              <br />
-              <span className="text-primary">Brighten Their Future.</span>
-            </motion.h1>
-            <motion.p 
-                className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-            >
-              We're on a mission to save students from back pain and save nature through digital books. Join us in rewriting the future of education.
-            </motion.p>
-            <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-            >
-                <Button size="lg" asChild className="rounded-full text-lg px-10 py-6">
-                    <a href="#donate">
-                        Support Our Mission <ArrowRight className="ml-2 h-5 w-5" />
-                    </a>
-                </Button>
-            </motion.div>
+            <AnimatePresence initial={false} custom={direction}>
+              <motion.div
+                key={page}
+                custom={direction}
+                variants={slideVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{
+                  x: { type: "spring", stiffness: 300, damping: 30 },
+                  opacity: { duration: 0.2 },
+                }}
+                className="absolute inset-0 flex flex-col items-center justify-center"
+              >
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                    <Image src={slides[slideIndex].logo} alt="E-SchoolBooks Logo" width={128} height={128} className="rounded-full mx-auto mb-6 animate-float"/>
+                </motion.div>
+                <motion.h1 
+                    className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  {slides[slideIndex].title}
+                </motion.h1>
+                <motion.p 
+                    className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
+                >
+                  {slides[slideIndex].subtitle}
+                </motion.p>
+                <motion.div
+                    className="flex gap-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.6 }}
+                >
+                    {slides[slideIndex].buttons.map((button, index) => (
+                      <Button key={index} size="lg" asChild className="rounded-full text-lg px-10 py-6" variant={button.variant as any}>
+                          <a href={button.href}>
+                              {button.text} {button.icon}
+                          </a>
+                      </Button>
+                    ))}
+                </motion.div>
+              </motion.div>
+            </AnimatePresence>
           </div>
+          
+          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
+            {slides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setPage([index, index > slideIndex ? 1 : -1])}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  slideIndex === index ? 'bg-primary' : 'bg-muted'
+                }`}
+              />
+            ))}
+          </div>
+
         </section>
 
         {/* The Problem & Solution Section */}
