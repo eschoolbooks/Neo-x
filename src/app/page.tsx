@@ -16,7 +16,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Progress } from '@/components/ui/progress';
 import { Chat } from '@/components/chat';
-import { chatWithNeo, type ChatWithNeoInput } from '@/ai/flows/chatFlow';
+import { chatWithNeo } from '@/ai/flows/chatFlow';
+import type { ChatWithNeoInput } from '@/ai/flows/chatFlowSchemas';
 
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {

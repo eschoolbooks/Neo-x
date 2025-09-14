@@ -3,39 +3,16 @@
  * @fileOverview A conversational AI flow for chatting with Neo X.
  *
  * - chatWithNeo - A function that handles the conversational chat with Neo X.
- * - ChatWithNeoInput - The input type for the chatWithNeo function.
- * - ChatWithNeoOutput - The return type for the chatWithNeo function.
  */
 
 import {ai} from '@/ai/genkit';
 import {z} from 'zod';
-
-const ChatHistorySchema = z.object({
-    role: z.enum(['user', 'model']),
-    content: z.string(),
-});
-
-export const ChatWithNeoInputSchema = z.object({
-  query: z.string().describe('The user\'s message to Neo X.'),
-  textbookPdfs: z
-    .array(z.string())
-    .describe(
-      "An array of textbook PDFs as data URIs. Expected format: 'data:application/pdf;base64,<encoded_data>'."
-    ),
-  questionPapers: z
-    .array(z.string())
-    .describe(
-      "An array of previous year question paper PDFs as data URIs. Expected format: 'data:application/pdf;base64,<encoded_data>'."
-    ),
-  history: z.array(ChatHistorySchema).describe('The conversation history.'),
-});
-export type ChatWithNeoInput = z.infer<typeof ChatWithNeoInputSchema>;
-
-export const ChatWithNeoOutputSchema = z.object({
-  response: z.string().describe("Neo X's response to the user's query."),
-});
-export type ChatWithNeoOutput = z.infer<typeof ChatWithNeoOutputSchema>;
-
+import {
+  type ChatWithNeoInput,
+  ChatWithNeoInputSchema,
+  type ChatWithNeoOutput,
+  ChatWithNeoOutputSchema,
+} from './chatFlowSchemas';
 
 export async function chatWithNeo(input: ChatWithNeoInput): Promise<ChatWithNeoOutput> {
   return chatWithNeoFlow(input);
