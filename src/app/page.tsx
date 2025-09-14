@@ -82,24 +82,21 @@ const FeatureCard = ({ icon, title, description, delay = 0 }: { icon: React.Reac
 };
 
 const slideVariants = {
-  enter: (direction: number) => {
-    return {
-      x: direction > 0 ? 1000 : -1000,
-      opacity: 0,
-    };
-  },
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1,
-  },
-  exit: (direction: number) => {
-    return {
-      zIndex: 0,
-      x: direction < 0 ? 1000 : -1000,
-      opacity: 0,
-    };
-  },
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.3 } },
+    exit: { opacity: 0, transition: { staggerChildren: 0.1, staggerDirection: -1 } }
+};
+
+const itemVariants = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+    exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: 'easeIn' } }
+};
+
+const logoVariants = {
+    initial: { opacity: 0, scale: 0.5 },
+    animate: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 260, damping: 20, delay: 0.2 } },
+    exit: { opacity: 0, scale: 0.5, transition: { duration: 0.3, ease: 'easeIn' } }
 };
 
 
@@ -119,8 +116,6 @@ export default function Home() {
     // Persist data URIs for chat
     const [textbookDataUris, setTextbookDataUris] = useState<string[]>([]);
     const [questionPaperDataUris, setQuestionPaperDataUris] = useState<string[]>([]);
-
-    const [currentSlide, setCurrentSlide] = useState(0);
 
     const slides = [
       {
@@ -142,11 +137,11 @@ export default function Home() {
       },
     ];
 
-    const [[page, direction], setPage] = useState([0, 0]);
+    const [page, setPage] = useState(0);
     const slideIndex = page % slides.length;
 
     const paginate = (newDirection: number) => {
-      setPage([page + newDirection, newDirection]);
+        setPage(prevPage => (prevPage + newDirection + slides.length) % slides.length);
     };
     
     useEffect(() => {
@@ -154,7 +149,7 @@ export default function Home() {
             paginate(1);
         }, 5000);
         return () => clearInterval(interval);
-    }, [page]);
+    }, []);
 
 
     const fileToDataUri = (file: File): Promise<string> => {
@@ -289,49 +284,34 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-950/20 to-background opacity-50"></div>
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-            <AnimatePresence initial={false} custom={direction}>
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 h-[500px] flex items-center justify-center">
+            <AnimatePresence mode="wait">
               <motion.div
                 key={page}
-                custom={direction}
                 variants={slideVariants}
-                initial="enter"
-                animate="center"
+                initial="initial"
+                animate="animate"
                 exit="exit"
-                transition={{
-                  x: { type: "spring", stiffness: 300, damping: 30 },
-                  opacity: { duration: 0.2 },
-                }}
-                className="absolute inset-0 flex flex-col items-center justify-center"
+                className="w-full"
               >
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.8, ease: "easeOut" }}
-                >
-                    <Image src={slides[slideIndex].logo} alt="E-SchoolBooks Logo" width={128} height={128} className="rounded-full mx-auto mb-6 animate-float"/>
-                </motion.div>
+                  <motion.div variants={logoVariants} className="flex justify-center">
+                      <Image src={slides[slideIndex].logo} alt="E-SchoolBooks Logo" width={128} height={128} className="rounded-full mx-auto mb-6 animate-float"/>
+                  </motion.div>
                 <motion.h1 
+                    variants={itemVariants}
                     className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.2 }}
                 >
                   {slides[slideIndex].title}
                 </motion.h1>
                 <motion.p 
+                    variants={itemVariants}
                     className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.4 }}
                 >
                   {slides[slideIndex].subtitle}
                 </motion.p>
                 <motion.div
-                    className="flex gap-4"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.6 }}
+                    variants={itemVariants}
+                    className="flex justify-center gap-4"
                 >
                     {slides[slideIndex].buttons.map((button, index) => (
                       <Button key={index} size="lg" asChild className="rounded-full text-lg px-10 py-6" variant={button.variant as any}>
@@ -349,7 +329,7 @@ export default function Home() {
             {slides.map((_, index) => (
               <button
                 key={index}
-                onClick={() => setPage([index, index > slideIndex ? 1 : -1])}
+                onClick={() => setPage(index)}
                 className={`w-3 h-3 rounded-full transition-colors ${
                   slideIndex === index ? 'bg-primary' : 'bg-muted'
                 }`}
@@ -739,3 +719,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
