@@ -128,7 +128,7 @@ export default function Home() {
       },
       {
         logo: "https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8",
-        title: <span className="text-primary">Taking Education beyond Boundaries</span>,
+        title: <>Taking Education<br /><span className="text-primary">beyond Boundaries</span></>,
         subtitle: "A mission to make students able to self-learn, choose their own future, and build a great nation by helping today's generation find their pathway.",
         buttons: [
           { text: "Support Our Mission", href: "#donate", variant: "default" },
@@ -720,5 +720,7 @@ export default function Home() {
     </div>
   );
 }
+
+    
 
     
