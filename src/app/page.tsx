@@ -373,8 +373,9 @@ export default function Home() {
                  <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Vision for a Better World</h2>
                     <p className="max-w-3xl mx-auto text-muted-foreground">
-                        At E-SchoolBooks, we believe education is the cornerstone of a bright future. Our vision is to bridge the gap between students and learning resources, ensuring every child has access to quality educational materials.
+                        "At E-SchoolBooks, we believe education is the cornerstone of a bright future. We strive to bridge the gap between students and learning resources, ensuring every child has access to quality educational materials. We stand for saving our earth through nature-blended education beyond boundaries. Our vision is to make students able to self-learn, choose their own future, and build a great nation by empowering today’s generation to find their own pathway—leading to the next society."
                     </p>
+                    <p className="max-w-3xl mx-auto text-muted-foreground mt-4 font-semibold italic">- Founder Kevin Anjo</p>
                 </div>
                  <div className="grid md:grid-cols-3 gap-8 text-center">
                     <FeatureCard icon={<Zap className="w-10 h-10"/>} title="Innovative Learning" description="We create an interactive digital experience that mirrors physical books, making learning more engaging and accessible." delay={0} />
