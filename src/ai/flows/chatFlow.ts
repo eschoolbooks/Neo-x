@@ -20,7 +20,7 @@ export async function chatWithNeo(input: ChatWithNeoInput): Promise<ChatWithNeoO
 
 const chatPrompt = ai.definePrompt({
   name: 'chatWithNeoPrompt',
-  model: 'gemini-1.5-flash',
+  model: 'gemini-1.5-pro',
   input: {schema: ChatWithNeoInputSchema},
   output: {schema: z.object({ response: z.string() })},
   prompt: `You are Neo X, an advanced AI exam assistant from E-SchoolBooks. Your personality is helpful, encouraging, and an expert in educational topics. Your goal is to help the user understand concepts and answer their questions based on the provided documents and your general knowledge.
