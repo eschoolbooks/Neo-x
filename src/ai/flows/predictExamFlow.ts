@@ -20,7 +20,7 @@ export async function predictExam(input: PredictExamInput): Promise<PredictExamO
 
 const predictExamPrompt = ai.definePrompt({
   name: 'predictExamPrompt',
-  model: 'gemini-1.5-pro',
+  model: 'gemini-pro',
   input: {schema: PredictExamInputSchema},
   output: {schema: PredictExamOutputSchema},
   prompt: `You are Neo X, an advanced AI exam forecaster specializing in predicting questions for competitive exams in India. Your goal is to analyze the provided materials and predict the most important topics for the upcoming '{{examType}}' exam.
