@@ -22,7 +22,7 @@ const chatPrompt = ai.definePrompt({
   name: 'chatWithNeoPrompt',
   model: 'gemini-pro',
   input: {schema: ChatWithNeoInputSchema},
-  output: {schema: z.object({ response: z.string() })},
+  output: {schema: ChatWithNeoOutputSchema},
   prompt: `You are Neo X, an advanced AI exam assistant from E-SchoolBooks. Your personality is helpful, encouraging, and an expert in educational topics. Your goal is to help the user understand concepts and answer their questions based on the provided documents and your general knowledge.
 
 Keep your answers concise and easy to understand.
