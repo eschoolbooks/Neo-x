@@ -7,7 +7,7 @@ import { motion, useAnimation, AnimatePresence } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap, BrainCircuit, FileUp, Lightbulb, LoaderCircle, X, GraduationCap, Sparkles, MessageCircle } from 'lucide-react';
+import { ArrowRight, Book, CheckCircle, Heart, Leaf, Mail, Phone, Users, Zap, BrainCircuit, FileUp, Lightbulb, LoaderCircle, X, GraduationCap, Sparkles, MessageCircle, FileQuestion, MessageSquare } from 'lucide-react';
 import CountUp from 'react-countup';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
@@ -18,6 +18,9 @@ import { Progress } from '@/components/ui/progress';
 import { Chat } from '@/components/chat';
 import { chatWithNeo } from '@/ai/flows/chatFlow';
 import type { ChatWithNeoInput } from '@/ai/flows/chatFlowSchemas';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { generateQuiz } from '@/ai/flows/generateQuizFlow';
+import type { Quiz, QuizQuestion } from '@/ai/flows/generateQuizSchemas';
 
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
@@ -113,9 +116,18 @@ export default function Home() {
     const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', content: string}[]>([]);
     const [isChatting, setIsChatting] = useState(false);
     
-    // Persist data URIs for chat
+    // Persist data URIs
     const [textbookDataUris, setTextbookDataUris] = useState<string[]>([]);
     const [questionPaperDataUris, setQuestionPaperDataUris] = useState<string[]>([]);
+
+    // Quiz State
+    const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
+    const [quiz, setQuiz] = useState<Quiz | null>(null);
+    const [quizError, setQuizError] = useState<string | null>(null);
+    const [numQuestions, setNumQuestions] = useState(5);
+    const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+    const [userAnswers, setUserAnswers] = useState<string[]>([]);
+    const [quizScore, setQuizScore] = useState<number | null>(null);
 
     const slides = [
       {
@@ -184,7 +196,7 @@ export default function Home() {
         }
     };
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    const handleSubmitPrediction = async (e: React.FormEvent) => {
         e.preventDefault();
         if (textbooks.length === 0 && questionPapers.length === 0) {
             toast({
@@ -223,6 +235,85 @@ export default function Home() {
             setIsLoading(false);
         }
     };
+
+    const handleGenerateQuiz = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (textbooks.length === 0 && questionPapers.length === 0) {
+            toast({
+                title: 'No files uploaded',
+                description: 'Please upload at least one textbook or question paper.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
+        setIsGeneratingQuiz(true);
+        setQuizError(null);
+        setQuiz(null);
+        setQuizScore(null);
+        setUserAnswers([]);
+        setCurrentQuestionIndex(0);
+
+        try {
+            const result = await generateQuiz({
+                numQuestions,
+                textbookPdfs: textbookDataUris,
+                questionPapers: questionPaperDataUris,
+            });
+
+            if (result.questions.length === 0) {
+                setQuizError("The AI couldn't generate a quiz from the provided documents. Try different files.");
+                toast({
+                    title: 'Quiz Generation Failed',
+                    description: "The AI couldn't generate a quiz. Please try different documents.",
+                    variant: 'destructive',
+                });
+            } else {
+                 setQuiz(result);
+            }
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+            setQuizError(errorMessage);
+            toast({
+                title: 'Quiz Generation Failed',
+                description: errorMessage,
+                variant: 'destructive',
+            });
+        } finally {
+            setIsGeneratingQuiz(false);
+        }
+    };
+
+     const handleAnswerSelect = (answer: string) => {
+        const newAnswers = [...userAnswers];
+        newAnswers[currentQuestionIndex] = answer;
+        setUserAnswers(newAnswers);
+    };
+
+    const handleNextQuestion = () => {
+        if (quiz && currentQuestionIndex < quiz.questions.length - 1) {
+            setCurrentQuestionIndex(prev => prev + 1);
+        }
+    };
+
+    const handleFinishQuiz = () => {
+        if (!quiz) return;
+        let score = 0;
+        quiz.questions.forEach((q, index) => {
+            if (userAnswers[index] === q.correctAnswer) {
+                score++;
+            }
+        });
+        setQuizScore((score / quiz.questions.length) * 100);
+    };
+
+    const handleTryAgain = () => {
+        setQuiz(null);
+        setQuizScore(null);
+        setCurrentQuestionIndex(0);
+        setUserAnswers([]);
+    };
+
 
     const handleChatSubmit = async (query: string) => {
       const newUserMessage = { role: 'user', content: query };
@@ -266,7 +357,7 @@ export default function Home() {
           </a>
           <div className="hidden md:flex items-center gap-8">
             <a href="#vision" className="hover:text-primary transition-colors">Our Vision</a>
-            <a href="#ema-project" className="hover:text-primary transition-colors">AI Projects</a>
+            <a href="#ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
             <a href="#impact" className="hover:text-primary transition-colors">Impact</a>
             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
@@ -368,7 +459,7 @@ export default function Home() {
         </section>
 
         {/* Vision Section */}
-        <section id="vision" className="py-20 lg:py-32 bg-card/30">
+        <section id="vision" className="py-20 lg:py-32">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                  <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Vision for a Better World</h2>
@@ -385,146 +476,79 @@ export default function Home() {
             </div>
         </section>
 
-        {/* AI Projects Section */}
-        <section id="ema-project" className="py-20 lg:py-32">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-                        Our AI Initiatives
-                    </h2>
-                     <p className="max-w-3xl mx-auto text-muted-foreground">
-                        We are leveraging Artificial Intelligence to create groundbreaking tools that personalize and revolutionize the learning experience for every student.
-                    </p>
-                </div>
-                
-                {/* Project EMA */}
-                <div className="grid md:grid-cols-2 gap-12 items-center mb-24">
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.7 }}
-                    >
-                        <Image 
-                            src="https://placehold.co/600x500.png" 
-                            alt="AI EMA Project illustration" 
-                            width={600} 
-                            height={500} 
-                            className="rounded-xl shadow-2xl" 
-                            data-ai-hint="futuristic robot education" 
-                        />
-                    </motion.div>
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.7, delay: 0.2 }}
-                    >
-                        <h3 className="text-2xl font-bold mb-2">Project EMA: Your Personal Tutor</h3>
-                        <p className="text-primary mb-6 font-semibold">Educational Mentor Assistant</p>
-                        <ul className="space-y-6">
-                            <li className="flex items-start">
-                                <div className="flex-shrink-0">
-                                    <CheckCircle className="h-7 w-7 text-accent" />
-                                </div>
-                                <div className="ml-4">
-                                    <h4 className="text-lg font-semibold text-foreground">Personalized Learning Paths</h4>
-                                    <p className="text-muted-foreground mt-1">AI adapts to each student's pace and style, offering tailored exercises and explanations.</p>
-                                </div>
-                            </li>
-                            <li className="flex items-start">
-                                 <div className="flex-shrink-0">
-                                    <CheckCircle className="h-7 w-7 text-accent" />
-                                </div>
-                                <div className="ml-4">
-                                    <h4 className="text-lg font-semibold text-foreground">24/7 Tutoring Support</h4>
-                                    <p className="text-muted-foreground mt-1">Instant help with homework, concepts, and exam preparation, anytime, anywhere.</p>
-                                </div>
-                            </li>
-                            <li className="flex items-start">
-                                 <div className="flex-shrink-0">
-                                    <CheckCircle className="h-7 w-7 text-accent" />
-                                </div>
-                                <div className="ml-4">
-                                    <h4 className="text-lg font-semibold text-foreground">Interactive & Engaging</h4>
-                                    <p className="text-muted-foreground mt-1">Goes beyond static PDFs with interactive quizzes and gamified lessons.</p>
-                                </div>
-                            </li>
-                        </ul>
-                    </motion.div>
-                </div>
-            </div>
-        </section>
 
-        {/* Neo X AI Exam Forecaster Section */}
-        <section id="neo-x" className="py-20 lg:py-32 bg-card/30">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
+        {/* AI Hub Section */}
+        <section id="ai-hub" className="py-20 lg:py-32 bg-grid">
+             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                 <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-2">
-                        Meet <span className="text-primary">Neo X</span>
+                        Welcome to the <span className="text-primary">AI-Powered Study Hub</span>
                     </h2>
-                     <p className="text-lg text-muted-foreground mb-4">Your AI Exam Forecaster</p>
                     <p className="max-w-3xl mx-auto text-muted-foreground">
-                        Upload previous year's question papers and textbook PDFs. Neo X will analyze them, identify patterns, and predict the most likely topics for your upcoming exams.
+                        Meet Neo X, your personal Educational Mentor Assistant. Upload your textbooks and past question papers, then let Neo X help you predict exams, generate quizzes, and answer your toughest questions.
                     </p>
                 </div>
 
-                <Card className="max-w-4xl mx-auto shadow-2xl">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <BrainCircuit className="text-primary" />
-                            Create New Exam Prediction
-                        </CardTitle>
-                        <CardDescription>The more documents you provide, the more accurate the prediction.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={handleSubmit} className="space-y-8">
-                            {/* File Uploads */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                <div className="space-y-2">
-                                    <Label htmlFor="textbooks" className="text-lg font-semibold">Textbooks (PDF)</Label>
-                                    <div className="flex items-center justify-center w-full">
-                                        <label htmlFor="textbooks-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted">
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                                                <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                            </div>
-                                            <input id="textbooks-input" type="file" className="hidden" multiple accept=".pdf" onChange={(e) => handleFileChange(e, 'textbooks')} />
-                                        </label>
-                                    </div>
-                                    <div className="space-y-1 pt-2">
-                                        {textbooks.map((file, index) => (
-                                            <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
-                                                <span>{file.name}</span>
-                                                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(index, 'textbooks')}><X className="h-4 w-4" /></Button>
-                                            </div>
-                                        ))}
-                                    </div>
+                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                    <div className="space-y-2">
+                        <Label htmlFor="textbooks" className="text-lg font-semibold">Textbooks (PDF)</Label>
+                        <div className="flex items-center justify-center w-full">
+                            <label htmlFor="textbooks-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card/50 hover:bg-muted">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                                    <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="question-papers" className="text-lg font-semibold">Question Papers (PDF)</Label>
-                                    <div className="flex items-center justify-center w-full">
-                                        <label htmlFor="question-papers-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-background hover:bg-muted">
-                                            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                                                <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                            </div>
-                                            <input id="question-papers-input" type="file" className="hidden" multiple accept=".pdf" onChange={(e) => handleFileChange(e, 'questionPapers')} />
-                                        </label>
-                                    </div>
-                                     <div className="space-y-1 pt-2">
-                                        {questionPapers.map((file, index) => (
-                                            <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
-                                                <span>{file.name}</span>
-                                                <Button type="button" variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(index, 'questionPapers')}><X className="h-4 w-4" /></Button>
-                                            </div>
-                                        ))}
-                                    </div>
+                                <input id="textbooks-input" type="file" className="hidden" multiple accept=".pdf" onChange={(e) => handleFileChange(e, 'textbooks')} />
+                            </label>
+                        </div>
+                        <div className="space-y-1 pt-2">
+                            {textbooks.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
+                                    <span className="truncate pr-2">{file.name}</span>
+                                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => handleRemoveFile(index, 'textbooks')}><X className="h-4 w-4" /></Button>
                                 </div>
-                            </div>
-                            
-                            {/* Exam Type Selection */}
-                            <div className="space-y-3">
+                            ))}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <Label htmlFor="question-papers" className="text-lg font-semibold">Question Papers (PDF)</Label>
+                        <div className="flex items-center justify-center w-full">
+                            <label htmlFor="question-papers-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card/50 hover:bg-muted">
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                                    <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                </div>
+                                <input id="question-papers-input" type="file" className="hidden" multiple accept=".pdf" onChange={(e) => handleFileChange(e, 'questionPapers')} />
+                            </label>
+                        </div>
+                         <div className="space-y-1 pt-2">
+                            {questionPapers.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
+                                    <span className="truncate pr-2">{file.name}</span>
+                                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => handleRemoveFile(index, 'questionPapers')}><X className="h-4 w-4" /></Button>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+
+                <Card className="max-w-4xl mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
+                  <Tabs defaultValue="predictor" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3">
+                      <TabsTrigger value="predictor"><BrainCircuit className="w-4 h-4 mr-2"/>Exam Predictor</TabsTrigger>
+                      <TabsTrigger value="quiz"><FileQuestion className="w-4 h-4 mr-2"/>Quiz Generator</TabsTrigger>
+                      <TabsTrigger value="chat"><MessageSquare className="w-4 h-4 mr-2"/>Chat Tutor</TabsTrigger>
+                    </TabsList>
+                    
+                    {/* Exam Predictor Tab */}
+                    <TabsContent value="predictor">
+                      <CardHeader>
+                        <CardTitle>Exam Forecaster</CardTitle>
+                        <CardDescription>Analyze past papers and textbooks to predict the most likely exam topics.</CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                         <form onSubmit={handleSubmitPrediction} className="space-y-6">
+                             <div className="space-y-3">
                                 <Label className="text-lg font-semibold">Select Exam Type</Label>
                                 <RadioGroup value={examType} onValueChange={setExamType} className="flex flex-wrap gap-4">
                                     {['Plus 2', 'PSC', 'NEET', 'JEE', 'Custom'].map(type => (
@@ -535,25 +559,126 @@ export default function Home() {
                                     ))}
                                 </RadioGroup>
                             </div>
-
-                            {/* Submit Button */}
                             <div>
                                 <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
-                                    {isLoading ? (
-                                        <>
-                                            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                                            Analyzing...
-                                        </>
-                                    ) : (
-                                        'Predict My Exam'
-                                    )}
+                                    {isLoading ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Analyzing...</> : 'Predict My Exam'}
                                 </Button>
                             </div>
-                        </form>
-                    </CardContent>
+                         </form>
+                      </CardContent>
+                    </TabsContent>
+                    
+                    {/* Quiz Generator Tab */}
+                    <TabsContent value="quiz">
+                         <CardHeader>
+                            <CardTitle>AI Quiz Generator</CardTitle>
+                            <CardDescription>Test your knowledge by generating a quiz from your uploaded documents.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {!quiz && (
+                                <form onSubmit={handleGenerateQuiz} className="space-y-6">
+                                    <div className="space-y-3">
+                                        <Label htmlFor="num-questions" className="text-lg font-semibold">Number of Questions</Label>
+                                        <RadioGroup
+                                            value={String(numQuestions)}
+                                            onValueChange={(val) => setNumQuestions(Number(val))}
+                                            className="flex flex-wrap gap-4"
+                                        >
+                                            {[5, 10, 15, 20].map(num => (
+                                                <div key={num} className="flex items-center space-x-2">
+                                                    <RadioGroupItem value={String(num)} id={`q-${num}`} />
+                                                    <Label htmlFor={`q-${num}`}>{num}</Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    </div>
+                                    <Button type="submit" size="lg" className="w-full" disabled={isGeneratingQuiz}>
+                                        {isGeneratingQuiz ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Generating Quiz...</> : 'Start Quiz'}
+                                    </Button>
+                                </form>
+                            )}
+
+                             {quiz && !quizScore && (
+                                <div className="space-y-6">
+                                    <div className="text-center">
+                                        <h3 className="text-xl font-bold">{quiz.title}</h3>
+                                        <p className="text-muted-foreground">Question {currentQuestionIndex + 1} of {quiz.questions.length}</p>
+                                    </div>
+                                    <Progress value={((currentQuestionIndex + 1) / quiz.questions.length) * 100} />
+
+                                    <div className="space-y-4">
+                                        <p className="text-lg font-semibold">{quiz.questions[currentQuestionIndex].questionText}</p>
+                                        <RadioGroup onValueChange={handleAnswerSelect} value={userAnswers[currentQuestionIndex]} className="space-y-2">
+                                            {quiz.questions[currentQuestionIndex].options.map((option, i) => (
+                                                <div key={i} className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
+                                                    <RadioGroupItem value={option} id={`q${currentQuestionIndex}-opt${i}`} />
+                                                    <Label htmlFor={`q${currentQuestionIndex}-opt${i}`} className="w-full cursor-pointer">{option}</Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    </div>
+                                     <div className="flex justify-end">
+                                        {currentQuestionIndex < quiz.questions.length - 1 ? (
+                                            <Button onClick={handleNextQuestion} disabled={!userAnswers[currentQuestionIndex]}>Next</Button>
+                                        ) : (
+                                            <Button onClick={handleFinishQuiz} disabled={!userAnswers[currentQuestionIndex]}>Finish Quiz</Button>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+
+                             {quizScore !== null && (
+                                <div className="text-center space-y-6 flex flex-col items-center">
+                                    <h3 className="text-2xl font-bold">Quiz Complete!</h3>
+                                    <p className="text-lg">Your Score:</p>
+                                    <div className="relative w-32 h-32">
+                                        <svg className="w-full h-full" viewBox="0 0 36 36">
+                                            <path
+                                                className="stroke-current text-muted/50"
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                fill="none"
+                                                strokeWidth="3"
+                                            />
+                                            <path
+                                                className="stroke-current text-primary"
+                                                strokeDasharray={`${quizScore}, 100`}
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                fill="none"
+                                                strokeWidth="3"
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-3xl font-bold">{Math.round(quizScore)}%</span>
+                                        </div>
+                                    </div>
+                                    <Button onClick={handleTryAgain}>Try a New Quiz</Button>
+                                </div>
+                            )}
+
+                             {quizError && <p className="text-destructive text-center">{quizError}</p>}
+                        </CardContent>
+                    </TabsContent>
+
+                    {/* Chat Tutor Tab */}
+                    <TabsContent value="chat">
+                         <CardHeader>
+                            <CardTitle>Chat with Neo X</CardTitle>
+                            <CardDescription>Ask questions, clarify doubts, and get instant help with your studies.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                             <p className="text-center text-muted-foreground">
+                                Use the chat bubble at the bottom-right corner to talk with Neo X anytime!
+                            </p>
+                            <div className="flex justify-center mt-4">
+                                <Button onClick={() => setIsChatOpen(true)}>Open Chat</Button>
+                            </div>
+                        </CardContent>
+                    </TabsContent>
+                  </Tabs>
                 </Card>
 
-                {/* Results Section */}
+                {/* Prediction Results */}
                 <div ref={resultsRef}>
                     {prediction && (
                         <motion.div
@@ -608,7 +733,7 @@ export default function Home() {
                         </motion.div>
                     )}
                 </div>
-            </div>
+             </div>
         </section>
 
 
@@ -720,7 +845,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
-
-    

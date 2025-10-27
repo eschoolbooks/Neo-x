@@ -105,3 +105,12 @@ body {
     scroll-behavior: smooth;
   }
 }
+
+.bg-grid {
+    background-color: hsl(var(--background));
+    background-image:
+        linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+        linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 4rem 4rem;
+    animation: grid 15s linear infinite;
+}

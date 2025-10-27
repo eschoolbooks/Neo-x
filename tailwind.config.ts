@@ -35,8 +35,8 @@ export default {
           },
         },
         'grid': {
-          '0%': { transform: 'translateY(-50%)' },
-          '100%': { transform: 'translateY(0)' },
+          '0%': { backgroundPosition: '0% 50%' },
+          '100%': { backgroundPosition: '-100% 50%' },
         },
         'float': {
           '0%, 100%': { transform: 'translateY(0px)' },
