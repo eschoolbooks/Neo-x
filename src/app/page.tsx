@@ -316,7 +316,7 @@ export default function Home() {
 
 
     const handleChatSubmit = async (query: string) => {
-      const newUserMessage = { role: 'user', content: query };
+      const newUserMessage = { role: 'user' as const, content: query };
       const newHistory = [...chatHistory, newUserMessage];
       setChatHistory(newHistory);
       setIsChatting(true);
@@ -329,12 +329,12 @@ export default function Home() {
           questionPapers: questionPaperDataUris
         };
         const result = await chatWithNeo(input);
-        const newModelMessage = { role: 'model', content: result.response };
+        const newModelMessage = { role: 'model' as const, content: result.response };
         setChatHistory([...newHistory, newModelMessage]);
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-        const errorResponseMessage = {role: 'model', content: `Sorry, I ran into an error: ${errorMessage}`};
+        const errorResponseMessage = {role: 'model' as const, content: `Sorry, I ran into an error: ${errorMessage}`};
         setChatHistory([...newHistory, errorResponseMessage]);
          toast({
             title: 'Chat Error',
@@ -845,3 +845,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
