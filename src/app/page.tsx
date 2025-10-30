@@ -175,14 +175,21 @@ export default function Home() {
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'textbooks' | 'questionPapers') => {
         const newFiles = Array.from(e.target.files || []);
-        if (fileType === 'textbooks') {
-            setTextbooks(prev => [...prev, ...newFiles]);
+        try {
             const uris = await Promise.all(newFiles.map(fileToDataUri));
-            setTextbookDataUris(prev => [...prev, ...uris]);
-        } else {
-            setQuestionPapers(prev => [...prev, ...newFiles]);
-            const uris = await Promise.all(newFiles.map(fileToDataUri));
-            setQuestionPaperDataUris(prev => [...prev, ...uris]);
+            if (fileType === 'textbooks') {
+                setTextbooks(prev => [...prev, ...newFiles]);
+                setTextbookDataUris(prev => [...prev, ...uris]);
+            } else {
+                setQuestionPapers(prev => [...prev, ...newFiles]);
+                setQuestionPaperDataUris(prev => [...prev, ...uris]);
+            }
+        } catch (error) {
+            toast({
+                title: 'File Upload Error',
+                description: 'Failed to process files. Please try again.',
+                variant: 'destructive',
+            });
         }
     };
 
