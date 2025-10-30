@@ -151,17 +151,13 @@ export default function Home() {
 
     const [page, setPage] = useState(0);
     const slideIndex = page % slides.length;
-
-    const paginate = (newDirection: number) => {
-        setPage(prevPage => (prevPage + newDirection + slides.length) % slides.length);
-    };
     
     useEffect(() => {
         const interval = setInterval(() => {
-            paginate(1);
+            setPage(prevPage => (prevPage + 1) % slides.length);
         }, 5000);
         return () => clearInterval(interval);
-    }, []);
+    }, [slides.length]);
 
 
     const fileToDataUri = (file: File): Promise<string> => {
@@ -341,7 +337,7 @@ export default function Home() {
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-        const errorResponseMessage = {role: 'model' as const, content: `Sorry, I ran into an error: ${errorMessage}`};
+        const errorResponseMessage = { role: 'model' as const, content: `Sorry, I ran into an error: ${errorMessage}`};
         setChatHistory([...newHistory, errorResponseMessage]);
          toast({
             title: 'Chat Error',
@@ -412,7 +408,7 @@ export default function Home() {
                     className="flex justify-center gap-4"
                 >
                     {slides[slideIndex].buttons.map((button, index) => (
-                      <Button key={index} size="lg" asChild className="rounded-full text-lg px-10 py-6" variant={button.variant as any}>
+                      <Button key={index} size="lg" asChild className="rounded-full text-lg px-10 py-6" variant={button.variant as "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"}>
                           <a href={button.href}>
                               {button.text} {button.icon}
                           </a>
@@ -628,7 +624,12 @@ export default function Home() {
                                         {currentQuestionIndex < quiz.questions.length - 1 ? (
                                             <Button onClick={handleNextQuestion} disabled={!userAnswers[currentQuestionIndex]}>Next</Button>
                                         ) : (
-                                            <Button onClick={handleFinishQuiz} disabled={!userAnswers[currentQuestionIndex]}>Finish Quiz</Button>
+                                            <Button 
+                                                onClick={handleFinishQuiz} 
+                                                disabled={!quiz || userAnswers.length !== quiz.questions.length || userAnswers.some(a => !a)}
+                                            >
+                                                Finish Quiz
+                                            </Button>
                                         )}
                                     </div>
                                 </div>
