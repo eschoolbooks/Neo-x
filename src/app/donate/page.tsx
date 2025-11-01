@@ -77,9 +77,7 @@ export default function DonatePage() {
              <a href="#mission" className="hover:text-primary transition-colors">Our Mission</a>
           </div>
           <Button variant="secondary" className="rounded-full" onClick={handleScrollToForm}>
-            <div className="cursor-pointer">
-              Donate Now <Heart className="ml-2 h-4 w-4" />
-            </div>
+            Donate Now <Heart className="ml-2 h-4 w-4" />
           </Button>
         </nav>
       </header>
@@ -278,7 +276,7 @@ export default function DonatePage() {
                  whileInView={{ opacity: 1, scale: 1 }}
                  viewport={{ once: true, amount: 0.5 }}
                  transition={{ duration: 0.7 }}
-                 className="md:order-1"
+                 className="md:order-2"
               >
                 <Image src="https://picsum.photos/seed/vision/600/400" alt="Student looking towards future" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="student future" />
               </motion.div>
@@ -287,7 +285,7 @@ export default function DonatePage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                 className="md:order-2"
+                 className="md:order-1"
               >
                   <Lightbulb className="w-16 h-16 text-primary mb-4"/>
                   <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Vision</h2>
