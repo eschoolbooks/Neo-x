@@ -84,25 +84,6 @@ const FeatureCard = ({ icon, title, description, delay = 0 }: { icon: React.Reac
     );
 };
 
-const slideVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.3 } },
-    exit: { opacity: 0, transition: { staggerChildren: 0.1, staggerDirection: -1 } }
-};
-
-const itemVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
-    exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: 'easeIn' } }
-};
-
-const logoVariants = {
-    initial: { opacity: 0, scale: 0.5 },
-    animate: { opacity: 1, scale: 1, transition: { type: 'spring', stiffness: 260, damping: 20, delay: 0.2 } },
-    exit: { opacity: 0, scale: 0.5, transition: { duration: 0.3, ease: 'easeIn' } }
-};
-
-
 export default function Home() {
     const [examType, setExamType] = useState('Plus 2');
     const [textbooks, setTextbooks] = useState<File[]>([]);
@@ -128,36 +109,6 @@ export default function Home() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [userAnswers, setUserAnswers] = useState<string[]>([]);
     const [quizScore, setQuizScore] = useState<number | null>(null);
-
-    const slides = [
-      {
-        logo: "https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8",
-        title: <>Lighten Their Bags.<br /><span className="text-primary">Brighten Their Future.</span></>,
-        subtitle: "We're on a mission to save students from back pain and save nature through digital books. Join us in rewriting the future of education.",
-        buttons: [
-          { text: "Support Our Mission", href: "#donate", variant: "default", icon: <ArrowRight className="ml-2 h-5 w-5" /> },
-        ],
-      },
-      {
-        logo: "https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8",
-        title: <>Taking Education<br /><span className="text-primary">beyond Boundaries</span></>,
-        subtitle: "A mission to make students able to self-learn, choose their own future, and build a great nation by helping today's generation find their pathway.",
-        buttons: [
-          { text: "Support Our Mission", href: "#donate", variant: "default" },
-          { text: "Join Our Mission", href: "#contact", variant: "secondary" },
-        ],
-      },
-    ];
-
-    const [page, setPage] = useState(0);
-    const slideIndex = page % slides.length;
-    
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setPage(prevPage => (prevPage + 1) % slides.length);
-        }, 5000);
-        return () => clearInterval(interval);
-    }, [slides.length]);
 
 
     const fileToDataUri = (file: File): Promise<string> => {
@@ -375,89 +326,33 @@ export default function Home() {
       <main>
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-950/20 to-background opacity-50"></div>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-950/20 to-background opacity-50"></div>
+            <div className="absolute inset-0 bg-grid-slow"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
 
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10 h-[500px] flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={page}
-                variants={slideVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="w-full"
-              >
-                  <motion.div variants={logoVariants} className="flex justify-center">
-                      <Image src={slides[slideIndex].logo} alt="E-SchoolBooks Logo" width={128} height={128} className="rounded-full mx-auto mb-6 animate-float"/>
-                  </motion.div>
-                <motion.h1 
-                    variants={itemVariants}
-                    className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6"
-                >
-                  {slides[slideIndex].title}
-                </motion.h1>
-                <motion.p 
-                    variants={itemVariants}
-                    className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10"
-                >
-                  {slides[slideIndex].subtitle}
-                </motion.p>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                 <motion.div
-                    variants={itemVariants}
-                    className="flex justify-center gap-4"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
                 >
-                    {slides[slideIndex].buttons.map((button, index) => (
-                      <Button key={index} size="lg" asChild className="rounded-full text-lg px-10 py-6" variant={button.variant as "default" | "secondary" | "destructive" | "outline" | "ghost" | "link"}>
-                          <a href={button.href}>
-                              {button.text} {button.icon}
-                          </a>
-                      </Button>
-                    ))}
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6">
+                        Taking Education<br /><span className="text-primary">beyond Boundaries</span>
+                    </h1>
+                    <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
+                        A mission to make students able to self-learn, choose their own future, and build a great nation by helping today's generation find their pathway.
+                    </p>
+                    <div className="flex justify-center gap-4">
+                        <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="default">
+                            <a href="#ai-hub">
+                                Explore AI Hub <ArrowRight className="ml-2 h-5 w-5" />
+                            </a>
+                        </Button>
+                        <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="secondary">
+                           <a href="#contact">Join Our Mission</a>
+                        </Button>
+                    </div>
                 </motion.div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          
-          <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex space-x-3 z-20">
-            {slides.map((_, index) => (
-              <button
-                key={index}
-                onClick={() => setPage(index)}
-                className={`w-3 h-3 rounded-full transition-colors ${
-                  slideIndex === index ? 'bg-primary' : 'bg-muted'
-                }`}
-              />
-            ))}
-          </div>
-
-        </section>
-
-        {/* The Problem & Solution Section */}
-        <section className="py-20 lg:py-32 bg-card/30">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.7 }}
-                    >
-                        <Image src="https://placehold.co/600x400.png" alt="Student with heavy backpack" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="child sad backpack" />
-                        <h2 className="text-3xl font-bold mt-6 mb-3 text-red-400">The Unseen Burden</h2>
-                        <p className="text-muted-foreground">Millions of students suffer from chronic back pain, shoulder, and spinal cord issues from carrying heavy backpacks daily. This physical strain hinders their ability to learn and thrive.</p>
-                    </motion.div>
-                    <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true, amount: 0.5 }}
-                        transition={{ duration: 0.7, delay: 0.2 }}
-                    >
-                        <Image src="https://placehold.co/600x400.png" alt="Student learning with a tablet" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="child happy tablet" />
-                        <h2 className="text-3xl font-bold mt-6 mb-3 text-accent">A Lighter Path Forward</h2>
-                        <p className="text-muted-foreground">E-SchoolBooks provides a simple, powerful solution: free digital textbooks. We eliminate heavy loads, promote better health, and create a more sustainable, eco-friendly learning environment for all.</p>
-                    </motion.div>
-                </div>
             </div>
         </section>
 
@@ -465,11 +360,33 @@ export default function Home() {
         <section id="vision" className="py-20 lg:py-32">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                  <div className="text-center mb-12">
-                    <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Vision for a Better World</h2>
-                    <p className="max-w-3xl mx-auto text-muted-foreground">
+                    <motion.h2 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.5 }}
+                        className="text-3xl sm:text-4xl font-bold mb-4"
+                    >
+                        Our Vision for a Better World
+                    </motion.h2>
+                    <motion.p 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.5, delay: 0.2 }}
+                        className="max-w-3xl mx-auto text-muted-foreground"
+                    >
                         "At E-SchoolBooks, we believe education is the cornerstone of a bright future. We strive to bridge the gap between students and learning resources, ensuring every child has access to quality educational materials. We stand for saving our earth through nature-blended education beyond boundaries. Our vision is to make students able to self-learn, choose their own future, and build a great nation by empowering today’s generation to find their own pathway—leading to the next society."
-                    </p>
-                    <p className="max-w-3xl mx-auto text-muted-foreground mt-4 font-semibold italic">- Founder Kevin Anjo</p>
+                    </motion.p>
+                    <motion.p 
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.5, delay: 0.4 }}
+                        className="max-w-3xl mx-auto text-muted-foreground mt-4 font-semibold italic"
+                    >
+                        - Founder Kevin Anjo
+                    </motion.p>
                 </div>
                  <div className="grid md:grid-cols-3 gap-8 text-center">
                     <FeatureCard icon={<Zap className="w-10 h-10"/>} title="Innovative Learning" description="We create an interactive digital experience that mirrors physical books, making learning more engaging and accessible." delay={0} />
@@ -578,7 +495,7 @@ export default function Home() {
                             <CardDescription>Test your knowledge by generating a quiz from your uploaded documents.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {!quiz && (
+                            {!quiz && !quizScore && (
                                 <form onSubmit={handleGenerateQuiz} className="space-y-6">
                                     <div className="space-y-3">
                                         <Label htmlFor="num-questions" className="text-lg font-semibold">Number of Questions</Label>
@@ -601,7 +518,7 @@ export default function Home() {
                                 </form>
                             )}
 
-                             {quiz && !quizScore && (
+                             {quiz && quizScore === null && (
                                 <div className="space-y-6">
                                     <div className="text-center">
                                         <h3 className="text-xl font-bold">{quiz.title}</h3>
@@ -760,6 +677,64 @@ export default function Home() {
             </div>
         </section>
 
+        {/* Team Section */}
+        <section className="py-20 lg:py-32 bg-card/30">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                 <h2 className="text-3xl sm:text-4xl font-bold mb-4">Meet the Hearts Behind the Mission</h2>
+                <p className="max-w-2xl mx-auto text-muted-foreground mb-12">
+                    E-SchoolBooks is a project by <strong className="text-primary">"Theo,"</strong> a non-profit founded by Kevin Anjo. We are a passionate force of 15 educators, technologists, and dreamers united for change.
+                </p>
+                <div className="flex justify-center -space-x-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: i * 0.1 }}
+                        >
+                            <Image
+                                src={`https://picsum.photos/seed/${i+10}/100/100`}
+                                alt={`Team member ${i + 1}`}
+                                width={100}
+                                height={100}
+                                className="rounded-full border-4 border-background"
+                                data-ai-hint="person portrait"
+                            />
+                        </motion.div>
+                    ))}
+                </div>
+            </div>
+        </section>
+        
+        {/* The Problem & Solution Section */}
+        <section className="py-20 lg:py-32">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <motion.div
+                        initial={{ opacity: 0, x: -50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.7 }}
+                    >
+                        <Image src="https://picsum.photos/seed/problem/600/400" alt="Student with heavy backpack" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="child sad backpack" />
+                        <h2 className="text-3xl font-bold mt-6 mb-3 text-destructive">The Unseen Burden</h2>
+                        <p className="text-muted-foreground">Millions of students suffer from chronic back pain and spinal issues from carrying heavy backpacks. This physical strain hinders their ability to learn and thrive.</p>
+                    </motion.div>
+                    <motion.div
+                        initial={{ opacity: 0, x: 50 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true, amount: 0.5 }}
+                        transition={{ duration: 0.7, delay: 0.2 }}
+                    >
+                        <Image src="https://picsum.photos/seed/solution/600/400" alt="Student learning with a tablet" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="child happy tablet" />
+                        <h2 className="text-3xl font-bold mt-6 mb-3 text-accent">A Lighter Path Forward</h2>
+                        <p className="text-muted-foreground">E-SchoolBooks provides free digital textbooks. We eliminate heavy loads, promote better health, and create a more sustainable, eco-friendly learning environment for all.</p>
+                    </motion.div>
+                </div>
+            </div>
+        </section>
+
         {/* Donate Section */}
         <section id="donate" className="py-20 lg:py-32">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -784,28 +759,6 @@ export default function Home() {
             </div>
         </section>
 
-        {/* Team Section */}
-        <section className="py-20 lg:py-32 bg-card/30">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                 <h2 className="text-3xl sm:text-4xl font-bold mb-4">Meet the Hearts Behind the Mission</h2>
-                <p className="max-w-2xl mx-auto text-muted-foreground mb-12">
-                    E-SchoolBooks is a project by <strong className="text-primary">"Theo,"</strong> a non-profit founded by Kevin Anjo. We are a passionate force of 15 educators, technologists, and dreamers united for change.
-                </p>
-                <div className="flex justify-center -space-x-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <Image
-                            key={i}
-                            src={`https://placehold.co/100x100.png`}
-                            alt={`Team member ${i + 1}`}
-                            width={100}
-                            height={100}
-                            className="rounded-full border-4 border-background"
-                             data-ai-hint="person portrait"
-                        />
-                    ))}
-                </div>
-            </div>
-        </section>
 
         {/* Contact Section */}
         <footer id="contact" className="py-16 bg-background border-t border-border/20">
@@ -853,5 +806,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

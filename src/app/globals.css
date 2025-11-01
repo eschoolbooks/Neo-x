@@ -29,7 +29,7 @@ body {
     --accent: 173 95% 50%;
     --accent-foreground: 224 71% 4%;
     
-    --destructive: 0 63% 31%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217 33% 17%;
@@ -73,7 +73,7 @@ body {
     --accent: 173 95% 50%;
     --accent-foreground: 224 71% 4%;
     
-    --destructive: 0 63% 31%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217 33% 17%;
@@ -113,4 +113,13 @@ body {
         linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
     background-size: 4rem 4rem;
     animation: grid 15s linear infinite;
+}
+
+.bg-grid-slow {
+    background-color: hsl(var(--background));
+    background-image:
+        linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+        linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 8rem 8rem;
+    animation: grid 30s linear infinite;
 }
