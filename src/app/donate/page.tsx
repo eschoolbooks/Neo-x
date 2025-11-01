@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import QRCode from 'qrcode.react';
@@ -9,7 +9,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, Target, Lightbulb, Users, IndianRupee, HandHeart, BookHeart, School } from 'lucide-react';
+import { Heart, Target, Lightbulb, IndianRupee, HandHeart, BookHeart, School, Users, ArrowDown, CheckCircle } from 'lucide-react';
+import CountUp from 'react-countup';
 
 export default function DonatePage() {
   const [name, setName] = useState('');
@@ -19,6 +20,16 @@ export default function DonatePage() {
   const [upiUrl, setUpiUrl] = useState('');
   const { toast } = useToast();
   const formRef = useRef<HTMLDivElement>(null);
+  
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setHasScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleScrollToForm = () => {
     formRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -38,15 +49,15 @@ export default function DonatePage() {
     setUpiUrl(upiLink);
   };
 
-  const InfoCard = ({ icon, title, description }: { icon: React.ReactNode, title: string, description: string }) => (
+  const InfoCard = ({ icon, title, description, delay = 0 }: { icon: React.ReactNode, title: string, description: string, delay?: number }) => (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.5 }}
-      transition={{ duration: 0.5 }}
+      transition={{ duration: 0.5, delay }}
       className="bg-card/50 p-6 rounded-lg border border-border/20 backdrop-blur-sm"
     >
-      <div className="text-accent mb-4">{icon}</div>
+      <div className="text-primary mb-4">{icon}</div>
       <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
     </motion.div>
@@ -54,7 +65,7 @@ export default function DonatePage() {
 
   return (
     <div className="bg-background text-foreground overflow-x-hidden">
-      <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${hasScrolled ? 'bg-background/80 backdrop-blur-lg border-b border-border/20' : 'bg-transparent'}`}>
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="/" className="flex items-center gap-2">
             <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="E-SchoolBooks Logo" width={40} height={40} className="rounded-full"/>
@@ -62,8 +73,10 @@ export default function DonatePage() {
           </a>
           <div className="hidden md:flex items-center gap-8">
              <a href="/" className="hover:text-primary transition-colors">Home</a>
+             <a href="#impact" className="hover:text-primary transition-colors">Impact</a>
+             <a href="#mission" className="hover:text-primary transition-colors">Our Mission</a>
           </div>
-          <Button asChild className="rounded-full" onClick={handleScrollToForm}>
+          <Button variant="secondary" className="rounded-full" onClick={handleScrollToForm}>
             <div className="cursor-pointer">
               Donate Now <Heart className="ml-2 h-4 w-4" />
             </div>
@@ -71,14 +84,47 @@ export default function DonatePage() {
         </nav>
       </header>
 
-      <main className="pt-20">
+      <main>
+        {/* Hero Section */}
+        <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-950/20 to-background opacity-50"></div>
+            <div className="absolute inset-0 bg-grid-slow"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+            <div className="container relative z-10 px-4">
+                 <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, ease: "easeOut" }}
+                >
+                    <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter mb-6">
+                        Your Contribution,<br /> <span className="text-primary">Their Tomorrow.</span>
+                    </h1>
+                    <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
+                        Even the smallest donation can rewrite a child's future. Join us in making education accessible, sustainable, and burden-free for every student.
+                    </p>
+                    <Button size="lg" className="rounded-full text-lg px-10 py-6" onClick={handleScrollToForm}>
+                       Make a Donation <HandHeart className="ml-2 h-5 w-5" />
+                    </Button>
+                </motion.div>
+                <motion.div 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 1, duration: 1 }}
+                    className="absolute bottom-10 left-1/2 -translate-x-1/2"
+                >
+                    <ArrowDown className="w-6 h-6 animate-bounce" />
+                </motion.div>
+            </div>
+        </section>
+
         {/* Donation Form Section */}
         <section ref={formRef} id="donate-form" className="py-20 lg:py-32 bg-grid">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-8 md:gap-12 items-center">
               <motion.div 
                 initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.7 }}
               >
                 <Card className="bg-card/80 backdrop-blur-sm shadow-2xl">
@@ -102,10 +148,10 @@ export default function DonatePage() {
                       </div>
                       <div>
                         <Label htmlFor="phone">Phone Number</Label>
-                        <Input id="phone" type="tel" placeholder="Optional: your phone number" value={phone} onChange={(e) => setPhone(e.target.value)} />
+                        <Input id="phone" type="tel" placeholder="+91-9876543210" value={phone} onChange={(e) => setPhone(e.target.value)} />
                       </div>
                       <Button type="submit" size="lg" className="w-full" disabled={!!upiUrl}>
-                        {upiUrl ? 'QR Code Generated!' : 'Generate QR Code'}
+                        {upiUrl ? 'QR Code Generated!' : 'Generate QR Code to Pay'}
                       </Button>
                     </form>
                   </CardContent>
@@ -114,7 +160,8 @@ export default function DonatePage() {
               
               <motion.div 
                 initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                viewport={{ once: true }}
                 transition={{ duration: 0.7, delay: 0.2 }}
                 className="flex flex-col items-center justify-center text-center"
               >
@@ -135,8 +182,8 @@ export default function DonatePage() {
                 ) : (
                   <div className="text-center p-8 bg-card/50 rounded-xl">
                      <HandHeart className="w-20 h-20 mx-auto text-primary animate-pulse" />
-                     <h3 className="text-2xl font-bold mt-4">Thank You for Your Generosity</h3>
-                     <p className="text-muted-foreground mt-2">Please fill out the form to generate a secure UPI payment QR code.</p>
+                     <h3 className="text-2xl font-bold mt-4">Your Generosity Matters</h3>
+                     <p className="text-muted-foreground mt-2">Fill out the form to generate a secure UPI payment QR code and make a difference.</p>
                   </div>
                 )}
               </motion.div>
@@ -145,7 +192,7 @@ export default function DonatePage() {
         </section>
 
         {/* Funds Raised Section */}
-        <section className="py-20 lg:py-24">
+        <section id="impact" className="py-20 lg:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -154,7 +201,9 @@ export default function DonatePage() {
                     transition={{ duration: 0.7 }}
                 >
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">Funds Raised So Far</h2>
-                    <p className="text-7xl font-extrabold text-primary mb-2">₹0</p>
+                    <p className="text-7xl font-extrabold text-primary mb-2">
+                        <CountUp end={0} duration={2} separator="," prefix="₹" />
+                    </p>
                     <p className="max-w-2xl mx-auto text-muted-foreground">
                         We are just getting started and you can be among the first to contribute to our mission. Every single rupee counts!
                     </p>
@@ -177,39 +226,99 @@ export default function DonatePage() {
                 icon={<BookHeart className="w-10 h-10"/>}
                 title="Digitizing Textbooks"
                 description="Your funds help us convert physical textbooks into high-quality, interactive digital formats, making them freely available to all students."
+                delay={0}
               />
               <InfoCard 
                 icon={<School className="w-10 h-10"/>}
                 title="Empowering Girl Students"
                 description="A significant portion of our efforts is dedicated to providing girls with the resources and support they need to pursue their educational dreams."
+                delay={0.2}
               />
               <InfoCard 
                 icon={<Users className="w-10 h-10"/>}
                 title="Community Outreach"
                 description="We run awareness programs in schools and communities to promote the benefits of digital education and sustainable learning practices."
+                delay={0.4}
               />
             </div>
           </div>
         </section>
 
-        {/* Mission Vision Goal Section */}
-        <section className="py-20 lg:py-32">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-3 gap-12 text-center">
-            <InfoCard 
-                icon={<Target className="w-10 h-10"/>}
-                title="Our Mission"
-                description="To make education accessible, eco-friendly, and burden-free for every student by providing free digital learning resources."
-            />
-            <InfoCard 
-                icon={<Lightbulb className="w-10 h-10"/>}
-                title="Our Vision"
-                description="To create a self-learning ecosystem where students can choose their own future and build a great nation, unhindered by physical or financial boundaries."
-            />
-            <InfoCard 
-                icon={<IndianRupee className="w-10 h-10"/>}
-                title="Our Goal"
-                description="To eliminate the need for heavy school bags, save millions of trees, and ensure every child, especially girls, has the tools to succeed."
-            />
+        {/* Mission, Vision, Goal Sections */}
+        <section id="mission" className="py-20 lg:py-32">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.7 }}
+              >
+                  <Target className="w-16 h-16 text-primary mb-4"/>
+                  <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Mission</h2>
+                  <p className="text-lg text-muted-foreground">To make education accessible, eco-friendly, and burden-free for every student by providing free digital learning resources. We strive to create a future where knowledge has no price tag.</p>
+              </motion.div>
+              <motion.div
+                 initial={{ opacity: 0, scale: 0.8 }}
+                 whileInView={{ opacity: 1, scale: 1 }}
+                 viewport={{ once: true, amount: 0.5 }}
+                 transition={{ duration: 0.7, delay: 0.2 }}
+              >
+                <Image src="https://picsum.photos/seed/mission/600/400" alt="Students collaborating" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="students collaborating" />
+              </motion.div>
+            </div>
+          </div>
+        </section>
+        
+        <section id="vision" className="py-20 lg:py-32 bg-card/30">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+               <motion.div
+                 initial={{ opacity: 0, scale: 0.8 }}
+                 whileInView={{ opacity: 1, scale: 1 }}
+                 viewport={{ once: true, amount: 0.5 }}
+                 transition={{ duration: 0.7 }}
+                 className="md:order-2"
+              >
+                <Image src="https://picsum.photos/seed/vision/600/400" alt="Student looking towards future" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="student future" />
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.7, delay: 0.2 }}
+                 className="md:order-1"
+              >
+                  <Lightbulb className="w-16 h-16 text-primary mb-4"/>
+                  <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Vision</h2>
+                  <p className="text-lg text-muted-foreground">To create a self-learning ecosystem where students can choose their own future and build a great nation, unhindered by physical or financial boundaries. A world where curiosity is the only currency.</p>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        <section id="goal" className="py-20 lg:py-32">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.5 }}
+                transition={{ duration: 0.7 }}
+              >
+                  <CheckCircle className="w-16 h-16 text-primary mb-4"/>
+                  <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Goal</h2>
+                  <p className="text-lg text-muted-foreground">To eliminate the need for heavy school bags, save millions of trees by promoting digital resources, and ensure every child—especially girls—has the tools and opportunities to succeed and lead.</p>
+              </motion.div>
+              <motion.div
+                 initial={{ opacity: 0, scale: 0.8 }}
+                 whileInView={{ opacity: 1, scale: 1 }}
+                 viewport={{ once: true, amount: 0.5 }}
+                 transition={{ duration: 0.7, delay: 0.2 }}
+              >
+                <Image src="https://picsum.photos/seed/goal/600/400" alt="Happy girl student" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="happy girl student" />
+              </motion.div>
+            </div>
           </div>
         </section>
         
