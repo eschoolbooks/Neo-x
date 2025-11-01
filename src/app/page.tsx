@@ -661,6 +661,35 @@ export default function Home() {
              </div>
         </section>
 
+        {/* New "Lighten their bags" section */}
+        <section className="py-20 lg:py-32">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                 <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, amount: 0.5 }}
+                    transition={{ duration: 0.7 }}
+                >
+                    <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tighter text-foreground mb-6">
+                        Lighten their bags.<br/>
+                        <span className="text-primary">Brighten their Future.</span>
+                    </h2>
+                    <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
+                        Join our mission to provide free digital textbooks, reduce the physical burden on students, and create an innovative, eco-friendly learning ecosystem for the next generation.
+                    </p>
+                    <div className="flex justify-center gap-4">
+                        <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="default">
+                            <a href="#ai-hub">
+                                Explore AI Hub <ArrowRight className="ml-2 h-5 w-5" />
+                            </a>
+                        </Button>
+                        <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="secondary">
+                           <a href="#contact">Join Our Mission</a>
+                        </Button>
+                    </div>
+                </motion.div>
+            </div>
+        </section>
 
         {/* Impact Section */}
         <section id="impact" className="py-20 lg:py-32">
@@ -673,36 +702,6 @@ export default function Home() {
                     <StatCard icon={<Users className="w-12 h-12" />} value={15} label="Passionate Team Members" />
                     <StatCard icon={<Book className="w-12 h-12" />} value={5000} suffix="+" label="Free Textbooks Provided" />
                     <StatCard icon={<Leaf className="w-12 h-12" />} value={1000} suffix="+" label="Trees Saved" />
-                </div>
-            </div>
-        </section>
-
-        {/* Team Section */}
-        <section className="py-20 lg:py-32 bg-card/30">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                 <h2 className="text-3xl sm:text-4xl font-bold mb-4">Meet the Hearts Behind the Mission</h2>
-                <p className="max-w-2xl mx-auto text-muted-foreground mb-12">
-                    E-SchoolBooks is a project by <strong className="text-primary">"Theo,"</strong> a non-profit founded by Kevin Anjo. We are a passionate force of 15 educators, technologists, and dreamers united for change.
-                </p>
-                <div className="flex justify-center -space-x-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
-                        >
-                            <Image
-                                src={`https://picsum.photos/seed/${i+10}/100/100`}
-                                alt={`Team member ${i + 1}`}
-                                width={100}
-                                height={100}
-                                className="rounded-full border-4 border-background"
-                                data-ai-hint="person portrait"
-                            />
-                        </motion.div>
-                    ))}
                 </div>
             </div>
         </section>
@@ -755,6 +754,36 @@ export default function Home() {
                            </a>
                         </Button>
                     </motion.div>
+                </div>
+            </div>
+        </section>
+
+        {/* Team Section */}
+        <section className="py-20 lg:py-32 bg-card/30">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                 <h2 className="text-3xl sm:text-4xl font-bold mb-4">Meet the Hearts Behind the Mission</h2>
+                <p className="max-w-2xl mx-auto text-muted-foreground mb-12">
+                    E-SchoolBooks is a project by <strong className="text-primary">"Theo,"</strong> a non-profit founded by Kevin Anjo. We are a passionate force of 15 educators, technologists, and dreamers united for change.
+                </p>
+                <div className="flex justify-center -space-x-4">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <motion.div
+                            key={i}
+                            initial={{ opacity: 0, scale: 0.5 }}
+                            whileInView={{ opacity: 1, scale: 1 }}
+                            viewport={{ once: true }}
+                            transition={{ duration: 0.5, delay: i * 0.1 }}
+                        >
+                            <Image
+                                src={`https://picsum.photos/seed/${i+10}/100/100`}
+                                alt={`Team member ${i + 1}`}
+                                width={100}
+                                height={100}
+                                className="rounded-full border-4 border-background"
+                                data-ai-hint="person portrait"
+                            />
+                        </motion.div>
+                    ))}
                 </div>
             </div>
         </section>
