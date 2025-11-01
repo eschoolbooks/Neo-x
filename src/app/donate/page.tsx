@@ -45,7 +45,7 @@ export default function DonatePage() {
       });
       return;
     }
-    const upiLink = `upi://pay?pa=9946882478-2@ibl&pn=ESchoolBooks&am=${amount}&cu=INR&tn=Donation to ESB from ${encodeURIComponent(name)}`;
+    const upiLink = `upi://pay?pa=9946882478-2@ibl&pn=ESchoolBooks&am=${amount}&cu=INR&tn=Donation from ${encodeURIComponent(name)}`;
     setUpiUrl(upiLink);
   };
 
@@ -278,7 +278,7 @@ export default function DonatePage() {
                  whileInView={{ opacity: 1, scale: 1 }}
                  viewport={{ once: true, amount: 0.5 }}
                  transition={{ duration: 0.7 }}
-                 className="md:order-2"
+                 className="md:order-1"
               >
                 <Image src="https://picsum.photos/seed/vision/600/400" alt="Student looking towards future" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="student future" />
               </motion.div>
@@ -287,7 +287,7 @@ export default function DonatePage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true, amount: 0.5 }}
                 transition={{ duration: 0.7, delay: 0.2 }}
-                 className="md:order-1"
+                 className="md:order-2"
               >
                   <Lightbulb className="w-16 h-16 text-primary mb-4"/>
                   <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Vision</h2>
