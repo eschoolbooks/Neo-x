@@ -316,7 +316,7 @@ export default function Home() {
             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
           <Button asChild className="rounded-full animate-pulse-strong">
-            <a href="#donate">
+            <a href="/donate">
               Donate Now <Heart className="ml-2 h-4 w-4" />
             </a>
           </Button>
@@ -495,7 +495,7 @@ export default function Home() {
                             <CardDescription>Test your knowledge by generating a quiz from your uploaded documents.</CardDescription>
                         </CardHeader>
                         <CardContent>
-                            {!quiz && !quizScore && (
+                            {!quiz && quizScore === null && (
                                 <form onSubmit={handleGenerateQuiz} className="space-y-6">
                                     <div className="space-y-3">
                                         <Label htmlFor="num-questions" className="text-lg font-semibold">Number of Questions</Label>
@@ -749,7 +749,7 @@ export default function Home() {
                             Your small contribution has a massive impact. It helps us digitize another book, save another tree, and ease the burden for another child. Join the movement.
                         </p>
                         <Button variant="secondary" size="lg" asChild className="rounded-full text-lg px-10 py-6 bg-white text-primary hover:bg-gray-200">
-                           <a href="#">
+                           <a href="/donate">
                              Donate Securely <Heart className="ml-2 h-5 w-5 fill-current"/>
                            </a>
                         </Button>
