@@ -260,10 +260,10 @@ export function AiHub({ isDemo }: AiHubProps) {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-2">
-                        Welcome to the <span className="text-primary">AI-Powered Study Hub</span>
+                        <span className="text-primary">NEO X</span>
                     </h2>
                     <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
-                        Meet Neo X, your personal Educational Mentor Assistant. Upload your textbooks and past question papers, then let Neo X help you predict exams, generate quizzes, and answer your toughest questions.
+                        The most powerful and accurate question prediction AI.
                     </p>
                     {isDemo && (
                         <div className="flex justify-center gap-4">
