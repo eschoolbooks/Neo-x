@@ -400,16 +400,26 @@ export default function Home() {
         {/* AI Hub Section */}
         <section id="ai-hub" className="py-20 lg:py-32 bg-grid">
              <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                 <div className="text-center mb-12">
+                <div className="text-center mb-12">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-2">
                         Welcome to the <span className="text-primary">AI-Powered Study Hub</span>
                     </h2>
-                    <p className="max-w-3xl mx-auto text-muted-foreground">
+                    <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
                         Meet Neo X, your personal Educational Mentor Assistant. Upload your textbooks and past question papers, then let Neo X help you predict exams, generate quizzes, and answer your toughest questions.
                     </p>
+                    <div className="flex justify-center gap-4">
+                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
+                           <a href="#">Learn More</a>
+                        </Button>
+                         <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="default">
+                            <a href="#ai-hub-form">
+                                Predict Questions <ArrowRight className="ml-2 h-5 w-5" />
+                            </a>
+                        </Button>
+                    </div>
                 </div>
 
-                <div className="grid md:grid-cols-2 gap-6 mb-8">
+                <div id="ai-hub-form" className="grid md:grid-cols-2 gap-6 mb-8">
                     <div className="space-y-2">
                         <Label htmlFor="textbooks" className="text-lg font-semibold">Textbooks (PDF)</Label>
                         <div className="flex items-center justify-center w-full">
@@ -692,7 +702,7 @@ export default function Home() {
         </section>
 
         {/* Impact Section */}
-        <section id="impact" className="py-20 lg:py-32">
+        <section id="impact" className="py-20 lg:py-32 bg-card/30">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Impact, By the Numbers</h2>
                 <p className="max-w-2xl mx-auto text-muted-foreground mb-16">
@@ -835,3 +845,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
