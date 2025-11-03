@@ -23,9 +23,9 @@ const generateQuizPrompt = ai.definePrompt({
   model: 'googleai/gemini-2.5-flash',
   input: {schema: GenerateQuizInputSchema},
   output: {schema: QuizSchema},
-  prompt: `You are Neo X, an AI designed to help students learn. Your task is to generate a multiple-choice quiz based on the provided documents.
+  prompt: `You are Neo X, an AI designed to help students learn. Your task is to generate a multiple-choice quiz based on the provided document(s).
 
-Use the following materials for your analysis. You must analyze the content of these documents.
+You must analyze the content of the following document(s) to create the quiz.
 {{#if documents}}
 ## Provided Documents
 {{#each documents}}
@@ -43,7 +43,7 @@ For each question:
 5.  Specify which option is the correct answer.
 6.  Provide a brief explanation for why the correct answer is right.
 
-Structure the output as a quiz with a title and a list of questions.
+IMPORTANT: Your response MUST be a valid JSON object that strictly adheres to the provided output schema. Do NOT include any extra text, markdown, or explanations outside of the JSON structure.
 `,
 });
 
@@ -53,6 +53,7 @@ const generateQuizFlow = ai.defineFlow(
     name: 'generateQuizFlow',
     inputSchema: GenerateQuizInputSchema,
     outputSchema: QuizSchema,
+    experimentalRetries: 3, // Add retry logic
   },
   async (input) => {
     if (input.documents.length === 0) {
