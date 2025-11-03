@@ -303,15 +303,24 @@ export function AiHub({ isDemo }: AiHubProps) {
             const margin = 15;
             let cursorY = margin;
 
-            // Helper function for adding text and managing Y position
-            const addText = (text: string, size: number, style: 'normal' | 'bold', color: string, y?: number, x?: number) => {
-                if (y) cursorY = y;
-                pdf.setFontSize(size);
-                pdf.setFont('helvetica', style);
-                pdf.setTextColor(color);
-                const splitText = pdf.splitTextToSize(text, pageWidth - (margin * 2));
-                pdf.text(splitText, x || margin, cursorY);
-                cursorY += (splitText.length * size * 0.35) + 2;
+            // Colors
+            const primaryColor = '#D97706'; // A darker, more readable orange
+            const textColor = '#333333'; // Dark gray for text
+            const mutedColor = '#666666';
+            const lightGrayBg = '#F3F4F6';
+            const whiteColor = '#FFFFFF';
+            const cardBorderColor = '#E5E7EB';
+
+            // --- FOOTER FUNCTION ---
+            const addFooter = () => {
+                const pageCount = pdf.internal.getNumberOfPages();
+                pdf.setFontSize(8);
+                pdf.setTextColor(mutedColor);
+                for (let i = 1; i <= pageCount; i++) {
+                    pdf.setPage(i);
+                    pdf.text(`© ${new Date().getFullYear()} E-SchoolBooks. All Rights Reserved.`, margin, pageHeight - 10);
+                    pdf.text(`Page ${i} of ${pageCount}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+                }
             };
 
             // --- PAGE 1: COVER PAGE ---
@@ -320,68 +329,86 @@ export function AiHub({ isDemo }: AiHubProps) {
             
             pdf.setFontSize(26);
             pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor('#f9b17a'); // Primary color
+            pdf.setTextColor(primaryColor);
             pdf.text('AI Exam Prediction Report', pageWidth / 2, margin + 40, { align: 'center' });
 
             cursorY = margin + 70;
-            addText(`Exam Type: ${examType}`, 12, 'bold', '#ffffff');
-            addText(`Prediction Date: ${new Date().toLocaleDateString()}`, 12, 'normal', '#a0a0a0');
-            addText(`Report ID: ${generateUniqueId()}`, 10, 'normal', '#a0a0a0');
-
-            // Footer for cover page
-            pdf.setFontSize(8);
-            pdf.setTextColor('#606060');
-            pdf.text(`© ${new Date().getFullYear()} E-SchoolBooks. All Rights Reserved.`, pageWidth / 2, pageHeight - margin, { align: 'center' });
+            
+            const addCoverInfo = (label: string, value: string) => {
+                pdf.setFontSize(12);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(textColor);
+                pdf.text(label, margin, cursorY);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor(mutedColor);
+                pdf.text(value, margin + 45, cursorY);
+                cursorY += 8;
+            };
+            
+            const firstPrediction = prediction.predictedTopics[0];
+            addCoverInfo('Exam Type:', examType);
+            if (firstPrediction) {
+                addCoverInfo('Subject:', firstPrediction.subject);
+                addCoverInfo('Grade:', firstPrediction.grade);
+            }
+            addCoverInfo('Prediction Date:', new Date().toLocaleDateString());
+            addCoverInfo('Report ID:', generateUniqueId());
             
 
             // --- PAGE 2+: PREDICTED TOPICS ---
             pdf.addPage();
             cursorY = margin;
-            addText('Predicted Topics', 18, 'bold', '#f9b17a');
-            cursorY += 5;
+            pdf.setFontSize(18);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(primaryColor);
+            pdf.text('Predicted Topics', margin, cursorY);
+            cursorY += 10;
 
             prediction.predictedTopics.forEach((item) => {
-                const cardHeight = 65 + pdf.splitTextToSize(item.reason, pageWidth - (margin * 2) - 10).length * 4;
-                if (cursorY + cardHeight > pageHeight - margin) {
+                const topicLines = pdf.splitTextToSize(item.topic, pageWidth - (margin * 2) - 20);
+                const reasonLines = pdf.splitTextToSize(item.reason, pageWidth - (margin * 2) - 20);
+                
+                const cardHeight = 15 + (topicLines.length * 7) + (reasonLines.length * 5) + 20;
+
+                if (cursorY + cardHeight > pageHeight - 20) { // Check for page break
                     pdf.addPage();
                     cursorY = margin;
-                    addText('Predicted Topics (cont.)', 18, 'bold', '#f9b17a');
-                    cursorY += 5;
+                    pdf.setFontSize(18);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(primaryColor);
+                    pdf.text('Predicted Topics (cont.)', margin, cursorY);
+                    cursorY += 10;
                 }
 
-                // Draw card
-                pdf.setFillColor(23, 31, 58); // Card background
-                pdf.setDrawColor(44, 57, 107); // Card border
+                pdf.setDrawColor(cardBorderColor);
+                pdf.setFillColor(lightGrayBg);
                 pdf.roundedRect(margin, cursorY, pageWidth - (margin*2), cardHeight, 3, 3, 'FD');
                 
                 let cardContentY = cursorY + 10;
+                
                 pdf.setFontSize(14);
                 pdf.setFont('helvetica', 'bold');
-                pdf.setTextColor('#ffffff');
-                pdf.text(item.topic, margin + 10, cardContentY);
+                pdf.setTextColor(textColor);
+                pdf.text(topicLines, margin + 10, cardContentY);
+                cardContentY += topicLines.length * 7;
                 
                 pdf.setFontSize(10);
                 pdf.setFont('helvetica', 'normal');
-                pdf.setTextColor('#a0a0a0');
-                pdf.text(`${item.subject} | Grade: ${item.grade}`, margin + 10, cardContentY + 6);
-                
-                cardContentY += 20;
-
-                pdf.setFontSize(10);
-                pdf.setTextColor('#d0d0d0');
-                const reasonLines = pdf.splitTextToSize(item.reason, pageWidth - (margin*2) - 20);
+                pdf.setTextColor(mutedColor);
                 pdf.text(reasonLines, margin + 10, cardContentY);
-                cardContentY += reasonLines.length * 4 + 5;
+                cardContentY += reasonLines.length * 5 + 8;
 
                 // Confidence progress bar
                 const progressBarWidth = 100;
-                pdf.setFillColor(44, 57, 107); // Progress bar background
+                pdf.setFillColor('#E5E7EB');
                 pdf.rect(margin + 10, cardContentY, progressBarWidth, 5, 'F');
-                pdf.setFillColor(249, 177, 122); // Primary color
+                pdf.setFillColor(primaryColor);
                 pdf.rect(margin + 10, cardContentY, progressBarWidth * ((item.confidence || 0) / 100), 5, 'F');
+                
                 pdf.setFontSize(10);
-                pdf.setTextColor('#ffffff');
-                pdf.text(`${item.confidence || 0}%`, margin + 15 + progressBarWidth, cardContentY + 4);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor(textColor);
+                pdf.text(`${item.confidence || 0}% Confidence`, margin + 15 + progressBarWidth, cardContentY + 4);
 
                 cursorY += cardHeight + 10;
             });
@@ -390,23 +417,31 @@ export function AiHub({ isDemo }: AiHubProps) {
             // --- FINAL PAGE: STUDY RECOMMENDATIONS ---
             pdf.addPage();
             cursorY = margin;
-            addText('Study Recommendations', 18, 'bold', '#f9b17a');
-            cursorY += 5;
+            pdf.setFontSize(18);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor(primaryColor);
+            pdf.text('Study Recommendations', margin, cursorY);
+            cursorY += 10;
             
-            prediction.studyRecommendations.forEach((rec, index) => {
-                const recLines = pdf.splitTextToSize(`• ${rec}`, pageWidth - margin*2 - 5);
-                const recHeight = recLines.length * 4 + 5;
-                if (cursorY + recHeight > pageHeight - margin) {
+            prediction.studyRecommendations.forEach((rec) => {
+                const recLines = pdf.splitTextToSize(`• ${rec}`, pageWidth - margin * 2 - 5);
+                const recHeight = recLines.length * 5 + 3; // Estimated height
+                if (cursorY + recHeight > pageHeight - 20) {
                     pdf.addPage();
                     cursorY = margin;
-                    addText('Study Recommendations (cont.)', 18, 'bold', '#f9b17a');
-                    cursorY += 5;
+                    pdf.setFontSize(18);
+                    pdf.setFont('helvetica', 'bold');
+                    pdf.setTextColor(primaryColor);
+                    pdf.text('Study Recommendations (cont.)', margin, cursorY);
+                    cursorY += 10;
                 }
                 pdf.setFontSize(11);
-                pdf.setTextColor('#d0d0d0');
+                pdf.setTextColor(textColor);
                 pdf.text(recLines, margin + 5, cursorY);
                 cursorY += recHeight;
             });
+
+            addFooter();
 
             pdf.save(`E-SchoolBooks-Prediction-${examType}-${new Date().toISOString().split('T')[0]}.pdf`);
 
@@ -450,7 +485,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                             <>
                                 <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
                                 <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">Up to 3 PDF files</p>
+                                <p className="text-xs text-muted-foreground">Up to {MAX_DOCUMENTS} PDF files</p>
                             </>
                         )}
                     </div>
@@ -638,10 +673,9 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                                 <Card key={index} className="bg-background">
                                                     <CardHeader className='pb-2'>
                                                         <CardTitle className="text-lg">{item.topic}</CardTitle>
-                                                        <CardDescription>{item.subject} | Grade: {item.grade}</CardDescription>
+                                                        <CardDescription>{item.reason}</CardDescription>
                                                     </CardHeader>
                                                     <CardContent>
-                                                        <p className="text-sm text-muted-foreground mb-3">{item.reason}</p>
                                                         <div className='flex items-center gap-2'>
                                                             <Progress value={item.confidence || 0} className="h-2" />
                                                             <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
@@ -786,7 +820,3 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
         </div>
     );
 }
-
-    
-
-    
