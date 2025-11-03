@@ -22,6 +22,8 @@ export type PredictExamInput = z.infer<typeof PredictExamInputSchema>;
 export const PredictExamOutputSchema = z.object({
   predictedTopics: z.array(
     z.object({
+      subject: z.string().describe('The subject of the predicted topic (e.g., Physics, Biology).'),
+      grade: z.string().describe("The grade or class level for the topic (e.g., '12th Grade', 'Plus 2')."),
       topic: z.string().describe('The name of the predicted topic.'),
       confidence: z
         .number()

@@ -34,7 +34,12 @@ Use the following materials for your analysis. You must analyze the content of a
 {{/if}}
 
 Based on a thorough analysis of these documents and your general knowledge of current educational trends and exam patterns in India, please provide:
-1.  **Predicted Key Topics**: A list of the most important topics. For each topic, provide a confidence score (from 0 to 100) indicating its likelihood of appearing on the exam, and a brief justification for your prediction.
+1.  **Predicted Key Topics**: A list of the most important topics. For each topic, provide:
+    - The **subject** (e.g., Physics, Biology).
+    - The **grade** or class level (e.g., '12th Grade', 'Plus 2').
+    - The specific **topic** name.
+    - A **confidence score** (from 0 to 100) indicating its likelihood of appearing on the exam.
+    - A brief **justification** for your prediction.
 2.  **Study Recommendations**: A list of actionable study recommendations based on your analysis to help a student focus their preparation effectively.
 
 Your analysis must be sharp, insightful, and tailored to the '{{examType}}' exam.`,

@@ -20,7 +20,6 @@ import { generateQuiz } from '@/ai/flows/generateQuizFlow';
 import type { Quiz } from '@/ai/flows/generateQuizSchemas';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { Skeleton } from './ui/skeleton';
 
 
@@ -38,7 +37,6 @@ export function AiHub({ isDemo }: AiHubProps) {
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
     const resultsRef = useRef<HTMLDivElement>(null);
-    const pdfRef = useRef<HTMLDivElement>(null);
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', content: string}[]>([]);
     const [isChatting, setIsChatting] = useState(false);
@@ -295,41 +293,120 @@ export function AiHub({ isDemo }: AiHubProps) {
     };
 
     const handleDownloadPdf = async () => {
-        if (!pdfRef.current || !prediction) return;
+        if (!prediction) return;
         setIsDownloadingPdf(true);
+
         try {
-            const canvas = await html2canvas(pdfRef.current, {
-                scale: 2,
-                useCORS: true,
-                backgroundColor: '#0a0e1c',
-            });
-            const imgData = canvas.toDataURL('image/png');
             const pdf = new jsPDF('p', 'mm', 'a4');
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            
-            const uniqueId = generateUniqueId();
-            const predictionDate = new Date().toLocaleDateString();
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const margin = 15;
+            let cursorY = margin;
 
-            // Header
+            // Helper function for adding text and managing Y position
+            const addText = (text: string, size: number, style: 'normal' | 'bold', color: string, y?: number, x?: number) => {
+                if (y) cursorY = y;
+                pdf.setFontSize(size);
+                pdf.setFont('helvetica', style);
+                pdf.setTextColor(color);
+                const splitText = pdf.splitTextToSize(text, pageWidth - (margin * 2));
+                pdf.text(splitText, x || margin, cursorY);
+                cursorY += (splitText.length * size * 0.35) + 2;
+            };
+
+            // --- PAGE 1: COVER PAGE ---
             const logo = "https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8";
-            pdf.addImage(logo, 'PNG', 15, 10, 20, 20);
-            pdf.setFontSize(20);
-            pdf.setTextColor('#f9b17a');
-            pdf.text('E-SchoolBooks', 40, 22);
-             pdf.setFontSize(10);
-            pdf.setTextColor('#a0a0a0');
-            pdf.text(`Prediction Report - ${predictionDate}`, 40, 28);
+            pdf.addImage(logo, 'PNG', margin, margin, 30, 30);
             
-            // Body
-            pdf.addImage(imgData, 'PNG', 0, 40, pdfWidth, pdfHeight);
+            pdf.setFontSize(26);
+            pdf.setFont('helvetica', 'bold');
+            pdf.setTextColor('#f9b17a'); // Primary color
+            pdf.text('AI Exam Prediction Report', pageWidth / 2, margin + 40, { align: 'center' });
 
-            // Footer
+            cursorY = margin + 70;
+            addText(`Exam Type: ${examType}`, 12, 'bold', '#ffffff');
+            addText(`Prediction Date: ${new Date().toLocaleDateString()}`, 12, 'normal', '#a0a0a0');
+            addText(`Report ID: ${generateUniqueId()}`, 10, 'normal', '#a0a0a0');
+
+            // Footer for cover page
             pdf.setFontSize(8);
             pdf.setTextColor('#606060');
-            pdf.text(`Report ID: ${uniqueId}`, 15, pdf.internal.pageSize.getHeight() - 10);
-            pdf.text(`© ${new Date().getFullYear()} E-SchoolBooks. All Rights Reserved.`, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
+            pdf.text(`© ${new Date().getFullYear()} E-SchoolBooks. All Rights Reserved.`, pageWidth / 2, pageHeight - margin, { align: 'center' });
+            
 
+            // --- PAGE 2+: PREDICTED TOPICS ---
+            pdf.addPage();
+            cursorY = margin;
+            addText('Predicted Topics', 18, 'bold', '#f9b17a');
+            cursorY += 5;
+
+            prediction.predictedTopics.forEach((item) => {
+                const cardHeight = 65 + pdf.splitTextToSize(item.reason, pageWidth - (margin * 2) - 10).length * 4;
+                if (cursorY + cardHeight > pageHeight - margin) {
+                    pdf.addPage();
+                    cursorY = margin;
+                    addText('Predicted Topics (cont.)', 18, 'bold', '#f9b17a');
+                    cursorY += 5;
+                }
+
+                // Draw card
+                pdf.setFillColor(23, 31, 58); // Card background
+                pdf.setDrawColor(44, 57, 107); // Card border
+                pdf.roundedRect(margin, cursorY, pageWidth - (margin*2), cardHeight, 3, 3, 'FD');
+                
+                let cardContentY = cursorY + 10;
+                pdf.setFontSize(14);
+                pdf.setFont('helvetica', 'bold');
+                pdf.setTextColor('#ffffff');
+                pdf.text(item.topic, margin + 10, cardContentY);
+                
+                pdf.setFontSize(10);
+                pdf.setFont('helvetica', 'normal');
+                pdf.setTextColor('#a0a0a0');
+                pdf.text(`${item.subject} | Grade: ${item.grade}`, margin + 10, cardContentY + 6);
+                
+                cardContentY += 20;
+
+                pdf.setFontSize(10);
+                pdf.setTextColor('#d0d0d0');
+                const reasonLines = pdf.splitTextToSize(item.reason, pageWidth - (margin*2) - 20);
+                pdf.text(reasonLines, margin + 10, cardContentY);
+                cardContentY += reasonLines.length * 4 + 5;
+
+                // Confidence progress bar
+                const progressBarWidth = 100;
+                pdf.setFillColor(44, 57, 107); // Progress bar background
+                pdf.rect(margin + 10, cardContentY, progressBarWidth, 5, 'F');
+                pdf.setFillColor(249, 177, 122); // Primary color
+                pdf.rect(margin + 10, cardContentY, progressBarWidth * ((item.confidence || 0) / 100), 5, 'F');
+                pdf.setFontSize(10);
+                pdf.setTextColor('#ffffff');
+                pdf.text(`${item.confidence || 0}%`, margin + 15 + progressBarWidth, cardContentY + 4);
+
+                cursorY += cardHeight + 10;
+            });
+
+
+            // --- FINAL PAGE: STUDY RECOMMENDATIONS ---
+            pdf.addPage();
+            cursorY = margin;
+            addText('Study Recommendations', 18, 'bold', '#f9b17a');
+            cursorY += 5;
+            
+            prediction.studyRecommendations.forEach((rec, index) => {
+                const recLines = pdf.splitTextToSize(`• ${rec}`, pageWidth - margin*2 - 5);
+                const recHeight = recLines.length * 4 + 5;
+                if (cursorY + recHeight > pageHeight - margin) {
+                    pdf.addPage();
+                    cursorY = margin;
+                    addText('Study Recommendations (cont.)', 18, 'bold', '#f9b17a');
+                    cursorY += 5;
+                }
+                pdf.setFontSize(11);
+                pdf.setTextColor('#d0d0d0');
+                pdf.text(recLines, margin + 5, cursorY);
+                cursorY += recHeight;
+            });
 
             pdf.save(`E-SchoolBooks-Prediction-${examType}-${new Date().toISOString().split('T')[0]}.pdf`);
 
@@ -394,14 +471,14 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
 
     
     return (
-         <div className="w-full px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             { showUpload && (
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5 }}
                 >
-                <div className="text-center mb-12">
+                <div className="text-center mb-12 pt-10">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-2">
                         <span className="text-primary">NEO X</span>
                     </h2>
@@ -520,7 +597,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
             )}
 
             {/* Results */}
-            <div ref={resultsRef} className="max-w-7xl mx-auto">
+            <div ref={resultsRef} className="w-full">
                 {(isLoading || isGeneratingQuiz || prediction || quiz) && (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -532,7 +609,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                         <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
                         </div>
                         <Card className="shadow-2xl overflow-hidden">
-                            <div ref={pdfRef} className="bg-card">
+                            <div className="bg-card">
                             <CardHeader>
                                 <div className="flex justify-between items-start">
                                   <div>
@@ -561,6 +638,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                                 <Card key={index} className="bg-background">
                                                     <CardHeader className='pb-2'>
                                                         <CardTitle className="text-lg">{item.topic}</CardTitle>
+                                                        <CardDescription>{item.subject} | Grade: {item.grade}</CardDescription>
                                                     </CardHeader>
                                                     <CardContent>
                                                         <p className="text-sm text-muted-foreground mb-3">{item.reason}</p>
