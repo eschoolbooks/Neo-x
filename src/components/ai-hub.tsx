@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageCircle, MessageSquare, Plus, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageCircle, MessageSquare, Plus, Sparkles, Trash2, TriangleAlert, X } from 'lucide-react';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -345,42 +345,53 @@ export function AiHub({ isDemo }: AiHubProps) {
         }
     };
     
-    const FileUploadArea = ({title, files, onFileChange, onRemoveFile} : {title: string, files: File[], onFileChange: any, onRemoveFile: any}) => {
-        const fileCount = files.length;
-        const isLimitReached = fileCount >= MAX_DOCUMENTS;
+const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: string, files: File[], onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void, onRemoveFile: (index: number) => void}) => {
+    const fileCount = files.length;
+    const isLimitReached = fileCount >= MAX_DOCUMENTS;
 
-        return (
-            <div className="space-y-2">
-                <Label htmlFor="documents" className="text-lg font-semibold flex justify-between">
-                    {title} (PDF) <span>{fileCount} / {MAX_DOCUMENTS}</span>
-                </Label>
-                 {isLimitReached && (
-                    <Alert variant="destructive" className="text-xs">
-                        <AlertDescription>
-                            You have reached the maximum of {MAX_DOCUMENTS} files.
-                        </AlertDescription>
-                    </Alert>
-                )}
-                <div className="flex items-center justify-center w-full">
-                    <label htmlFor="documents-input" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isLimitReached ? 'bg-muted/50 cursor-not-allowed' : 'cursor-pointer bg-card/50 hover:bg-muted'}`}>
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                            <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                        </div>
-                        <input id="documents-input" type="file" className="hidden" multiple accept=".pdf" onChange={onFileChange} disabled={isLimitReached} />
-                    </label>
-                </div>
-                <div className="space-y-1 pt-2">
-                    {files.map((file, index) => (
-                        <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
-                            <span className="truncate pr-2">{file.name}</span>
-                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => onRemoveFile(index)}><X className="h-4 w-4" /></Button>
-                        </div>
-                    ))}
-                </div>
+    return (
+        <div className="space-y-2">
+            <Label htmlFor="documents-input" className="text-lg font-semibold flex justify-between">
+                {title} (PDF) <span>{fileCount} / {MAX_DOCUMENTS}</span>
+            </Label>
+            <div className="flex items-center justify-center w-full">
+                <label 
+                    htmlFor="documents-input" 
+                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors
+                        ${isLimitReached 
+                            ? 'bg-destructive/10 border-destructive text-destructive cursor-not-allowed' 
+                            : 'cursor-pointer bg-card/50 hover:bg-muted border-input'
+                        }`}
+                >
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                        {isLimitReached ? (
+                            <>
+                                <TriangleAlert className="w-8 h-8 mb-2" />
+                                <p className="text-sm font-semibold">You have reached the maximum of {MAX_DOCUMENTS} files.</p>
+                            </>
+                        ) : (
+                            <>
+                                <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                                <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p className="text-xs text-muted-foreground">Up to 3 PDF files</p>
+                            </>
+                        )}
+                    </div>
+                    <input id="documents-input" type="file" className="hidden" multiple accept=".pdf" onChange={onFileChange} disabled={isLimitReached} />
+                </label>
             </div>
-        );
-    }
+            <div className="space-y-1 pt-2">
+                {files.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
+                        <span className="truncate pr-2">{file.name}</span>
+                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => onRemoveFile(index)}><X className="h-4 w-4" /></Button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
     
     return (
          <div className="w-full px-4 sm:px-6 lg:px-8">
@@ -697,5 +708,7 @@ export function AiHub({ isDemo }: AiHubProps) {
         </div>
     );
 }
+
+    
 
     
