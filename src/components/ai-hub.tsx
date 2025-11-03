@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -620,7 +621,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                             </CardHeader>
                             <CardContent>
                                 <p className="text-center text-muted-foreground">
-                                    Use the chat bubble at the bottom-right corner to talk with Neo X anytime!
+                                    Use the chat button in the results header to talk with Neo X anytime!
                                 </p>
                                 <div className="flex justify-center mt-4">
                                     <Button onClick={() => setIsChatOpen(true)}>Open Chat</Button>
@@ -641,8 +642,9 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                       transition={{ duration: 0.5 }}
                       className="mt-12"
                     >
-                        <div className="flex justify-end mb-4">
-                        <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
+                        <div className="flex justify-end items-center gap-4 mb-4">
+                           <Button variant="outline" onClick={() => setIsChatOpen(true)}><MessageSquare className="mr-2 h-4 w-4"/> Chat with Neo X</Button>
+                           <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
                         </div>
                         <Card className="shadow-2xl overflow-hidden">
                             <div className="bg-card">
@@ -855,19 +857,6 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                         </Card>
                     </motion.div>
                 )}
-            </div>
-
-            {/* Chat FAB */}
-            <div className="fixed bottom-6 right-6 z-50">
-                <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5, delay: 1 }}
-                >
-                    <Button size="lg" className="rounded-full w-16 h-16 shadow-lg" onClick={() => setIsChatOpen(true)}>
-                    <MessageCircle className="h-8 w-8" />
-                    </Button>
-                </motion.div>
             </div>
 
             {/* Chat Window */}
