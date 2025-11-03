@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageCircle, MessageSquare, Plus, Sparkles, Trash2, TriangleAlert, X } from 'lucide-react';
+import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageCircle, MessageSquare, Plus, Sparkles, Trash2, TriangleAlert, X, BookCheck, Info } from 'lucide-react';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -21,6 +21,7 @@ import type { Quiz } from '@/ai/flows/generateQuizSchemas';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import jsPDF from 'jspdf';
 import { Skeleton } from './ui/skeleton';
+import { cn } from '@/lib/utils';
 
 
 type AiHubProps = {
@@ -207,7 +208,7 @@ export function AiHub({ isDemo }: AiHubProps) {
                 }, 100);
             }
         } catch (err) {
-            const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+            const errorMessage = err instanceof Error ? err.message : 'An unexpected response was received from the server.';
             setQuizError(errorMessage);
             setShowUpload(true);
             toast({
@@ -314,10 +315,10 @@ export function AiHub({ isDemo }: AiHubProps) {
             // --- FOOTER FUNCTION ---
             const addFooter = () => {
                 const pageCount = pdf.internal.getNumberOfPages();
-                pdf.setFontSize(8);
-                pdf.setTextColor(mutedColor);
                 for (let i = 1; i <= pageCount; i++) {
                     pdf.setPage(i);
+                    pdf.setFontSize(8);
+                    pdf.setTextColor(mutedColor);
                     pdf.text(`© ${new Date().getFullYear()} E-SchoolBooks. All Rights Reserved.`, margin, pageHeight - 10);
                     pdf.text(`Page ${i} of ${pageCount}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
                 }
@@ -662,10 +663,42 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                     )}
                                 </div>
                             </CardHeader>
-                            <CardContent className="grid md:grid-cols-2 gap-8">
-                                {/* Predicted Topics */}
-                                {prediction && !quiz && (
-                                <>
+                            <CardContent>
+                                {/* Loading Skeletons */}
+                                {isLoading && !isGeneratingQuiz && (
+                                     <div className="grid md:grid-cols-2 gap-8">
+                                        <div className="space-y-4">
+                                             <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
+                                            <Skeleton className="h-28 w-full" />
+                                            <Skeleton className="h-28 w-full" />
+                                            <Skeleton className="h-28 w-full" />
+                                        </div>
+                                        <div className="space-y-4">
+                                            <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
+                                            <Skeleton className="h-8 w-full" />
+                                            <Skeleton className="h-8 w-full" />
+                                            <Skeleton className="h-8 w-full" />
+                                            <Skeleton className="h-8 w-full" />
+                                        </div>
+                                    </div>
+                                )}
+                                {isGeneratingQuiz && (
+                                    <div className='space-y-6'>
+                                        <Skeleton className="h-8 w-1/2 mx-auto" />
+                                        <Skeleton className="h-4 w-1/4 mx-auto" />
+                                        <Skeleton className="h-2 w-full" />
+                                        <div className='space-y-4 pt-4'>
+                                            <Skeleton className="h-10 w-full" />
+                                            <Skeleton className="h-10 w-full" />
+                                            <Skeleton className="h-10 w-full" />
+                                            <Skeleton className="h-10 w-full" />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Prediction Results */}
+                                {prediction && !quiz && !isLoading && (
+                                <div className="grid md:grid-cols-2 gap-8">
                                     <div className="space-y-4">
                                         <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
                                         <div className="space-y-4">
@@ -685,7 +718,6 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                             ))}
                                         </div>
                                     </div>
-                                    {/* Study Recommendations */}
                                     <div className="space-y-4">
                                         <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
                                         <ul className="space-y-3">
@@ -697,29 +729,12 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                             ))}
                                         </ul>
                                     </div>
-                                </>
-                                )}
-                                {(isLoading || isGeneratingQuiz) && (
-                                    <>
-                                        <div className="space-y-4">
-                                             <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
-                                            <Skeleton className="h-28 w-full" />
-                                            <Skeleton className="h-28 w-full" />
-                                            <Skeleton className="h-28 w-full" />
-                                        </div>
-                                        <div className="space-y-4">
-                                            <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
-                                            <Skeleton className="h-8 w-full" />
-                                            <Skeleton className="h-8 w-full" />
-                                            <Skeleton className="h-8 w-full" />
-                                            <Skeleton className="h-8 w-full" />
-                                        </div>
-                                    </>
+                                </div>
                                 )}
                             </CardContent>
                             </div>
                             
-                            {quiz && quizScore === null && (
+                            {quiz && quizScore === null && !isGeneratingQuiz && (
                                 <div className="border-t p-6 space-y-6">
                                     <div className="text-center">
                                         <h3 className="text-xl font-bold">{quiz.title}</h3>
@@ -752,35 +767,84 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                     </div>
                                 </div>
                             )}
-
-                            {quizScore !== null && (
-                                <div className="border-t p-6 text-center space-y-6 flex flex-col items-center">
-                                    <h3 className="text-2xl font-bold">Quiz Complete!</h3>
-                                    <p className="text-lg">Your Score:</p>
-                                    <div className="relative w-32 h-32">
-                                        <svg className="w-full h-full" viewBox="0 0 36 36">
-                                            <path
-                                                className="stroke-current text-muted/50"
-                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                                fill="none"
-                                                strokeWidth="3"
-                                            />
-                                            <path
-                                                className="stroke-current text-primary"
-                                                strokeDasharray={`${quizScore}, 100`}
-                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                                fill="none"
-                                                strokeWidth="3"
-                                                strokeLinecap="round"
-                                            />
-                                        </svg>
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <span className="text-3xl font-bold">{Math.round(quizScore)}%</span>
+                             {quiz && quizScore !== null && (
+                                <div className="border-t p-6 space-y-6">
+                                    <div className="text-center space-y-4 flex flex-col items-center">
+                                        <h3 className="text-2xl font-bold">Quiz Complete!</h3>
+                                        <p className="text-lg">Your Score:</p>
+                                        <div className="relative w-32 h-32">
+                                            <svg className="w-full h-full" viewBox="0 0 36 36">
+                                                <path
+                                                    className="stroke-current text-muted/50"
+                                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                    fill="none"
+                                                    strokeWidth="3"
+                                                />
+                                                <path
+                                                    className="stroke-current text-primary"
+                                                    strokeDasharray={`${quizScore}, 100`}
+                                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                    fill="none"
+                                                    strokeWidth="3"
+                                                    strokeLinecap="round"
+                                                />
+                                            </svg>
+                                            <div className="absolute inset-0 flex items-center justify-center">
+                                                <span className="text-3xl font-bold">{Math.round(quizScore)}%</span>
+                                            </div>
                                         </div>
                                     </div>
-                                    <Button onClick={handleTryAgain}>Try a New Quiz</Button>
+                                    <div className="space-y-6 pt-6">
+                                        <h4 className="text-xl font-bold flex items-center gap-2"><BookCheck/> Review Your Answers</h4>
+                                        {quiz.questions.map((q, index) => {
+                                            const userAnswer = userAnswers[index];
+                                            const isCorrect = userAnswer === q.correctAnswer;
+                                            return (
+                                                <Card key={index} className="bg-background">
+                                                    <CardHeader>
+                                                        <CardTitle className="text-lg">Question {index + 1}: {q.questionText}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-3">
+                                                        <div className="space-y-2">
+                                                            {q.options.map((option, i) => {
+                                                                const isUserChoice = userAnswer === option;
+                                                                const isTheCorrectAnswer = q.correctAnswer === option;
+                                                                return (
+                                                                    <div 
+                                                                        key={i}
+                                                                        className={cn(
+                                                                            "flex items-center space-x-2 p-3 rounded-md border text-sm",
+                                                                            isUserChoice && !isTheCorrectAnswer && "bg-destructive/10 border-destructive/50 text-destructive-foreground",
+                                                                            isTheCorrectAnswer && "bg-accent/10 border-accent/50 text-accent-foreground",
+                                                                            !isUserChoice && !isTheCorrectAnswer && "bg-muted/50"
+                                                                        )}
+                                                                    >
+                                                                        {isUserChoice ? <CheckCircle className="h-4 w-4"/> : <X className="h-4 w-4 opacity-0"/>}
+                                                                        <span>{option}</span>
+                                                                    </div>
+                                                                )
+                                                            })}
+                                                        </div>
+                                                        <Alert variant={isCorrect ? 'default' : 'destructive'} className={cn(
+                                                            isCorrect ? 'bg-accent/10 border-accent/50' : 'bg-destructive/10 border-destructive/50'
+                                                        )}>
+                                                            <Info className="h-4 w-4" />
+                                                            <AlertTitle>{isCorrect ? 'Correct!' : 'Incorrect'}</AlertTitle>
+                                                            <AlertDescription>
+                                                                {q.explanation}
+                                                            </AlertDescription>
+                                                        </Alert>
+                                                    </CardContent>
+                                                </Card>
+                                            )
+                                        })}
+                                    </div>
+                                    <div className="text-center pt-4">
+                                        <Button onClick={handleTryAgain}>Try a New Quiz</Button>
+                                    </div>
                                 </div>
                             )}
+
 
                             {quizError && (
                                  <div className="p-6 text-center">

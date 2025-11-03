@@ -41,7 +41,7 @@ For each question:
 3.  One of the options must be the correct answer.
 4.  The other three options should be plausible but incorrect (distractors).
 5.  Specify which option is the correct answer.
-6.  Provide a brief explanation for why the correct answer is right.
+6.  Provide a brief but thorough explanation for why the correct answer is right. This is crucial for learning.
 
 IMPORTANT: Your response MUST be a valid JSON object that strictly adheres to the provided output schema. Do NOT include any extra text, markdown, or explanations outside of the JSON structure.
 `,
