@@ -21,7 +21,6 @@ import type { Quiz } from '@/ai/flows/generateQuizSchemas';
 import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { useSidebar } from './ui/sidebar';
 import { Skeleton } from './ui/skeleton';
 
 
@@ -29,18 +28,7 @@ type AiHubProps = {
     isDemo: boolean;
 };
 
-type PredictionHistoryItem = {
-    id: string;
-    timestamp: Date;
-    examType: string;
-    prediction: PredictExamOutput;
-    quiz: Quiz | null;
-    files: {
-        textbooks: string[];
-        questionPapers: string[];
-    };
-};
-
+const MAX_FILES = 5;
 
 export function AiHub({ isDemo }: AiHubProps) {
     const [examType, setExamType] = useState('Plus 2');
@@ -55,11 +43,12 @@ export function AiHub({ isDemo }: AiHubProps) {
     const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', content: string}[]>([]);
     const [isChatting, setIsChatting] = useState(false);
     
-    // Persist data URIs
     const [textbookDataUris, setTextbookDataUris] = useState<string[]>([]);
     const [questionPaperDataUris, setQuestionPaperDataUris] = useState<string[]>([]);
 
-    // Quiz State
+    const [prediction, setPrediction] = useState<PredictExamOutput | null>(null);
+    const [quiz, setQuiz] = useState<Quiz | null>(null);
+
     const [isGeneratingQuiz, setIsGeneratingQuiz] = useState(false);
     const [quizError, setQuizError] = useState<string | null>(null);
     const [numQuestions, setNumQuestions] = useState(5);
@@ -67,19 +56,11 @@ export function AiHub({ isDemo }: AiHubProps) {
     const [userAnswers, setUserAnswers] = useState<string[]>([]);
     const [quizScore, setQuizScore] = useState<number | null>(null);
 
-    // Demo state
     const [demoUsed, setDemoUsed] = useState(false);
 
-    // Prediction History State
-    const [history, setHistory] = useState<PredictionHistoryItem[]>([]);
-    const [activePrediction, setActivePrediction] = useState<PredictionHistoryItem | null>(null);
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
-    const { open, state } = useSidebar();
+    const [showUpload, setShowUpload] = useState(true);
 
-
-    const prediction = activePrediction?.prediction ?? null;
-    const quiz = activePrediction?.quiz ?? null;
-    
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -90,7 +71,17 @@ export function AiHub({ isDemo }: AiHubProps) {
     };
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'textbooks' | 'questionPapers') => {
-        const newFiles = Array.from(e.target.files || []);
+        const currentFiles = fileType === 'textbooks' ? textbooks : questionPapers;
+        const newFiles = Array.from(e.target.files || []).slice(0, MAX_FILES - currentFiles.length);
+
+        if(currentFiles.length + newFiles.length > MAX_FILES) {
+            toast({
+                title: 'File Limit Exceeded',
+                description: `You can only upload a maximum of ${MAX_FILES} files per category.`,
+                variant: 'destructive',
+            });
+        }
+
         try {
             const uris = await Promise.all(newFiles.map(fileToDataUri));
             if (fileType === 'textbooks') {
@@ -120,7 +111,9 @@ export function AiHub({ isDemo }: AiHubProps) {
     };
     
     const handleNewPrediction = () => {
-        setActivePrediction(null);
+        setShowUpload(true);
+        setPrediction(null);
+        setQuiz(null);
         setTextbooks([]);
         setQuestionPapers([]);
         setTextbookDataUris([]);
@@ -149,7 +142,10 @@ export function AiHub({ isDemo }: AiHubProps) {
 
         setIsLoading(true);
         setError(null);
-        setActivePrediction(null);
+        setPrediction(null);
+        setQuiz(null);
+        setShowUpload(false);
+
 
         try {
             const result = await predictExam({
@@ -158,21 +154,7 @@ export function AiHub({ isDemo }: AiHubProps) {
                 questionPapers: questionPaperDataUris,
             });
             
-            const newHistoryItem: PredictionHistoryItem = {
-                id: new Date().toISOString(),
-                timestamp: new Date(),
-                examType: examType,
-                prediction: result,
-                quiz: null,
-                files: {
-                    textbooks: textbooks.map(f => f.name),
-                    questionPapers: questionPapers.map(f => f.name)
-                }
-            };
-
-            setHistory(prev => [newHistoryItem, ...prev]);
-            setActivePrediction(newHistoryItem);
-
+            setPrediction(result);
             if (isDemo) setDemoUsed(true);
 
             setTimeout(() => {
@@ -182,6 +164,7 @@ export function AiHub({ isDemo }: AiHubProps) {
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
             setError(errorMessage);
+            setShowUpload(true);
             toast({
                 title: 'Prediction Failed',
                 description: errorMessage,
@@ -194,7 +177,7 @@ export function AiHub({ isDemo }: AiHubProps) {
 
     const handleGenerateQuiz = async (e: React.FormEvent) => {
         e.preventDefault();
-         if (isDemo && demoUsed) {
+         if (isDemo && demoUsed && quiz) { // Allow one demo quiz
             toast({ title: 'Demo Limit Reached', description: 'Please sign up to continue generating quizzes.', variant: 'destructive' });
             return;
         }
@@ -209,13 +192,11 @@ export function AiHub({ isDemo }: AiHubProps) {
 
         setIsGeneratingQuiz(true);
         setQuizError(null);
-        if (activePrediction) {
-            const updatedPrediction = { ...activePrediction, quiz: null };
-            setActivePrediction(updatedPrediction);
-        }
+        setQuiz(null);
         setQuizScore(null);
         setUserAnswers([]);
         setCurrentQuestionIndex(0);
+        setShowUpload(false);
 
         try {
             const result = await generateQuiz({
@@ -231,17 +212,18 @@ export function AiHub({ isDemo }: AiHubProps) {
                     description: "The AI couldn't generate a quiz. Please try different documents.",
                     variant: 'destructive',
                 });
+                setShowUpload(true);
             } else {
-                 if (activePrediction) {
-                    const updatedPrediction = { ...activePrediction, quiz: result };
-                    setActivePrediction(updatedPrediction);
-                    setHistory(prev => prev.map(h => h.id === activePrediction.id ? updatedPrediction : h));
-                }
-                 if (isDemo) setDemoUsed(true);
+                setQuiz(result);
+                if (isDemo) setDemoUsed(true);
+                 setTimeout(() => {
+                    resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
             setQuizError(errorMessage);
+            setShowUpload(true);
             toast({
                 title: 'Quiz Generation Failed',
                 description: errorMessage,
@@ -276,13 +258,11 @@ export function AiHub({ isDemo }: AiHubProps) {
     };
 
     const handleTryAgain = () => {
-        if (activePrediction) {
-            const updatedPrediction = { ...activePrediction, quiz: null };
-            setActivePrediction(updatedPrediction);
-        }
+        setQuiz(null);
         setQuizScore(null);
         setCurrentQuestionIndex(0);
         setUserAnswers([]);
+        setShowUpload(true);
         if (isDemo) setDemoUsed(false);
     };
 
@@ -328,7 +308,7 @@ export function AiHub({ isDemo }: AiHubProps) {
     };
 
     const handleDownloadPdf = async () => {
-        if (!pdfRef.current || !activePrediction) return;
+        if (!pdfRef.current || !prediction) return;
         setIsDownloadingPdf(true);
         try {
             const canvas = await html2canvas(pdfRef.current, {
@@ -342,7 +322,7 @@ export function AiHub({ isDemo }: AiHubProps) {
             const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
             
             const uniqueId = generateUniqueId();
-            const predictionDate = new Date(activePrediction.timestamp).toLocaleDateString();
+            const predictionDate = new Date().toLocaleDateString();
 
             // Header
             const logo = "https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8";
@@ -364,7 +344,7 @@ export function AiHub({ isDemo }: AiHubProps) {
             pdf.text(`© ${new Date().getFullYear()} E-SchoolBooks. All Rights Reserved.`, pdf.internal.pageSize.getWidth() / 2, pdf.internal.pageSize.getHeight() - 10, { align: 'center' });
 
 
-            pdf.save(`E-SchoolBooks-Prediction-${activePrediction.examType}-${new Date().toISOString().split('T')[0]}.pdf`);
+            pdf.save(`E-SchoolBooks-Prediction-${examType}-${new Date().toISOString().split('T')[0]}.pdf`);
 
         } catch (error) {
             console.error("Error generating PDF:", error);
@@ -378,39 +358,47 @@ export function AiHub({ isDemo }: AiHubProps) {
         }
     };
     
-    // Sidebar content for non-demo view
-    const sidebarContent = (
-      <div className="flex flex-col h-full p-4 gap-4">
-        <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
-        <h2 className="text-lg font-semibold text-foreground">History</h2>
-        <div className="flex-1 overflow-y-auto space-y-2">
-            {history.length === 0 && (
-                 <div className="text-center text-muted-foreground py-10">
-                    <p>No predictions yet.</p>
-                 </div>
-            )}
-            {history.map(item => (
-                <Card 
-                    key={item.id} 
-                    className={`cursor-pointer hover:border-primary ${activePrediction?.id === item.id ? 'border-primary bg-primary/10' : ''}`}
-                    onClick={() => setActivePrediction(item)}
-                >
-                    <CardHeader className="p-3">
-                        <CardTitle className="text-base">{item.examType}</CardTitle>
-                        <CardDescription className="text-xs">{new Date(item.timestamp).toLocaleString()}</CardDescription>
-                    </CardHeader>
-                </Card>
-            ))}
-        </div>
-      </div>
-    );
-    
+    const FileUploadArea = ({title, fileType, files, onFileChange, onRemoveFile} : {title: string, fileType: 'textbooks'|'questionPapers', files: File[], onFileChange: any, onRemoveFile: any}) => {
+        const fileCount = files.length;
+        const isLimitReached = fileCount >= MAX_FILES;
 
-    // Main content
-    const mainContent = (
+        return (
+            <div className="space-y-2">
+                <Label htmlFor={fileType} className="text-lg font-semibold flex justify-between">
+                    {title} (PDF) <span>{fileCount} / {MAX_FILES}</span>
+                </Label>
+                 {isLimitReached && (
+                    <Alert variant="destructive" className="text-xs">
+                        <AlertDescription>
+                            You have reached the maximum number of files.
+                        </AlertDescription>
+                    </Alert>
+                )}
+                <div className="flex items-center justify-center w-full">
+                    <label htmlFor={`${fileType}-input`} className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isLimitReached ? 'bg-muted/50 cursor-not-allowed' : 'cursor-pointer bg-card/50 hover:bg-muted'}`}>
+                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
+                            <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                        </div>
+                        <input id={`${fileType}-input`} type="file" className="hidden" multiple accept=".pdf" onChange={onFileChange} disabled={isLimitReached} />
+                    </label>
+                </div>
+                <div className="space-y-1 pt-2">
+                    {files.map((file, index) => (
+                        <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
+                            <span className="truncate pr-2">{file.name}</span>
+                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => onRemoveFile(index, fileType)}><X className="h-4 w-4" /></Button>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+    
+    return (
          <>
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                { !activePrediction && (
+                { showUpload && (
                     <motion.div 
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -437,46 +425,20 @@ export function AiHub({ isDemo }: AiHubProps) {
                          )}
                     </div>
                     <div id="ai-hub-form" className="grid md:grid-cols-2 gap-6 mb-8">
-                        <div className="space-y-2">
-                            <Label htmlFor="textbooks" className="text-lg font-semibold">Textbooks (PDF)</Label>
-                            <div className="flex items-center justify-center w-full">
-                                <label htmlFor="textbooks-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card/50 hover:bg-muted">
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                                        <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                    </div>
-                                    <input id="textbooks-input" type="file" className="hidden" multiple accept=".pdf" onChange={(e) => handleFileChange(e, 'textbooks')} />
-                                </label>
-                            </div>
-                            <div className="space-y-1 pt-2">
-                                {textbooks.map((file, index) => (
-                                    <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
-                                        <span className="truncate pr-2">{file.name}</span>
-                                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => handleRemoveFile(index, 'textbooks')}><X className="h-4 w-4" /></Button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="question-papers" className="text-lg font-semibold">Question Papers (PDF)</Label>
-                            <div className="flex items-center justify-center w-full">
-                                <label htmlFor="question-papers-input" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-card/50 hover:bg-muted">
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
-                                        <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                    </div>
-                                    <input id="question-papers-input" type="file" className="hidden" multiple accept=".pdf" onChange={(e) => handleFileChange(e, 'questionPapers')} />
-                                </label>
-                            </div>
-                            <div className="space-y-1 pt-2">
-                                {questionPapers.map((file, index) => (
-                                    <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
-                                        <span className="truncate pr-2">{file.name}</span>
-                                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => handleRemoveFile(index, 'questionPapers')}><X className="h-4 w-4" /></Button>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
+                        <FileUploadArea 
+                            title="Textbooks"
+                            fileType="textbooks"
+                            files={textbooks}
+                            onFileChange={(e) => handleFileChange(e, 'textbooks')}
+                            onRemoveFile={handleRemoveFile}
+                        />
+                         <FileUploadArea 
+                            title="Question Papers"
+                            fileType="questionPapers"
+                            files={questionPapers}
+                            onFileChange={(e) => handleFileChange(e, 'questionPapers')}
+                            onRemoveFile={handleRemoveFile}
+                        />
                     </div>
                     {isDemo && demoUsed && (
                         <Alert className="max-w-4xl mx-auto my-8 border-primary text-primary-foreground bg-primary/10">
@@ -543,7 +505,7 @@ export function AiHub({ isDemo }: AiHubProps) {
                                                 ))}
                                             </RadioGroup>
                                         </div>
-                                        <Button type="submit" size="lg" className="w-full" disabled={isGeneratingQuiz || (isDemo && demoUsed)}>
+                                        <Button type="submit" size="lg" className="w-full" disabled={isGeneratingQuiz || (isDemo && demoUsed && !!quiz)}>
                                             {isGeneratingQuiz ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Generating Quiz...</> : 'Start Quiz'}
                                         </Button>
                                     </form>
@@ -568,27 +530,32 @@ export function AiHub({ isDemo }: AiHubProps) {
                     </motion.div>
                 )}
 
-                {/* Prediction Results */}
+                {/* Results */}
                 <div ref={resultsRef}>
-                    {activePrediction && (
+                    {(prediction || quiz) && (
                         <motion.div
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ duration: 0.5 }}
                           className="mt-12"
                         >
+                            {!isDemo && (
+                                <div className="flex justify-end mb-4">
+                                <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
+                                </div>
+                            )}
                             <Card className="shadow-2xl overflow-hidden">
                                 <div ref={pdfRef} className="bg-card">
                                 <CardHeader>
-                                    <div className="flex justify-between items-center">
+                                    <div className="flex justify-between items-start">
                                       <div>
                                         <CardTitle className="flex items-center gap-3 text-2xl">
                                             <Sparkles className="text-primary"/>
-                                            Prediction Results for {activePrediction.examType}
+                                            {quiz ? "Quiz Results" : `Prediction Results for ${examType}`}
                                         </CardTitle>
-                                        <CardDescription>Here are the topics and recommendations generated by Neo X.</CardDescription>
+                                        <CardDescription>{quiz ? "Test your knowledge." : "Here are the topics and recommendations generated by Neo X."}</CardDescription>
                                       </div>
-                                       {!isDemo && (
+                                       {!isDemo && prediction && (
                                             <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
                                                 {isDownloadingPdf ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
                                                 Download PDF
@@ -598,52 +565,58 @@ export function AiHub({ isDemo }: AiHubProps) {
                                 </CardHeader>
                                 <CardContent className="grid md:grid-cols-2 gap-8">
                                     {/* Predicted Topics */}
-                                    <div className="space-y-4">
-                                        <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
-                                        {isLoading && !prediction && (
-                                            <div className="space-y-4">
-                                                <Skeleton className="h-28 w-full" />
-                                                <Skeleton className="h-28 w-full" />
-                                                <Skeleton className="h-28 w-full" />
-                                            </div>
-                                        )}
+                                    {prediction && !quiz && (
+                                    <>
                                         <div className="space-y-4">
-                                            {prediction && prediction.predictedTopics.map((item, index) => (
-                                                <Card key={index} className="bg-background">
-                                                    <CardHeader className='pb-2'>
-                                                        <CardTitle className="text-lg">{item.topic}</CardTitle>
-                                                    </CardHeader>
-                                                    <CardContent>
-                                                        <p className="text-sm text-muted-foreground mb-3">{item.reason}</p>
-                                                        <div className='flex items-center gap-2'>
-                                                            <Progress value={item.confidence || 0} className="h-2" />
-                                                            <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
-                                                        </div>
-                                                    </CardContent>
-                                                </Card>
-                                            ))}
+                                            <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
+                                            <div className="space-y-4">
+                                                {prediction.predictedTopics.map((item, index) => (
+                                                    <Card key={index} className="bg-background">
+                                                        <CardHeader className='pb-2'>
+                                                            <CardTitle className="text-lg">{item.topic}</CardTitle>
+                                                        </CardHeader>
+                                                        <CardContent>
+                                                            <p className="text-sm text-muted-foreground mb-3">{item.reason}</p>
+                                                            <div className='flex items-center gap-2'>
+                                                                <Progress value={item.confidence || 0} className="h-2" />
+                                                                <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                    {/* Study Recommendations */}
-                                    <div className="space-y-4">
-                                        <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
-                                         {isLoading && !prediction && (
-                                            <div className="space-y-3">
+                                        {/* Study Recommendations */}
+                                        <div className="space-y-4">
+                                            <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
+                                            <ul className="space-y-3">
+                                                {prediction.studyRecommendations.map((rec, index) => (
+                                                    <li key={index} className="flex items-start gap-3">
+                                                        <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
+                                                        <span className="text-muted-foreground">{rec}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    </>
+                                    )}
+                                    {(isLoading || isGeneratingQuiz) && (
+                                        <>
+                                            <div className="space-y-4">
+                                                 <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
+                                                <Skeleton className="h-28 w-full" />
+                                                <Skeleton className="h-28 w-full" />
+                                                <Skeleton className="h-28 w-full" />
+                                            </div>
+                                            <div className="space-y-4">
+                                                <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
                                                 <Skeleton className="h-8 w-full" />
                                                 <Skeleton className="h-8 w-full" />
                                                 <Skeleton className="h-8 w-full" />
                                                 <Skeleton className="h-8 w-full" />
                                             </div>
-                                        )}
-                                        <ul className="space-y-3">
-                                            {prediction && prediction.studyRecommendations.map((rec, index) => (
-                                                <li key={index} className="flex items-start gap-3">
-                                                    <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
-                                                    <span className="text-muted-foreground">{rec}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </div>
+                                        </>
+                                    )}
                                 </CardContent>
                                 </div>
                                 
@@ -710,7 +683,12 @@ export function AiHub({ isDemo }: AiHubProps) {
                                     </div>
                                 )}
 
-                                {quizError && <p className="text-destructive text-center p-6">{quizError}</p>}
+                                {quizError && (
+                                     <div className="p-6 text-center">
+                                        <p className="text-destructive">{quizError}</p>
+                                        <Button onClick={handleTryAgain} className="mt-4">Try Again</Button>
+                                    </div>
+                                )}
                             </Card>
                         </motion.div>
                     )}
@@ -742,22 +720,4 @@ export function AiHub({ isDemo }: AiHubProps) {
             />
         </>
     );
-
-    if (isDemo) {
-        return mainContent;
-    }
-
-    if (!open && state === 'collapsed') {
-      return (
-        <div className="hidden md:block h-full bg-sidebar text-sidebar-foreground">
-          {sidebarContent}
-        </div>
-      );
-    }
-    
-    return (
-        <div className='md:hidden h-full bg-sidebar text-sidebar-foreground'>
-            {sidebarContent}
-        </div>
-    )
 }
