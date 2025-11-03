@@ -72,23 +72,28 @@ export function AiHub({ isDemo }: AiHubProps) {
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'textbooks' | 'questionPapers') => {
         const currentFiles = fileType === 'textbooks' ? textbooks : questionPapers;
-        const newFiles = Array.from(e.target.files || []).slice(0, MAX_FILES - currentFiles.length);
+        const availableSlots = MAX_FILES - currentFiles.length;
+        if (availableSlots <= 0) return;
+        
+        const newFiles = Array.from(e.target.files || []);
 
-        if(currentFiles.length + newFiles.length > MAX_FILES) {
-            toast({
+        if (newFiles.length > availableSlots) {
+             toast({
                 title: 'File Limit Exceeded',
-                description: `You can only upload a maximum of ${MAX_FILES} files per category.`,
+                description: `You can only upload ${availableSlots} more file(s). ${newFiles.length - availableSlots} file(s) were not added.`,
                 variant: 'destructive',
             });
         }
+        
+        const filesToAdd = newFiles.slice(0, availableSlots);
 
         try {
-            const uris = await Promise.all(newFiles.map(fileToDataUri));
+            const uris = await Promise.all(filesToAdd.map(fileToDataUri));
             if (fileType === 'textbooks') {
-                setTextbooks(prev => [...prev, ...newFiles]);
+                setTextbooks(prev => [...prev, ...filesToAdd]);
                 setTextbookDataUris(prev => [...prev, ...uris]);
             } else {
-                setQuestionPapers(prev => [...prev, ...newFiles]);
+                setQuestionPapers(prev => [...prev, ...filesToAdd]);
                 setQuestionPaperDataUris(prev => [...prev, ...uris]);
             }
         } catch (error) {
@@ -396,305 +401,302 @@ export function AiHub({ isDemo }: AiHubProps) {
     }
     
     return (
-         <>
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                { showUpload && (
-                    <motion.div 
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5 }}
-                    >
-                    <div className="text-center mb-12">
-                        <h2 className="text-3xl sm:text-4xl font-bold mb-2">
-                            <span className="text-primary">NEO X</span>
-                        </h2>
-                        <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
-                            The most powerful and accurate question prediction AI.
-                        </p>
-                         {isDemo && (
-                            <div className="flex justify-center gap-4">
-                                <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
-                                <a href="#">Learn More</a>
-                                </Button>
-                                <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="default">
-                                    <a href="/ai-hub">
-                                        Predict Questions <ArrowRight className="ml-2 h-5 w-5" />
-                                    </a>
-                                </Button>
-                            </div>
-                         )}
-                    </div>
-                    <div id="ai-hub-form" className="grid md:grid-cols-2 gap-6 mb-8">
-                        <FileUploadArea 
-                            title="Textbooks"
-                            fileType="textbooks"
-                            files={textbooks}
-                            onFileChange={(e) => handleFileChange(e, 'textbooks')}
-                            onRemoveFile={handleRemoveFile}
-                        />
-                         <FileUploadArea 
-                            title="Question Papers"
-                            fileType="questionPapers"
-                            files={questionPapers}
-                            onFileChange={(e) => handleFileChange(e, 'questionPapers')}
-                            onRemoveFile={handleRemoveFile}
-                        />
-                    </div>
-                    {isDemo && demoUsed && (
-                        <Alert className="max-w-4xl mx-auto my-8 border-primary text-primary-foreground bg-primary/10">
-                            <Sparkles className="h-4 w-4 !text-primary" />
-                            <AlertTitle>You're a natural!</AlertTitle>
-                            <AlertDescription>
-                                You've used your free demo. Please sign up to unlock unlimited predictions, quizzes, and chat sessions.
-                                <Button asChild variant="link" className="p-0 h-auto ml-2 text-primary-foreground"><a href="#">Sign up for free</a></Button>
-                            </AlertDescription>
-                        </Alert>
-                    )}
-                    <Card className="max-w-4xl mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
-                        <Tabs defaultValue="predictor" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
-                                <TabsTrigger value="predictor"><BrainCircuit className="w-4 h-4 mr-2"/>Exam Predictor</TabsTrigger>
-                                <TabsTrigger value="quiz"><FileQuestion className="w-4 h-4 mr-2"/>Quiz Generator</TabsTrigger>
-                                <TabsTrigger value="chat"><MessageSquare className="w-4 h-4 mr-2"/>Chat Tutor</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="predictor">
-                                <CardHeader>
-                                    <CardTitle>Exam Forecaster</CardTitle>
-                                    <CardDescription>Analyze past papers and textbooks to predict the most likely exam topics.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <form onSubmit={handleSubmitPrediction} className="space-y-6">
-                                        <div className="space-y-3">
-                                            <Label className="text-lg font-semibold">Select Exam Type</Label>
-                                            <RadioGroup value={examType} onValueChange={setExamType} className="flex flex-wrap gap-4">
-                                                {['Plus 2', 'PSC', 'NEET', 'JEE', 'Custom'].map(type => (
-                                                    <div key={type} className="flex items-center space-x-2">
-                                                        <RadioGroupItem value={type} id={`r-${type}`} />
-                                                        <Label htmlFor={`r-${type}`}>{type}</Label>
-                                                    </div>
-                                                ))}
-                                            </RadioGroup>
-                                        </div>
-                                        <div>
-                                            <Button type="submit" size="lg" className="w-full" disabled={isLoading || (isDemo && demoUsed)}>
-                                                {isLoading ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Analyzing...</> : 'Predict My Exam'}
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </CardContent>
-                            </TabsContent>
-                             <TabsContent value="quiz">
-                                <CardHeader>
-                                    <CardTitle>AI Quiz Generator</CardTitle>
-                                    <CardDescription>Test your knowledge by generating a quiz from your uploaded documents.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <form onSubmit={handleGenerateQuiz} className="space-y-6">
-                                        <div className="space-y-3">
-                                            <Label htmlFor="num-questions" className="text-lg font-semibold">Number of Questions</Label>
-                                            <RadioGroup
-                                                value={String(numQuestions)}
-                                                onValueChange={(val) => setNumQuestions(Number(val))}
-                                                className="flex flex-wrap gap-4"
-                                            >
-                                                {[5, 10, 15, 20].map(num => (
-                                                    <div key={num} className="flex items-center space-x-2">
-                                                        <RadioGroupItem value={String(num)} id={`q-${num}`} />
-                                                        <Label htmlFor={`q-${num}`}>{num}</Label>
-                                                    </div>
-                                                ))}
-                                            </RadioGroup>
-                                        </div>
-                                        <Button type="submit" size="lg" className="w-full" disabled={isGeneratingQuiz || (isDemo && demoUsed && !!quiz)}>
-                                            {isGeneratingQuiz ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Generating Quiz...</> : 'Start Quiz'}
-                                        </Button>
-                                    </form>
-                                </CardContent>
-                            </TabsContent>
-                            <TabsContent value="chat">
-                                <CardHeader>
-                                    <CardTitle>Chat with Neo X</CardTitle>
-                                    <CardDescription>Ask questions, clarify doubts, and get instant help with your studies.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-center text-muted-foreground">
-                                        Use the chat bubble at the bottom-right corner to talk with Neo X anytime!
-                                    </p>
-                                    <div className="flex justify-center mt-4">
-                                        <Button onClick={() => setIsChatOpen(true)}>Open Chat</Button>
-                                    </div>
-                                </CardContent>
-                            </TabsContent>
-                        </Tabs>
-                    </Card>
-                    </motion.div>
+         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+            { showUpload && (
+                <motion.div 
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5 }}
+                >
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-2">
+                        <span className="text-primary">NEO X</span>
+                    </h2>
+                    <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
+                        The most powerful and accurate question prediction AI.
+                    </p>
+                     {isDemo && (
+                        <div className="flex justify-center gap-4">
+                            <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
+                            <a href="#">Learn More</a>
+                            </Button>
+                            <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="default">
+                                <a href="/ai-hub">
+                                    Predict Questions <ArrowRight className="ml-2 h-5 w-5" />
+                                </a>
+                            </Button>
+                        </div>
+                     )}
+                </div>
+                <div id="ai-hub-form" className="grid md:grid-cols-2 gap-6 mb-8">
+                    <FileUploadArea 
+                        title="Textbooks"
+                        fileType="textbooks"
+                        files={textbooks}
+                        onFileChange={(e: any) => handleFileChange(e, 'textbooks')}
+                        onRemoveFile={handleRemoveFile}
+                    />
+                     <FileUploadArea 
+                        title="Question Papers"
+                        fileType="questionPapers"
+                        files={questionPapers}
+                        onFileChange={(e: any) => handleFileChange(e, 'questionPapers')}
+                        onRemoveFile={handleRemoveFile}
+                    />
+                </div>
+                {isDemo && demoUsed && (
+                    <Alert className="max-w-4xl mx-auto my-8 border-primary text-primary-foreground bg-primary/10">
+                        <Sparkles className="h-4 w-4 !text-primary" />
+                        <AlertTitle>You're a natural!</AlertTitle>
+                        <AlertDescription>
+                            You've used your free demo. Please sign up to unlock unlimited predictions, quizzes, and chat sessions.
+                            <Button asChild variant="link" className="p-0 h-auto ml-2 text-primary-foreground"><a href="#">Sign up for free</a></Button>
+                        </AlertDescription>
+                    </Alert>
                 )}
-
-                {/* Results */}
-                <div ref={resultsRef}>
-                    {(prediction || quiz) && (
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5 }}
-                          className="mt-12"
-                        >
-                            {!isDemo && (
-                                <div className="flex justify-end mb-4">
-                                <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
+                <Card className="max-w-4xl mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
+                    <Tabs defaultValue="predictor" className="w-full">
+                        <TabsList className="grid w-full grid-cols-3">
+                            <TabsTrigger value="predictor"><BrainCircuit className="w-4 h-4 mr-2"/>Exam Predictor</TabsTrigger>
+                            <TabsTrigger value="quiz"><FileQuestion className="w-4 h-4 mr-2"/>Quiz Generator</TabsTrigger>
+                            <TabsTrigger value="chat"><MessageSquare className="w-4 h-4 mr-2"/>Chat Tutor</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="predictor">
+                            <CardHeader>
+                                <CardTitle>Exam Forecaster</CardTitle>
+                                <CardDescription>Analyze past papers and textbooks to predict the most likely exam topics.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleSubmitPrediction} className="space-y-6">
+                                    <div className="space-y-3">
+                                        <Label className="text-lg font-semibold">Select Exam Type</Label>
+                                        <RadioGroup value={examType} onValueChange={setExamType} className="flex flex-wrap gap-4">
+                                            {['Plus 2', 'PSC', 'NEET', 'JEE', 'Custom'].map(type => (
+                                                <div key={type} className="flex items-center space-x-2">
+                                                    <RadioGroupItem value={type} id={`r-${type}`} />
+                                                    <Label htmlFor={`r-${type}`}>{type}</Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    </div>
+                                    <div>
+                                        <Button type="submit" size="lg" className="w-full" disabled={isLoading || (isDemo && demoUsed)}>
+                                            {isLoading ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Analyzing...</> : 'Predict My Exam'}
+                                        </Button>
+                                    </div>
+                                </form>
+                            </CardContent>
+                        </TabsContent>
+                         <TabsContent value="quiz">
+                            <CardHeader>
+                                <CardTitle>AI Quiz Generator</CardTitle>
+                                <CardDescription>Test your knowledge by generating a quiz from your uploaded documents.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <form onSubmit={handleGenerateQuiz} className="space-y-6">
+                                    <div className="space-y-3">
+                                        <Label htmlFor="num-questions" className="text-lg font-semibold">Number of Questions</Label>
+                                        <RadioGroup
+                                            value={String(numQuestions)}
+                                            onValueChange={(val) => setNumQuestions(Number(val))}
+                                            className="flex flex-wrap gap-4"
+                                        >
+                                            {[5, 10, 15, 20].map(num => (
+                                                <div key={num} className="flex items-center space-x-2">
+                                                    <RadioGroupItem value={String(num)} id={`q-${num}`} />
+                                                    <Label htmlFor={`q-${num}`}>{num}</Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    </div>
+                                    <Button type="submit" size="lg" className="w-full" disabled={isGeneratingQuiz || (isDemo && demoUsed && !!quiz)}>
+                                        {isGeneratingQuiz ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Generating Quiz...</> : 'Start Quiz'}
+                                    </Button>
+                                </form>
+                            </CardContent>
+                        </TabsContent>
+                        <TabsContent value="chat">
+                            <CardHeader>
+                                <CardTitle>Chat with Neo X</CardTitle>
+                                <CardDescription>Ask questions, clarify doubts, and get instant help with your studies.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <p className="text-center text-muted-foreground">
+                                    Use the chat bubble at the bottom-right corner to talk with Neo X anytime!
+                                </p>
+                                <div className="flex justify-center mt-4">
+                                    <Button onClick={() => setIsChatOpen(true)}>Open Chat</Button>
                                 </div>
-                            )}
-                            <Card className="shadow-2xl overflow-hidden">
-                                <div ref={pdfRef} className="bg-card">
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                      <div>
-                                        <CardTitle className="flex items-center gap-3 text-2xl">
-                                            <Sparkles className="text-primary"/>
-                                            {quiz ? "Quiz Results" : `Prediction Results for ${examType}`}
-                                        </CardTitle>
-                                        <CardDescription>{quiz ? "Test your knowledge." : "Here are the topics and recommendations generated by Neo X."}</CardDescription>
-                                      </div>
-                                       {!isDemo && prediction && (
-                                            <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
-                                                {isDownloadingPdf ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
-                                                Download PDF
+                            </CardContent>
+                        </TabsContent>
+                    </Tabs>
+                </Card>
+                </motion.div>
+            )}
+
+            {/* Results */}
+            <div ref={resultsRef}>
+                {(isLoading || isGeneratingQuiz || prediction || quiz) && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.5 }}
+                      className="mt-12"
+                    >
+                        <div className="flex justify-end mb-4">
+                        <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
+                        </div>
+                        <Card className="shadow-2xl overflow-hidden">
+                            <div ref={pdfRef} className="bg-card">
+                            <CardHeader>
+                                <div className="flex justify-between items-start">
+                                  <div>
+                                    <CardTitle className="flex items-center gap-3 text-2xl">
+                                        <Sparkles className="text-primary"/>
+                                        {(isLoading || isGeneratingQuiz) ? 'Generating...' : (quiz ? "Quiz Results" : `Prediction Results for ${examType}`)}
+                                    </CardTitle>
+                                    <CardDescription>{quiz ? "Test your knowledge." : "Here are the topics and recommendations generated by Neo X."}</CardDescription>
+                                  </div>
+                                   {!isDemo && prediction && (
+                                        <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
+                                            {isDownloadingPdf ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
+                                            Download PDF
+                                        </Button>
+                                    )}
+                                </div>
+                            </CardHeader>
+                            <CardContent className="grid md:grid-cols-2 gap-8">
+                                {/* Predicted Topics */}
+                                {prediction && !quiz && (
+                                <>
+                                    <div className="space-y-4">
+                                        <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
+                                        <div className="space-y-4">
+                                            {prediction.predictedTopics.map((item, index) => (
+                                                <Card key={index} className="bg-background">
+                                                    <CardHeader className='pb-2'>
+                                                        <CardTitle className="text-lg">{item.topic}</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <p className="text-sm text-muted-foreground mb-3">{item.reason}</p>
+                                                        <div className='flex items-center gap-2'>
+                                                            <Progress value={item.confidence || 0} className="h-2" />
+                                                            <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    {/* Study Recommendations */}
+                                    <div className="space-y-4">
+                                        <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
+                                        <ul className="space-y-3">
+                                            {prediction.studyRecommendations.map((rec, index) => (
+                                                <li key={index} className="flex items-start gap-3">
+                                                    <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
+                                                    <span className="text-muted-foreground">{rec}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                </>
+                                )}
+                                {(isLoading || isGeneratingQuiz) && (
+                                    <>
+                                        <div className="space-y-4">
+                                             <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
+                                            <Skeleton className="h-28 w-full" />
+                                            <Skeleton className="h-28 w-full" />
+                                            <Skeleton className="h-28 w-full" />
+                                        </div>
+                                        <div className="space-y-4">
+                                            <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
+                                            <Skeleton className="h-8 w-full" />
+                                            <Skeleton className="h-8 w-full" />
+                                            <Skeleton className="h-8 w-full" />
+                                            <Skeleton className="h-8 w-full" />
+                                        </div>
+                                    </>
+                                )}
+                            </CardContent>
+                            </div>
+                            
+                            {quiz && quizScore === null && (
+                                <div className="border-t p-6 space-y-6">
+                                    <div className="text-center">
+                                        <h3 className="text-xl font-bold">{quiz.title}</h3>
+                                        <p className="text-muted-foreground">Question {currentQuestionIndex + 1} of {quiz.questions.length}</p>
+                                    </div>
+                                    <Progress value={((currentQuestionIndex + 1) / quiz.questions.length) * 100} />
+
+                                    <div className="space-y-4">
+                                        <p className="text-lg font-semibold">{quiz.questions[currentQuestionIndex].questionText}</p>
+                                        <RadioGroup onValueChange={handleAnswerSelect} value={userAnswers[currentQuestionIndex]} className="space-y-2">
+                                            {quiz.questions[currentQuestionIndex].options.map((option, i) => (
+                                                <div key={i} className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
+                                                    <RadioGroupItem value={option} id={`q${currentQuestionIndex}-opt${i}`} />
+                                                    <Label htmlFor={`q${currentQuestionIndex}-opt${i}`} className="w-full cursor-pointer">{option}</Label>
+                                                </div>
+                                            ))}
+                                        </RadioGroup>
+                                    </div>
+                                    <div className="flex justify-end">
+                                        {currentQuestionIndex < quiz.questions.length - 1 ? (
+                                            <Button onClick={handleNextQuestion} disabled={!userAnswers[currentQuestionIndex]}>Next</Button>
+                                        ) : (
+                                            <Button 
+                                                onClick={handleFinishQuiz} 
+                                                disabled={!quiz || userAnswers.length !== quiz.questions.length || userAnswers.some(a => !a)}
+                                            >
+                                                Finish Quiz
                                             </Button>
                                         )}
                                     </div>
-                                </CardHeader>
-                                <CardContent className="grid md:grid-cols-2 gap-8">
-                                    {/* Predicted Topics */}
-                                    {prediction && !quiz && (
-                                    <>
-                                        <div className="space-y-4">
-                                            <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
-                                            <div className="space-y-4">
-                                                {prediction.predictedTopics.map((item, index) => (
-                                                    <Card key={index} className="bg-background">
-                                                        <CardHeader className='pb-2'>
-                                                            <CardTitle className="text-lg">{item.topic}</CardTitle>
-                                                        </CardHeader>
-                                                        <CardContent>
-                                                            <p className="text-sm text-muted-foreground mb-3">{item.reason}</p>
-                                                            <div className='flex items-center gap-2'>
-                                                                <Progress value={item.confidence || 0} className="h-2" />
-                                                                <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        {/* Study Recommendations */}
-                                        <div className="space-y-4">
-                                            <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
-                                            <ul className="space-y-3">
-                                                {prediction.studyRecommendations.map((rec, index) => (
-                                                    <li key={index} className="flex items-start gap-3">
-                                                        <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
-                                                        <span className="text-muted-foreground">{rec}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    </>
-                                    )}
-                                    {(isLoading || isGeneratingQuiz) && (
-                                        <>
-                                            <div className="space-y-4">
-                                                 <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
-                                                <Skeleton className="h-28 w-full" />
-                                                <Skeleton className="h-28 w-full" />
-                                                <Skeleton className="h-28 w-full" />
-                                            </div>
-                                            <div className="space-y-4">
-                                                <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
-                                                <Skeleton className="h-8 w-full" />
-                                                <Skeleton className="h-8 w-full" />
-                                                <Skeleton className="h-8 w-full" />
-                                                <Skeleton className="h-8 w-full" />
-                                            </div>
-                                        </>
-                                    )}
-                                </CardContent>
                                 </div>
-                                
-                                {quiz && quizScore === null && (
-                                    <div className="border-t p-6 space-y-6">
-                                        <div className="text-center">
-                                            <h3 className="text-xl font-bold">{quiz.title}</h3>
-                                            <p className="text-muted-foreground">Question {currentQuestionIndex + 1} of {quiz.questions.length}</p>
-                                        </div>
-                                        <Progress value={((currentQuestionIndex + 1) / quiz.questions.length) * 100} />
+                            )}
 
-                                        <div className="space-y-4">
-                                            <p className="text-lg font-semibold">{quiz.questions[currentQuestionIndex].questionText}</p>
-                                            <RadioGroup onValueChange={handleAnswerSelect} value={userAnswers[currentQuestionIndex]} className="space-y-2">
-                                                {quiz.questions[currentQuestionIndex].options.map((option, i) => (
-                                                    <div key={i} className="flex items-center space-x-2 p-3 bg-muted/50 rounded-md">
-                                                        <RadioGroupItem value={option} id={`q${currentQuestionIndex}-opt${i}`} />
-                                                        <Label htmlFor={`q${currentQuestionIndex}-opt${i}`} className="w-full cursor-pointer">{option}</Label>
-                                                    </div>
-                                                ))}
-                                            </RadioGroup>
-                                        </div>
-                                        <div className="flex justify-end">
-                                            {currentQuestionIndex < quiz.questions.length - 1 ? (
-                                                <Button onClick={handleNextQuestion} disabled={!userAnswers[currentQuestionIndex]}>Next</Button>
-                                            ) : (
-                                                <Button 
-                                                    onClick={handleFinishQuiz} 
-                                                    disabled={!quiz || userAnswers.length !== quiz.questions.length || userAnswers.some(a => !a)}
-                                                >
-                                                    Finish Quiz
-                                                </Button>
-                                            )}
+                            {quizScore !== null && (
+                                <div className="border-t p-6 text-center space-y-6 flex flex-col items-center">
+                                    <h3 className="text-2xl font-bold">Quiz Complete!</h3>
+                                    <p className="text-lg">Your Score:</p>
+                                    <div className="relative w-32 h-32">
+                                        <svg className="w-full h-full" viewBox="0 0 36 36">
+                                            <path
+                                                className="stroke-current text-muted/50"
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                fill="none"
+                                                strokeWidth="3"
+                                            />
+                                            <path
+                                                className="stroke-current text-primary"
+                                                strokeDasharray={`${quizScore}, 100`}
+                                                d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                                                fill="none"
+                                                strokeWidth="3"
+                                                strokeLinecap="round"
+                                            />
+                                        </svg>
+                                        <div className="absolute inset-0 flex items-center justify-center">
+                                            <span className="text-3xl font-bold">{Math.round(quizScore)}%</span>
                                         </div>
                                     </div>
-                                )}
+                                    <Button onClick={handleTryAgain}>Try a New Quiz</Button>
+                                </div>
+                            )}
 
-                                {quizScore !== null && (
-                                    <div className="border-t p-6 text-center space-y-6 flex flex-col items-center">
-                                        <h3 className="text-2xl font-bold">Quiz Complete!</h3>
-                                        <p className="text-lg">Your Score:</p>
-                                        <div className="relative w-32 h-32">
-                                            <svg className="w-full h-full" viewBox="0 0 36 36">
-                                                <path
-                                                    className="stroke-current text-muted/50"
-                                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                                    fill="none"
-                                                    strokeWidth="3"
-                                                />
-                                                <path
-                                                    className="stroke-current text-primary"
-                                                    strokeDasharray={`${quizScore}, 100`}
-                                                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                                                    fill="none"
-                                                    strokeWidth="3"
-                                                    strokeLinecap="round"
-                                                />
-                                            </svg>
-                                            <div className="absolute inset-0 flex items-center justify-center">
-                                                <span className="text-3xl font-bold">{Math.round(quizScore)}%</span>
-                                            </div>
-                                        </div>
-                                        <Button onClick={handleTryAgain}>Try a New Quiz</Button>
-                                    </div>
-                                )}
-
-                                {quizError && (
-                                     <div className="p-6 text-center">
-                                        <p className="text-destructive">{quizError}</p>
-                                        <Button onClick={handleTryAgain} className="mt-4">Try Again</Button>
-                                    </div>
-                                )}
-                            </Card>
-                        </motion.div>
-                    )}
-                </div>
+                            {quizError && (
+                                 <div className="p-6 text-center">
+                                    <p className="text-destructive">{quizError}</p>
+                                    <Button onClick={handleTryAgain} className="mt-4">Try Again</Button>
+                                </div>
+                            )}
+                        </Card>
+                    </motion.div>
+                )}
             </div>
-             {/* Chat FAB */}
+
+            {/* Chat FAB */}
             <div className="fixed bottom-6 right-6 z-50">
                 <motion.div
                     initial={{ opacity: 0, scale: 0.5 }}
@@ -718,6 +720,8 @@ export function AiHub({ isDemo }: AiHubProps) {
                 description={textbooks.length > 0 || questionPapers.length > 0 ? "Ask me anything about the uploaded documents!" : "Upload some documents to start chatting."}
                 logoUrl="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8"
             />
-        </>
+        </div>
     );
 }
+
+    
