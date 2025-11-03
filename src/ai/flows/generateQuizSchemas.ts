@@ -6,15 +6,10 @@ import { z } from 'zod';
 
 export const GenerateQuizInputSchema = z.object({
   numQuestions: z.number().min(1).max(20).describe('The number of questions to generate for the quiz.'),
-  textbookPdfs: z
+  documents: z
     .array(z.string())
     .describe(
-      "An array of textbook PDFs as data URIs. Expected format: 'data:application/pdf;base64,<encoded_data>'."
-    ),
-  questionPapers: z
-    .array(z.string())
-    .describe(
-      "An array of previous year question paper PDFs as data URIs. Expected format: 'data:application/pdf;base64,<encoded_data>'."
+      "An array of document PDFs as data URIs. These can be textbooks or question papers. Expected format: 'data:application/pdf;base64,<encoded_data>'."
     ),
 });
 export type GenerateQuizInput = z.infer<typeof GenerateQuizInputSchema>;

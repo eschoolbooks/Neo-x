@@ -16,15 +16,10 @@ const ChatHistorySchema = z.object({
 
 export const ChatWithNeoInputSchema = z.object({
   query: z.string().describe("The user's message to Neo X."),
-  textbookPdfs: z
+  documents: z
     .array(z.string())
     .describe(
-      "An array of textbook PDFs as data URIs. Expected format: 'data:application/pdf;base64,<encoded_data>'."
-    ),
-  questionPapers: z
-    .array(z.string())
-    .describe(
-      "An array of previous year question paper PDFs as data URIs. Expected format: 'data:application/pdf;base64,<encoded_data>'."
+      "An array of document PDFs as data URIs. These can be textbooks or question papers. Expected format: 'data:application/pdf;base64,<encoded_data>'."
     ),
   history: z.array(ChatHistorySchema).describe('The conversation history.'),
 });

@@ -25,18 +25,11 @@ const predictExamPrompt = ai.definePrompt({
   output: {schema: PredictExamOutputSchema},
   prompt: `You are Neo X, an advanced AI exam forecaster specializing in predicting questions for competitive exams in India. Your goal is to analyze the provided materials and predict the most important topics for the upcoming '{{examType}}' exam.
 
-Use the following materials for your analysis. You must analyze the content of these documents.
-{{#if textbookPdfs}}
-## Textbooks
-{{#each textbookPdfs}}
-- Textbook Document: {{media url=this}}
-{{/each}}
-{{/if}}
-
-{{#if questionPapers}}
-## Previous Question Papers
-{{#each questionPapers}}
-- Question Paper Document: {{media url=this}}
+Use the following materials for your analysis. You must analyze the content of all provided documents.
+{{#if documents}}
+## Provided Documents
+{{#each documents}}
+- Document: {{media url=this}}
 {{/each}}
 {{/if}}
 
@@ -56,7 +49,7 @@ const predictExamFlow = ai.defineFlow(
   },
   async (input) => {
     // A safeguard in case no files are provided.
-    if (input.textbookPdfs.length === 0 && input.questionPapers.length === 0) {
+    if (input.documents.length === 0) {
       throw new Error("Please upload at least one textbook or question paper.");
     }
     const {output} = await predictExamPrompt(input);

@@ -26,17 +26,10 @@ const generateQuizPrompt = ai.definePrompt({
   prompt: `You are Neo X, an AI designed to help students learn. Your task is to generate a multiple-choice quiz based on the provided documents.
 
 Use the following materials for your analysis. You must analyze the content of these documents.
-{{#if textbookPdfs}}
-## Textbooks
-{{#each textbookPdfs}}
-- Textbook Document: {{media url=this}}
-{{/each}}
-{{/if}}
-
-{{#if questionPapers}}
-## Previous Question Papers
-{{#each questionPapers}}
-- Question Paper Document: {{media url=this}}
+{{#if documents}}
+## Provided Documents
+{{#each documents}}
+- Document: {{media url=this}}
 {{/each}}
 {{/if}}
 
@@ -62,7 +55,7 @@ const generateQuizFlow = ai.defineFlow(
     outputSchema: QuizSchema,
   },
   async (input) => {
-    if (input.textbookPdfs.length === 0 && input.questionPapers.length === 0) {
+    if (input.documents.length === 0) {
       throw new Error("Please upload at least one textbook or question paper.");
     }
     const {output} = await generateQuizPrompt(input);

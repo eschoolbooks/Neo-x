@@ -27,19 +27,11 @@ const chatPrompt = ai.definePrompt({
 
 Keep your answers concise and easy to understand.
 
-{{#if textbookPdfs}}
-## Textbooks
+{{#if documents}}
+## Documents
 These are the primary source of information. Refer to them as much as possible.
-{{#each textbookPdfs}}
-- Textbook Document: {{media url=this}}
-{{/each}}
-{{/if}}
-
-{{#if questionPapers}}
-## Previous Question Papers
-Use these to understand the style and scope of past exam questions.
-{{#each questionPapers}}
-- Question Paper Document: {{media url=this}}
+{{#each documents}}
+- Document: {{media url=this}}
 {{/each}}
 {{/if}}
 

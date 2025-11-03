@@ -28,12 +28,12 @@ type AiHubProps = {
     isDemo: boolean;
 };
 
-const MAX_FILES = 5;
+const MAX_DOCUMENTS = 3;
 
 export function AiHub({ isDemo }: AiHubProps) {
     const [examType, setExamType] = useState('Plus 2');
-    const [textbooks, setTextbooks] = useState<File[]>([]);
-    const [questionPapers, setQuestionPapers] = useState<File[]>([]);
+    const [documents, setDocuments] = useState<File[]>([]);
+    const [documentDataUris, setDocumentDataUris] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { toast } = useToast();
@@ -43,9 +43,6 @@ export function AiHub({ isDemo }: AiHubProps) {
     const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', content: string}[]>([]);
     const [isChatting, setIsChatting] = useState(false);
     
-    const [textbookDataUris, setTextbookDataUris] = useState<string[]>([]);
-    const [questionPaperDataUris, setQuestionPaperDataUris] = useState<string[]>([]);
-
     const [prediction, setPrediction] = useState<PredictExamOutput | null>(null);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
 
@@ -70,9 +67,9 @@ export function AiHub({ isDemo }: AiHubProps) {
         });
     };
 
-    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>, fileType: 'textbooks' | 'questionPapers') => {
-        const currentFiles = fileType === 'textbooks' ? textbooks : questionPapers;
-        const availableSlots = MAX_FILES - currentFiles.length;
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const currentFiles = documents;
+        const availableSlots = MAX_DOCUMENTS - currentFiles.length;
         if (availableSlots <= 0) return;
         
         const newFiles = Array.from(e.target.files || []);
@@ -89,13 +86,8 @@ export function AiHub({ isDemo }: AiHubProps) {
 
         try {
             const uris = await Promise.all(filesToAdd.map(fileToDataUri));
-            if (fileType === 'textbooks') {
-                setTextbooks(prev => [...prev, ...filesToAdd]);
-                setTextbookDataUris(prev => [...prev, ...uris]);
-            } else {
-                setQuestionPapers(prev => [...prev, ...filesToAdd]);
-                setQuestionPaperDataUris(prev => [...prev, ...uris]);
-            }
+            setDocuments(prev => [...prev, ...filesToAdd]);
+            setDocumentDataUris(prev => [...prev, ...uris]);
         } catch (error) {
             toast({
                 title: 'File Upload Error',
@@ -105,24 +97,17 @@ export function AiHub({ isDemo }: AiHubProps) {
         }
     };
 
-    const handleRemoveFile = (index: number, fileType: 'textbooks' | 'questionPapers') => {
-        if (fileType === 'textbooks') {
-            setTextbooks(prev => prev.filter((_, i) => i !== index));
-            setTextbookDataUris(prev => prev.filter((_, i) => i !== index));
-        } else {
-            setQuestionPapers(prev => prev.filter((_, i) => i !== index));
-            setQuestionPaperDataUris(prev => prev.filter((_, i) => i !== index));
-        }
+    const handleRemoveFile = (index: number) => {
+        setDocuments(prev => prev.filter((_, i) => i !== index));
+        setDocumentDataUris(prev => prev.filter((_, i) => i !== index));
     };
     
     const handleNewPrediction = () => {
         setShowUpload(true);
         setPrediction(null);
         setQuiz(null);
-        setTextbooks([]);
-        setQuestionPapers([]);
-        setTextbookDataUris([]);
-        setQuestionPaperDataUris([]);
+        setDocuments([]);
+        setDocumentDataUris([]);
         setQuizScore(null);
         setUserAnswers([]);
         setCurrentQuestionIndex(0);
@@ -136,10 +121,10 @@ export function AiHub({ isDemo }: AiHubProps) {
             toast({ title: 'Demo Limit Reached', description: 'Please sign up to continue predicting exams.', variant: 'destructive' });
             return;
         }
-        if (textbooks.length === 0 && questionPapers.length === 0) {
+        if (documents.length === 0) {
             toast({
                 title: 'No files uploaded',
-                description: 'Please upload at least one textbook or question paper.',
+                description: 'Please upload at least one document (textbook or question paper).',
                 variant: 'destructive',
             });
             return;
@@ -155,8 +140,7 @@ export function AiHub({ isDemo }: AiHubProps) {
         try {
             const result = await predictExam({
                 examType,
-                textbookPdfs: textbookDataUris,
-                questionPapers: questionPaperDataUris,
+                documents: documentDataUris,
             });
             
             setPrediction(result);
@@ -186,10 +170,10 @@ export function AiHub({ isDemo }: AiHubProps) {
             toast({ title: 'Demo Limit Reached', description: 'Please sign up to continue generating quizzes.', variant: 'destructive' });
             return;
         }
-        if (textbooks.length === 0 && questionPapers.length === 0) {
+        if (documents.length === 0) {
             toast({
                 title: 'No files uploaded',
-                description: 'Please upload at least one textbook or question paper.',
+                description: 'Please upload at least one document.',
                 variant: 'destructive',
             });
             return;
@@ -206,8 +190,7 @@ export function AiHub({ isDemo }: AiHubProps) {
         try {
             const result = await generateQuiz({
                 numQuestions,
-                textbookPdfs: textbookDataUris,
-                questionPapers: questionPaperDataUris,
+                documents: documentDataUris,
             });
 
             if (result.questions.length === 0) {
@@ -282,8 +265,7 @@ export function AiHub({ isDemo }: AiHubProps) {
         const input: ChatWithNeoInput = {
           query,
           history: chatHistory,
-          textbookPdfs: textbookDataUris,
-          questionPapers: questionPaperDataUris
+          documents: documentDataUris,
         };
         const result = await chatWithNeo(input);
         const newModelMessage = { role: 'model' as const, content: result.response };
@@ -363,36 +345,36 @@ export function AiHub({ isDemo }: AiHubProps) {
         }
     };
     
-    const FileUploadArea = ({title, fileType, files, onFileChange, onRemoveFile} : {title: string, fileType: 'textbooks'|'questionPapers', files: File[], onFileChange: any, onRemoveFile: any}) => {
+    const FileUploadArea = ({title, files, onFileChange, onRemoveFile} : {title: string, files: File[], onFileChange: any, onRemoveFile: any}) => {
         const fileCount = files.length;
-        const isLimitReached = fileCount >= MAX_FILES;
+        const isLimitReached = fileCount >= MAX_DOCUMENTS;
 
         return (
             <div className="space-y-2">
-                <Label htmlFor={fileType} className="text-lg font-semibold flex justify-between">
-                    {title} (PDF) <span>{fileCount} / {MAX_FILES}</span>
+                <Label htmlFor="documents" className="text-lg font-semibold flex justify-between">
+                    {title} (PDF) <span>{fileCount} / {MAX_DOCUMENTS}</span>
                 </Label>
                  {isLimitReached && (
                     <Alert variant="destructive" className="text-xs">
                         <AlertDescription>
-                            You have reached the maximum number of files.
+                            You have reached the maximum of {MAX_DOCUMENTS} files.
                         </AlertDescription>
                     </Alert>
                 )}
                 <div className="flex items-center justify-center w-full">
-                    <label htmlFor={`${fileType}-input`} className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isLimitReached ? 'bg-muted/50 cursor-not-allowed' : 'cursor-pointer bg-card/50 hover:bg-muted'}`}>
+                    <label htmlFor="documents-input" className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg ${isLimitReached ? 'bg-muted/50 cursor-not-allowed' : 'cursor-pointer bg-card/50 hover:bg-muted'}`}>
                         <div className="flex flex-col items-center justify-center pt-5 pb-6">
                             <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
                             <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                         </div>
-                        <input id={`${fileType}-input`} type="file" className="hidden" multiple accept=".pdf" onChange={onFileChange} disabled={isLimitReached} />
+                        <input id="documents-input" type="file" className="hidden" multiple accept=".pdf" onChange={onFileChange} disabled={isLimitReached} />
                     </label>
                 </div>
                 <div className="space-y-1 pt-2">
                     {files.map((file, index) => (
                         <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
                             <span className="truncate pr-2">{file.name}</span>
-                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => onRemoveFile(index, fileType)}><X className="h-4 w-4" /></Button>
+                            <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => onRemoveFile(index)}><X className="h-4 w-4" /></Button>
                         </div>
                     ))}
                 </div>
@@ -401,7 +383,7 @@ export function AiHub({ isDemo }: AiHubProps) {
     }
     
     return (
-         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+         <div className="w-full px-4 sm:px-6 lg:px-8">
             { showUpload && (
                 <motion.div 
                     initial={{ opacity: 0, y: 20 }}
@@ -428,19 +410,11 @@ export function AiHub({ isDemo }: AiHubProps) {
                         </div>
                      )}
                 </div>
-                <div id="ai-hub-form" className="grid md:grid-cols-2 gap-6 mb-8">
+                <div id="ai-hub-form" className="grid grid-cols-1 gap-6 mb-8 max-w-4xl mx-auto">
                     <FileUploadArea 
-                        title="Textbooks"
-                        fileType="textbooks"
-                        files={textbooks}
-                        onFileChange={(e: any) => handleFileChange(e, 'textbooks')}
-                        onRemoveFile={handleRemoveFile}
-                    />
-                     <FileUploadArea 
-                        title="Question Papers"
-                        fileType="questionPapers"
-                        files={questionPapers}
-                        onFileChange={(e: any) => handleFileChange(e, 'questionPapers')}
+                        title="Upload Documents"
+                        files={documents}
+                        onFileChange={handleFileChange}
                         onRemoveFile={handleRemoveFile}
                     />
                 </div>
@@ -535,7 +509,7 @@ export function AiHub({ isDemo }: AiHubProps) {
             )}
 
             {/* Results */}
-            <div ref={resultsRef}>
+            <div ref={resultsRef} className="max-w-7xl mx-auto">
                 {(isLoading || isGeneratingQuiz || prediction || quiz) && (
                     <motion.div
                       initial={{ opacity: 0, y: 20 }}
@@ -717,7 +691,7 @@ export function AiHub({ isDemo }: AiHubProps) {
                 onSendMessage={handleChatSubmit}
                 isSending={isChatting}
                 title="Chat with Neo X"
-                description={textbooks.length > 0 || questionPapers.length > 0 ? "Ask me anything about the uploaded documents!" : "Upload some documents to start chatting."}
+                description={documents.length > 0 ? "Ask me anything about the uploaded documents!" : "Upload some documents to start chatting."}
                 logoUrl="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8"
             />
         </div>
