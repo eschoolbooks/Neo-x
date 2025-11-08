@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut, Settings } from 'lucide-react';
+import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut, Settings, History } from 'lucide-react';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -27,6 +27,7 @@ import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { SettingsSheet } from '@/components/settings-sheet';
+import { HistoryDrawer } from '@/components/history-drawer';
 
 
 const MAX_DOCUMENTS = 3;
@@ -43,6 +44,7 @@ function AiHubContent() {
     const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', content: string}[]>([]);
     const [isChatting, setIsChatting] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isHistoryOpen, setIsHistoryOpen] = useState(false);
     
     const [prediction, setPrediction] = useState<PredictExamOutput | null>(null);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -521,7 +523,10 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                   <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
                 </a>
               </div>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                 <Button variant="ghost" size="icon" onClick={() => setIsHistoryOpen(true)}>
+                    <History className="h-5 w-5" />
+                 </Button>
                  <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
                     <Settings className="h-5 w-5" />
                  </Button>
@@ -873,6 +878,11 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                     isOpen={isSettingsOpen}
                     onClose={() => setIsSettingsOpen(false)}
                     onSignOut={handleSignOut}
+                />
+                
+                <HistoryDrawer 
+                    isOpen={isHistoryOpen}
+                    onClose={() => setIsHistoryOpen(false)}
                 />
 
                 <Chat 
