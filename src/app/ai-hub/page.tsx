@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info } from 'lucide-react';
+import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut } from 'lucide-react';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -22,6 +22,9 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import jsPDF from 'jspdf';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import { FirebaseClientProvider, useAuth, useUser } from '@/firebase';
+import { useRouter } from 'next/navigation';
+import { signOut } from 'firebase/auth';
 
 
 type AiHubProps = {
@@ -30,7 +33,7 @@ type AiHubProps = {
 
 const MAX_DOCUMENTS = 3;
 
-export default function AiHubPage() {
+function AiHubContent() {
     const [examType, setExamType] = useState('Plus 2');
     const [documents, setDocuments] = useState<File[]>([]);
     const [documentDataUris, setDocumentDataUris] = useState<string[]>([]);
@@ -56,6 +59,16 @@ export default function AiHubPage() {
 
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
     const [showUpload, setShowUpload] = useState(true);
+
+    const auth = useAuth();
+    const { user } = useUser();
+    const router = useRouter();
+
+    const handleSignOut = async () => {
+        await signOut(auth);
+        toast({ title: 'Signed Out', description: 'You have been successfully signed out.' });
+        router.push('/auth');
+    };
 
     const fileToDataUri = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -506,11 +519,16 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                  <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
                  <a href="/upload-qn" className="hover:text-primary transition-colors">AI Training</a>
               </div>
-              <Button asChild className="rounded-full">
-                <a href="#">
-                  Sign In
-                </a>
-              </Button>
+              {user ? (
+                <Button variant="outline" onClick={handleSignOut} className="rounded-full">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  Sign Out
+                </Button>
+                ) : (
+                <Button asChild className="rounded-full">
+                    <a href="/auth">Sign In</a>
+                </Button>
+                )}
             </nav>
           </header>
           <main className="flex-1 py-10 lg:py-16">
@@ -860,3 +878,30 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
         </div>
     );
 }
+
+
+export default function AiHubPage() {
+    const { user, isUserLoading } = useUser();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isUserLoading && !user) {
+            router.push('/auth');
+        }
+    }, [user, isUserLoading, router]);
+
+    if (isUserLoading || !user) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-background">
+                <LoaderCircle className="w-10 h-10 animate-spin text-primary" />
+            </div>
+        );
+    }
+    
+    return (
+        <FirebaseClientProvider>
+            <AiHubContent />
+        </FirebaseClientProvider>
+    );
+}
+
