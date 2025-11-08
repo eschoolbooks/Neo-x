@@ -69,10 +69,8 @@ export default function Home() {
                     <a href="/ai-hub">Go to AI Hub <ArrowRight className="ml-2 h-4 w-4" /></a>
                 </Button>
             ) : (
-                <Button asChild className="rounded-full">
-                <a href="/auth">
-                    Sign In / Sign Up
-                </a>
+                <Button asChild className="rounded-full" variant="secondary">
+                  <a href="/donate">Donate Now</a>
                 </Button>
             )}
           </div>
@@ -100,8 +98,8 @@ export default function Home() {
                     </p>
                     <div className="flex justify-center gap-4">
                         <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="default">
-                            <a href="/ai-hub">
-                                Explore AI Hub <ArrowRight className="ml-2 h-5 w-5" />
+                            <a href="/auth">
+                                Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
                             </a>
                         </Button>
                         <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="secondary">

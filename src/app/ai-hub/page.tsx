@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut } from 'lucide-react';
+import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut, Settings } from 'lucide-react';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -26,6 +26,7 @@ import { FirebaseClientProvider, useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { SettingsSheet } from '@/components/settings-sheet';
 
 
 const MAX_DOCUMENTS = 3;
@@ -41,6 +42,7 @@ function AiHubContent() {
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [chatHistory, setChatHistory] = useState<{role: 'user' | 'model', content: string}[]>([]);
     const [isChatting, setIsChatting] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     
     const [prediction, setPrediction] = useState<PredictExamOutput | null>(null);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -62,7 +64,7 @@ function AiHubContent() {
     const handleSignOut = async () => {
         await signOut(auth);
         toast({ title: 'Signed Out', description: 'You have been successfully signed out.' });
-        router.push('/auth');
+        router.push('/');
     };
 
     const fileToDataUri = (file: File): Promise<string> => {
@@ -519,23 +521,10 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                   <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
                 </a>
               </div>
-              <div className="hidden md:flex items-center gap-8">
-                 <a href="/" className="hover:text-primary transition-colors">Home</a>
-                 <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
-                 <a href="/upload-qn" className="hover:text-primary transition-colors">AI Training</a>
-              </div>
               <div className="flex items-center gap-4">
-                <ThemeToggle />
-                {user ? (
-                    <Button variant="outline" onClick={handleSignOut} className="rounded-full">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                    </Button>
-                ) : (
-                    <Button asChild className="rounded-full">
-                        <a href="/auth">Sign In</a>
-                    </Button>
-                )}
+                 <Button variant="ghost" size="icon" onClick={() => setIsSettingsOpen(true)}>
+                    <Settings className="h-5 w-5" />
+                 </Button>
               </div>
             </nav>
           </header>
@@ -879,6 +868,12 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                         </motion.div>
                     )}
                 </div>
+                
+                 <SettingsSheet 
+                    isOpen={isSettingsOpen}
+                    onClose={() => setIsSettingsOpen(false)}
+                    onSignOut={handleSignOut}
+                />
 
                 <Chat 
                     isOpen={isChatOpen}
