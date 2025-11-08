@@ -28,10 +28,6 @@ import { signOut } from 'firebase/auth';
 import { ThemeToggle } from '@/components/theme-toggle';
 
 
-type AiHubProps = {
-    isDemo: boolean;
-};
-
 const MAX_DOCUMENTS = 3;
 
 function AiHubContent() {
@@ -55,9 +51,7 @@ function AiHubContent() {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [userAnswers, setUserAnswers] = useState<string[]>([]);
     const [quizScore, setQuizScore] = useState<number | null>(null);
-
     const [demoUsed, setDemoUsed] = useState(false);
-
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
     const [showUpload, setShowUpload] = useState(true);
 
@@ -139,6 +133,11 @@ function AiHubContent() {
             });
             return;
         }
+        
+        if (!user && demoUsed) {
+            toast({ title: 'Demo Limit Reached', description: 'Please sign up to continue predicting exams.', variant: 'destructive' });
+            return;
+        }
 
         setIsLoading(true);
         setError(null);
@@ -154,7 +153,7 @@ function AiHubContent() {
             });
             
             setPrediction(result);
-            
+            if (!user) setDemoUsed(true);
 
             setTimeout(() => {
                 resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -186,6 +185,11 @@ function AiHubContent() {
             return;
         }
 
+        if (!user && demoUsed) {
+            toast({ title: 'Demo Limit Reached', description: 'Please sign up to continue generating quizzes.', variant: 'destructive' });
+            return;
+        }
+
         setIsGeneratingQuiz(true);
         setQuizError(null);
         setQuiz(null);
@@ -210,7 +214,7 @@ function AiHubContent() {
                 setShowUpload(true);
             } else {
                 setQuiz(result);
-                
+                if (!user) setDemoUsed(true);
                  setTimeout(() => {
                     resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
                 }, 100);
@@ -258,7 +262,7 @@ function AiHubContent() {
         setCurrentQuestionIndex(0);
         setUserAnswers([]);
         setShowUpload(true);
-        
+        if (!user) setDemoUsed(false);
     };
 
 
@@ -560,7 +564,16 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                             onRemoveFile={handleRemoveFile}
                         />
                     </div>
-                    
+                    {!user && demoUsed && (
+                        <Alert className="max-w-4xl mx-auto my-8 border-primary text-primary-foreground bg-primary/10">
+                            <Sparkles className="h-4 w-4 !text-primary" />
+                            <AlertTitle>You're a natural!</AlertTitle>
+                            <AlertDescription>
+                                You've used your free demo. Please sign up to unlock unlimited predictions, quizzes, and chat sessions.
+                                <Button asChild variant="link" className="p-0 h-auto ml-2 text-primary-foreground"><a href="/auth">Sign up for free</a></Button>
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <Card className="max-w-4xl mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
                         <Tabs defaultValue="predictor" className="w-full">
                             <TabsList className="grid w-full grid-cols-3">
@@ -587,7 +600,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                             </RadioGroup>
                                         </div>
                                         <div>
-                                            <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+                                            <Button type="submit" size="lg" className="w-full" disabled={isLoading || (!user && demoUsed)}>
                                                 {isLoading ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Analyzing...</> : 'Predict My Exam'}
                                             </Button>
                                         </div>
@@ -616,7 +629,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                                 ))}
                                             </RadioGroup>
                                         </div>
-                                        <Button type="submit" size="lg" className="w-full" disabled={isGeneratingQuiz}>
+                                        <Button type="submit" size="lg" className="w-full" disabled={isGeneratingQuiz || (!user && demoUsed)}>
                                             {isGeneratingQuiz ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Generating Quiz...</> : 'Start Quiz'}
                                         </Button>
                                     </form>
@@ -665,7 +678,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                         </CardTitle>
                                         <CardDescription>{quiz ? "Test your knowledge." : "Here are the topics and recommendations generated by Neo X."}</CardDescription>
                                       </div>
-                                       {prediction && (
+                                       {prediction && user && (
                                             <Button onClick={handleDownloadPdf} disabled={isDownloadingPdf}>
                                                 {isDownloadingPdf ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin"/> : <Download className="mr-2 h-4 w-4" />}
                                                 Download PDF

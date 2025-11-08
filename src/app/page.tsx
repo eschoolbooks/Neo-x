@@ -7,7 +7,6 @@ import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users } from 'lucide-react';
 import CountUp from 'react-countup';
-import { AiHub } from '@/components/ai-hub';
 import { useUser } from '@/firebase';
 import { ThemeToggle } from '@/components/theme-toggle';
 
@@ -66,13 +65,13 @@ export default function Home() {
           <div className="flex items-center gap-4">
             <ThemeToggle />
             {user ? (
-                <Button asChild className="rounded-full animate-pulse-strong">
+                <Button asChild className="rounded-full">
                     <a href="/ai-hub">Go to AI Hub <ArrowRight className="ml-2 h-4 w-4" /></a>
                 </Button>
             ) : (
-                <Button asChild className="rounded-full animate-pulse-strong">
-                <a href="/donate">
-                    Donate Now <Heart className="ml-2 h-4 w-4" />
+                <Button asChild className="rounded-full">
+                <a href="/auth">
+                    Sign In / Sign Up
                 </a>
                 </Button>
             )}
@@ -151,7 +150,26 @@ export default function Home() {
 
         {/* AI Hub Section */}
         <section id="ai-hub" className="py-20 lg:py-32 bg-grid">
-             <AiHub isDemo={true} />
+             <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12 pt-10">
+                    <h2 className="text-3xl sm:text-4xl font-bold mb-2">
+                        <span className="text-primary">NEO X</span>
+                    </h2>
+                    <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
+                        The most powerful and accurate question prediction AI.
+                    </p>
+                    <div className="flex justify-center gap-4">
+                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
+                        <a href="/donate">Donate to Support</a>
+                        </Button>
+                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="default">
+                            <a href="/ai-hub">
+                                Try a Free Demo <ArrowRight className="ml-2 h-5 w-5" />
+                            </a>
+                        </Button>
+                    </div>
+                </div>
+            </div>
         </section>
 
         {/* New "Lighten their bags" section */}
