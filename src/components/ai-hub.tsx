@@ -471,11 +471,11 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
             <div className="flex items-center justify-center w-full">
                 <label 
                     htmlFor="documents-input" 
-                    className={`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors
-                        ${isLimitReached 
+                    className={cn(`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors`,
+                        isLimitReached 
                             ? 'bg-destructive/10 border-destructive text-destructive cursor-not-allowed' 
                             : 'cursor-pointer bg-card/50 hover:bg-muted border-input'
-                        }`}
+                        )}
                 >
                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                         {isLimitReached ? (
@@ -821,7 +821,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                                                             !isUserChoice && !isTheCorrectAnswer && "bg-muted/50"
                                                                         )}
                                                                     >
-                                                                        {isUserChoice ? <CheckCircle className="h-4 w-4"/> : <X className="h-4 w-4 opacity-0"/>}
+                                                                        {isTheCorrectAnswer ? <CheckCircle className="h-4 w-4"/> : (isUserChoice ? <X className="h-4 w-4" /> : <div className='w-4 h-4'/>)}
                                                                         <span>{option}</span>
                                                                     </div>
                                                                 )
@@ -873,3 +873,5 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
         </div>
     );
 }
+
+    
