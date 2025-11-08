@@ -13,6 +13,7 @@ import type { ProcessedQuestion } from '@/ai/flows/processQuestionsSchemas';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -112,9 +113,12 @@ export default function UploadQnPage() {
                <a href="/" className="hover:text-primary transition-colors">Home</a>
                <a href="/ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
             </div>
-            <Button asChild className="rounded-full">
-              <a href="/donate">Donate</a>
-            </Button>
+            <div className="flex items-center gap-4">
+                <ThemeToggle />
+                <Button asChild className="rounded-full">
+                  <a href="/donate">Donate</a>
+                </Button>
+            </div>
         </nav>
       </header>
       <main className="container mx-auto py-10 lg:py-16 px-4 sm:px-6 lg:px-8">

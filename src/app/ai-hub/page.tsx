@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { FirebaseClientProvider, useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 
 type AiHubProps = {
@@ -519,16 +520,19 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                  <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
                  <a href="/upload-qn" className="hover:text-primary transition-colors">AI Training</a>
               </div>
-              {user ? (
-                <Button variant="outline" onClick={handleSignOut} className="rounded-full">
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Sign Out
-                </Button>
+              <div className="flex items-center gap-4">
+                <ThemeToggle />
+                {user ? (
+                    <Button variant="outline" onClick={handleSignOut} className="rounded-full">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                    </Button>
                 ) : (
-                <Button asChild className="rounded-full">
-                    <a href="/auth">Sign In</a>
-                </Button>
+                    <Button asChild className="rounded-full">
+                        <a href="/auth">Sign In</a>
+                    </Button>
                 )}
+              </div>
             </nav>
           </header>
           <main className="flex-1 py-10 lg:py-16">
@@ -904,4 +908,3 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
-

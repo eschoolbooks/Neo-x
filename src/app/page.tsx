@@ -9,6 +9,7 @@ import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users } from 'lucide-react'
 import CountUp from 'react-countup';
 import { AiHub } from '@/components/ai-hub';
 import { useUser } from '@/firebase';
+import { ThemeToggle } from '@/components/theme-toggle';
 
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
@@ -62,17 +63,20 @@ export default function Home() {
             <a href="#impact" className="hover:text-primary transition-colors">Impact</a>
             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
-          {user ? (
-            <Button asChild className="rounded-full animate-pulse-strong">
-                <a href="/ai-hub">Go to AI Hub <ArrowRight className="ml-2 h-4 w-4" /></a>
-            </Button>
-          ) : (
-            <Button asChild className="rounded-full animate-pulse-strong">
-              <a href="/donate">
-                Donate Now <Heart className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          )}
+          <div className="flex items-center gap-4">
+            <ThemeToggle />
+            {user ? (
+                <Button asChild className="rounded-full animate-pulse-strong">
+                    <a href="/ai-hub">Go to AI Hub <ArrowRight className="ml-2 h-4 w-4" /></a>
+                </Button>
+            ) : (
+                <Button asChild className="rounded-full animate-pulse-strong">
+                <a href="/donate">
+                    Donate Now <Heart className="ml-2 h-4 w-4" />
+                </a>
+                </Button>
+            )}
+          </div>
         </nav>
       </header>
 
@@ -299,4 +303,3 @@ export default function Home() {
     </div>
   );
 }
-
