@@ -31,77 +31,92 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
     onSignOut();
   };
 
-  const SettingItem = ({ href, icon, children }: { href: string, icon: React.ReactNode, children: React.ReactNode }) => (
-    <Button variant="ghost" className="w-full justify-start gap-2" asChild>
-      <Link href={href}>
-        {icon}
+  const SettingItem = ({ href, icon, children }: { href?: string, icon: React.ReactNode, children: React.ReactNode }) => {
+    const content = (
+      <Button variant="ghost" className="w-full justify-start gap-3 p-2 h-auto text-sm font-normal">
+        <div className="w-4">{icon}</div>
         {children}
-      </Link>
-    </Button>
+      </Button>
+    );
+
+    if (href) {
+        return <Link href={href}>{content}</Link>
+    }
+    return content;
+  }
+  
+  const SettingRow = ({ icon, label, control }: { icon: React.ReactNode, label: string, control: React.ReactNode}) => (
+     <div className="flex items-center justify-between rounded-md p-2 text-sm">
+        <div className="flex items-center gap-3">
+             <div className="w-4">{icon}</div>
+            <span className="font-normal">{label}</span>
+        </div>
+        {control}
+    </div>
   );
+
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="flex flex-col p-0">
-        <ScrollArea className="flex-1">
-            <div className="p-6">
-                <SheetHeader className="text-left pb-4">
-                  <SheetTitle>Settings</SheetTitle>
-                  <SheetDescription>
-                    Manage your preferences and access app information.
-                  </SheetDescription>
-                </SheetHeader>
-                <div className="space-y-6">
-                    <div className='space-y-2'>
-                        <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase">General</h3>
-                        <div className="flex items-center justify-between rounded-md p-2 hover:bg-accent hover:text-accent-foreground">
-                            <div className="flex items-center gap-2">
-                                <Lightbulb className="h-4 w-4" />
-                                <span className="text-sm font-medium">Theme</span>
-                            </div>
-                            <ThemeToggle />
-                        </div>
-                        <SettingItem href="/donate" icon={<Heart className="h-4 w-4" />}>Donate to Support</SettingItem>
-                        <SettingItem href="/upload-qn" icon={<BrainCircuit className="h-4 w-4" />}>AI Training Ground</SettingItem>
-                    </div>
-                    
-                    <Separator />
+        <SheetHeader className="p-6 pb-4 text-left border-b">
+          <SheetTitle>Settings</SheetTitle>
+          <SheetDescription>
+            Manage your preferences and access app information.
+          </SheetDescription>
+        </SheetHeader>
 
-                    <div className='space-y-2'>
-                        <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase">About & Help</h3>
-                        <SettingItem href="#" icon={<FileText className="h-4 w-4" />}>Terms & Conditions</SettingItem>
-                        <SettingItem href="#" icon={<FileText className="h-4 w-4" />}>Privacy Policy</SettingItem>
-                        <SettingItem href="#" icon={<Lightbulb className="h-4 w-4" />}>Suggest a Feature</SettingItem>
-                        <SettingItem href="#" icon={<Bug className="h-4 w-4" />}>Report a Bug</SettingItem>
-                        <SettingItem href="#" icon={<Github className="h-4 w-4" />}>Source Code</SettingItem>
-                    </div>
-                    
-                    <Separator />
-                    
-                     <div className='space-y-2'>
-                         <Button variant="destructive" className="w-full justify-start gap-2" onClick={handleSignOut}>
-                            <LogOut className="h-4 w-4"/>
-                            Sign Out
-                          </Button>
-                     </div>
+        <ScrollArea className="flex-1">
+            <div className="p-6 space-y-6">
+                <div className='space-y-1'>
+                    <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">General</h3>
+                    <SettingRow 
+                        icon={<Lightbulb className="h-4 w-4" />}
+                        label="Theme"
+                        control={<ThemeToggle />}
+                    />
+                    <SettingItem href="/donate" icon={<Heart className="h-4 w-4" />}>Donate to Support</SettingItem>
+                    <SettingItem href="/upload-qn" icon={<BrainCircuit className="h-4 w-4" />}>AI Training Ground</SettingItem>
                 </div>
-            </div>
-            <SheetFooter className="p-6 pt-0 text-left border-t mt-6">
-                <div className="text-xs text-muted-foreground space-y-2">
-                    <p>Version: 0.1.0 (Beta)</p>
-                    <p>
-                    A part of the <a href="https://varts.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">varts.org</a> initiative.
-                    </p>
-                    <p>Contact: <a href="mailto:info@e-schoolbooks.in" className="underline hover:text-primary">info@e-schoolbooks.in</a></p>
+                
+                <Separator />
+
+                <div className='space-y-1'>
+                    <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">About & Help</h3>
+                    <SettingItem href="#" icon={<FileText className="h-4 w-4" />}>Terms & Conditions</SettingItem>
+                    <SettingItem href="#" icon={<FileText className="h-4 w-4" />}>Privacy Policy</SettingItem>
+                    <SettingItem href="#" icon={<Lightbulb className="h-4 w-4" />}>Suggest a Feature</SettingItem>
+                    <SettingItem href="#" icon={<Bug className="h-4 w-4" />}>Report a Bug</SettingItem>
+                    <SettingItem href="#" icon={<Github className="h-4 w-4" />}>Source Code</SettingItem>
+                </div>
+                
+                <Separator />
+                
+                <div className='space-y-2'>
+                    <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Account</h3>
                     {user && (
-                        <div className="flex items-center gap-2 pt-2">
+                        <div className="flex items-center gap-3 p-2 text-sm text-muted-foreground">
                             <User className="h-4 w-4"/>
-                            <span className='truncate'>User ID: {user.uid}</span>
+                            <span className='truncate font-mono text-xs'>ID: {user.uid}</span>
                         </div>
                     )}
+                    <Button variant="destructive" className="w-full justify-center gap-2" onClick={handleSignOut}>
+                        <LogOut className="h-4 w-4"/>
+                        Sign Out
+                    </Button>
                 </div>
-            </SheetFooter>
+            </div>
         </ScrollArea>
+
+        <SheetFooter className="p-6 pt-4 text-left border-t">
+            <div className="text-xs text-muted-foreground space-y-1">
+                <p>Version: 0.1.0 (Beta)</p>
+                <p>
+                A part of the <a href="https://varts.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">varts.org</a> initiative.
+                </p>
+                <p>Contact: <a href="mailto:info@e-schoolbooks.in" className="underline hover:text-primary">info@e-schoolbooks.in</a></p>
+            </div>
+        </SheetFooter>
       </SheetContent>
     </Sheet>
   );
