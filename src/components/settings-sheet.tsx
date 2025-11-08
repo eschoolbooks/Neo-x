@@ -11,10 +11,9 @@ import { Button } from './ui/button';
 import { ThemeToggle } from './theme-toggle';
 import { Separator } from './ui/separator';
 import { useUser } from '@/firebase';
-import { LifeBuoy, LogOut, FileText, Heart, BrainCircuit, Github, Bug, Lightbulb, User } from 'lucide-react';
+import { LogOut, FileText, Heart, BrainCircuit, Github, Bug, Lightbulb, User } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollArea } from './ui/scroll-area';
-import { cn } from '@/lib/utils';
 
 type SettingsSheetProps = {
   isOpen: boolean;
@@ -58,7 +57,7 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
             <div className="p-6 space-y-6">
                 <div className='space-y-1'>
                     <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">General</h3>
-                     <div className="flex items-center justify-between rounded-md p-0 text-sm font-normal">
+                     <div className="text-sm font-normal">
                         <ThemeToggle />
                     </div>
                     <SettingItem href="/donate" icon={<Heart className="h-4 w-4" />}>Donate to Support</SettingItem>
