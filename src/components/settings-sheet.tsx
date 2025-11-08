@@ -14,6 +14,8 @@ import { Separator } from './ui/separator';
 import { useUser } from '@/firebase';
 import { LifeBuoy, LogOut, FileText, Heart, BrainCircuit, Github, Bug, Lightbulb, User } from 'lucide-react';
 import Link from 'next/link';
+import { ScrollArea } from './ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 type SettingsSheetProps = {
   isOpen: boolean;
@@ -30,7 +32,7 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
   };
 
   const SettingItem = ({ href, icon, children }: { href: string, icon: React.ReactNode, children: React.ReactNode }) => (
-    <Button variant="ghost" className="w-full justify-start" asChild>
+    <Button variant="ghost" className="w-full justify-start gap-2" asChild>
       <Link href={href}>
         {icon}
         {children}
@@ -40,38 +42,43 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent className="flex flex-col">
-        <SheetHeader>
+      <SheetContent className="flex flex-col p-0">
+        <SheetHeader className="p-6 pb-4">
           <SheetTitle>Settings</SheetTitle>
           <SheetDescription>
             Manage your preferences and access app information.
           </SheetDescription>
         </SheetHeader>
-        <div className="flex-1 space-y-4 py-4">
-          <div className='space-y-1'>
-            <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase">General</h3>
-            <div className="flex items-center justify-between px-2">
-                <span className="text-sm font-medium">Theme</span>
-                <ThemeToggle />
+        <ScrollArea className="flex-1 px-6">
+          <div className="space-y-6">
+            <div className='space-y-2'>
+              <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase">General</h3>
+              <div className="flex items-center justify-between rounded-md p-2 hover:bg-accent hover:text-accent-foreground">
+                  <div className="flex items-center gap-2">
+                    <SunMoonIcon />
+                    <span className="text-sm font-medium">Theme</span>
+                  </div>
+                  <ThemeToggle />
+              </div>
+              <SettingItem href="/donate" icon={<Heart />}>Donate to Support</SettingItem>
+              <SettingItem href="/upload-qn" icon={<BrainCircuit />}>AI Training Ground</SettingItem>
             </div>
-            <SettingItem href="/donate" icon={<Heart />}>Donate to Support</SettingItem>
-            <SettingItem href="/upload-qn" icon={<BrainCircuit />}>AI Training Ground</SettingItem>
-          </div>
-          
-          <Separator />
+            
+            <Separator />
 
-          <div className='space-y-1'>
-             <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase">About & Help</h3>
-            <SettingItem href="#" icon={<FileText />}>Terms & Conditions</SettingItem>
-            <SettingItem href="#" icon={<FileText />}>Privacy Policy</SettingItem>
-            <SettingItem href="#" icon={<Lightbulb />}>Suggest a Feature</SettingItem>
-            <SettingItem href="#" icon={<Bug />}>Report a Bug</SettingItem>
-            <SettingItem href="#" icon={<Github />}>Source Code</SettingItem>
+            <div className='space-y-2'>
+              <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase">About & Help</h3>
+              <SettingItem href="#" icon={<FileText />}>Terms & Conditions</SettingItem>
+              <SettingItem href="#" icon={<FileText />}>Privacy Policy</SettingItem>
+              <SettingItem href="#" icon={<Lightbulb />}>Suggest a Feature</SettingItem>
+              <SettingItem href="#" icon={<Bug />}>Report a Bug</SettingItem>
+              <SettingItem href="#" icon={<Github />}>Source Code</SettingItem>
+            </div>
           </div>
-        </div>
+        </ScrollArea>
 
-        <SheetFooter className="flex-col !space-x-0 items-start space-y-4 border-t pt-4">
-          <div className="text-xs text-muted-foreground space-y-1 px-2">
+        <SheetFooter className="flex-col !space-x-0 items-start space-y-4 border-t p-6">
+          <div className="text-xs text-muted-foreground space-y-1">
             <p>Version: 0.1.0 (Beta)</p>
             <p>
               A part of the <a href="https://varts.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">varts.org</a> initiative.
@@ -83,8 +90,8 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
             Sign Out
           </Button>
            {user && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground px-2 pt-2 border-t w-full">
-                <User className="h-3 w-3"/>
+            <div className="flex w-full items-center gap-2 border-t pt-4 text-xs text-muted-foreground">
+                <User className="h-4 w-4"/>
                 <span className='truncate'>User ID: {user.uid}</span>
             </div>
            )}
@@ -92,4 +99,14 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
       </SheetContent>
     </Sheet>
   );
+}
+
+// A simple helper for the icon in the theme toggle row
+function SunMoonIcon() {
+    return (
+        <div className="relative h-4 w-4">
+            <Lightbulb className="absolute transition-all scale-100 dark:scale-0"/>
+            <Lightbulb className="absolute transition-all scale-0 dark:scale-100"/>
+        </div>
+    )
 }
