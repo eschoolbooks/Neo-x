@@ -33,7 +33,7 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
   const SettingItem = ({ href, icon, children }: { href?: string, icon: React.ReactNode, children: React.ReactNode }) => {
     const content = (
       <Button variant="ghost" className="w-full justify-start gap-3 p-2 h-auto text-sm font-normal">
-        <div className="w-4">{icon}</div>
+        <div className="w-4 flex-shrink-0 flex justify-center">{icon}</div>
         {children}
       </Button>
     );
@@ -43,17 +43,6 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
     }
     return content;
   }
-  
-  const SettingRow = ({ icon, label, control }: { icon: React.ReactNode, label: string, control: React.ReactNode}) => (
-     <div className="flex items-center justify-between rounded-md p-2 text-sm">
-        <div className="flex items-center gap-3">
-             <div className="w-4">{icon}</div>
-            <span className="font-normal">{label}</span>
-        </div>
-        {control}
-    </div>
-  );
-
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -69,11 +58,13 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
             <div className="p-6 space-y-6">
                 <div className='space-y-1'>
                     <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">General</h3>
-                    <SettingRow 
-                        icon={<Lightbulb className="h-4 w-4" />}
-                        label="Theme"
-                        control={<ThemeToggle />}
-                    />
+                     <div className="flex items-center justify-between rounded-md p-2 text-sm font-normal">
+                        <div className="flex items-center gap-3">
+                            <div className="w-4 flex-shrink-0 flex justify-center"><Lightbulb className="h-4 w-4" /></div>
+                            <span>Theme</span>
+                        </div>
+                        <ThemeToggle />
+                    </div>
                     <SettingItem href="/donate" icon={<Heart className="h-4 w-4" />}>Donate to Support</SettingItem>
                     <SettingItem href="/upload-qn" icon={<BrainCircuit className="h-4 w-4" />}>AI Training Ground</SettingItem>
                 </div>
@@ -95,7 +86,7 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
                     <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">Account</h3>
                     {user && (
                         <div className="flex items-center gap-3 p-2 text-sm text-muted-foreground">
-                            <User className="h-4 w-4"/>
+                            <div className="w-4 flex-shrink-0 flex justify-center"><User className="h-4 w-4"/></div>
                             <span className='truncate font-mono text-xs'>ID: {user.uid}</span>
                         </div>
                     )}
