@@ -58,11 +58,7 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
             <div className="p-6 space-y-6">
                 <div className='space-y-1'>
                     <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">General</h3>
-                     <div className="flex items-center justify-between rounded-md p-2 text-sm font-normal">
-                        <div className="flex items-center gap-3">
-                            <div className="w-4 flex-shrink-0 flex justify-center"><Lightbulb className="h-4 w-4" /></div>
-                            <span>Theme</span>
-                        </div>
+                     <div className="flex items-center justify-between rounded-md p-0 text-sm font-normal">
                         <ThemeToggle />
                     </div>
                     <SettingItem href="/donate" icon={<Heart className="h-4 w-4" />}>Donate to Support</SettingItem>
