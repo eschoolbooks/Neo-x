@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { LoaderCircle, FileUp, X, BrainCircuit, UploadCloud } from 'lucide-react';
+import { LoaderCircle, FileUp, X, BrainCircuit, UploadCloud, ChevronDown } from 'lucide-react';
 import { processQuestions } from '@/ai/flows/processQuestionsFlow';
 import type { ProcessedQuestion } from '@/ai/flows/processQuestionsSchemas';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -176,7 +177,7 @@ export default function UploadQnPage() {
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
                                         <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                        <p className="text-xs text-muted-foreground">PDF, DOCX, or TXT (Max {MAX_FILE_SIZE_MB}MB)</p>
+                                        <p className="text-xs text-muted-foreground">PDF, DOCX, or TXT (Max ${MAX_FILE_SIZE_MB}MB)</p>
                                     </div>
                                     <input id="file-upload" type="file" className="hidden" accept=".pdf,.doc,.docx,.txt" onChange={handleFileChange} />
                                 </label>
@@ -209,11 +210,12 @@ export default function UploadQnPage() {
             )}
 
             {processedData && (
+              <>
                 <Card>
                     <CardHeader>
                         <CardTitle>Processed TOON Data</CardTitle>
                         <CardDescription>
-                            Here is the structured data extracted from the document. This data can now be used for training.
+                            Here is the structured data extracted from the document. This data will be used for training.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -222,6 +224,43 @@ export default function UploadQnPage() {
                         </pre>
                     </CardContent>
                 </Card>
+                <Accordion type="single" collapsible className="w-full mt-8">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger>
+                      <span className="font-semibold text-lg flex items-center gap-2">
+                        <BrainCircuit className="h-5 w-5" />
+                        Learn more about what just happened
+                      </span>
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground space-y-4 pt-2">
+                      <div>
+                        <h4 className="font-semibold text-foreground mb-1">What is the AI Training Ground?</h4>
+                        <p>
+                          This page is the heart of our community-driven AI improvement process. By uploading question papers, you are directly contributing valuable data that helps Neo X become more intelligent and accurate. Each document you provide is a new learning opportunity for our AI.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-foreground mb-1">How is the AI Trained?</h4>
+                        <p>
+                          When you upload a document, our AI (powered by Google's Gemini model) analyzes the content. It doesn't just read the text; it understands the structure of the questions, options, and metadata. It then converts this unstructured information into a perfectly organized format called TOON. This clean, structured data is then used in future training cycles to improve the AI's ability to predict exam questions, generate quizzes, and answer your questions.
+                        </p>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-foreground mb-1">What is TOON?</h4>
+                        <p>
+                          <strong>TOON</strong> stands for <strong>Token Oriented Object Notation</strong>. It's a custom, highly structured data format we designed, similar to JSON. Instead of just raw text, TOON organizes every piece of information into a specific "token"—like `questionText`, `subject`, `year`, and `correctAnswer`.
+                        </p>
+                      </div>
+                       <div>
+                        <h4 className="font-semibold text-foreground mb-1">Why is TOON Important?</h4>
+                        <p>
+                          Computers and AI models thrive on structure. A simple PDF or text file is messy and inconsistent. By converting documents into the strict TOON format, we create a clean, reliable, and standardized dataset. This is the single most important step for effective AI training, as it allows the model to learn patterns and relationships from the data far more efficiently. Your contributions create the high-quality fuel that powers our AI.
+                        </p>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </>
             )}
         </div>
       </main>
