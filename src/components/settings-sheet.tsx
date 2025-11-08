@@ -6,7 +6,6 @@ import {
   SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetFooter,
 } from '@/components/ui/sheet';
 import { Button } from './ui/button';
 import { ThemeToggle } from './theme-toggle';
@@ -108,7 +107,7 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
             </div>
         </ScrollArea>
 
-        <SheetFooter className="p-6 pt-4 text-left border-t">
+        <div className="p-6 pt-4 text-left border-t">
             <div className="text-xs text-muted-foreground space-y-1">
                 <p>Version: 0.1.0 (Beta)</p>
                 <p>
@@ -116,7 +115,7 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
                 </p>
                 <p>Contact: <a href="mailto:info@e-schoolbooks.in" className="underline hover:text-primary">info@e-schoolbooks.in</a></p>
             </div>
-        </SheetFooter>
+        </div>
       </SheetContent>
     </Sheet>
   );
