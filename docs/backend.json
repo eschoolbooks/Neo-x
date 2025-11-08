@@ -1,0 +1,294 @@
+{
+  "entities": {
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the EMA platform.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address.",
+          "format": "email"
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user account was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "name",
+        "createdAt"
+      ]
+    },
+    "Exam": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Exam",
+      "type": "object",
+      "description": "Represents an exam type supported by the platform (e.g., Plus 2, NEET).",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Exam entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the exam (e.g., 'Plus 2', 'NEET')."
+        },
+        "description": {
+          "type": "string",
+          "description": "A brief description of the exam."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "description"
+      ]
+    },
+    "Upload": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Upload",
+      "type": "object",
+      "description": "Represents a file upload, such as a previous year question paper or textbook.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Upload entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Upload)"
+        },
+        "examId": {
+          "type": "string",
+          "description": "Reference to Exam. (Relationship: Exam 1:N Upload)"
+        },
+        "filename": {
+          "type": "string",
+          "description": "Original filename of the uploaded file."
+        },
+        "storageLocation": {
+          "type": "string",
+          "description": "Location of the file in storage (e.g., cloud storage URL)."
+        },
+        "uploadDate": {
+          "type": "string",
+          "description": "Timestamp indicating when the file was uploaded.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "examId",
+        "filename",
+        "storageLocation",
+        "uploadDate"
+      ]
+    },
+    "Analysis": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Analysis",
+      "type": "object",
+      "description": "Represents the results of an AI analysis performed on an uploaded file.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Analysis entity."
+        },
+        "uploadId": {
+          "type": "string",
+          "description": "Reference to Upload. (Relationship: Upload 1:N Analysis)"
+        },
+        "analysisDate": {
+          "type": "string",
+          "description": "Timestamp indicating when the analysis was performed.",
+          "format": "date-time"
+        },
+        "predictionResults": {
+          "type": "string",
+          "description": "JSON string containing the detailed exam prediction results. This should be a json string.",
+          "format": "json"
+        },
+        "studyRecommendations": {
+          "type": "string",
+          "description": "JSON string containing study recommendations based on the analysis. This should be a json string.",
+          "format": "json"
+        }
+      },
+      "required": [
+        "id",
+        "uploadId",
+        "analysisDate",
+        "predictionResults",
+        "studyRecommendations"
+      ]
+    },
+    "Log": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Log",
+      "type": "object",
+      "description": "Represents a log entry for system events or user actions.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Log entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to User. (Relationship: User 1:N Log).  Can be null if not related to any specific user."
+        },
+        "timestamp": {
+          "type": "string",
+          "description": "Timestamp of the log entry.",
+          "format": "date-time"
+        },
+        "level": {
+          "type": "string",
+          "description": "Log level (e.g., INFO, WARNING, ERROR)."
+        },
+        "message": {
+          "type": "string",
+          "description": "Log message describing the event."
+        }
+      },
+      "required": [
+        "id",
+        "timestamp",
+        "level",
+        "message"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profiles.  Accessed by the user and admins only.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/exams/{examId}",
+        "definition": {
+          "entityName": "Exam",
+          "schema": {
+            "$ref": "#/backend/entities/Exam"
+          },
+          "description": "Stores exam types supported by the platform.",
+          "params": [
+            {
+              "name": "examId",
+              "description": "The unique identifier of the exam."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/uploads/{uploadId}",
+        "definition": {
+          "entityName": "Upload",
+          "schema": {
+            "$ref": "#/backend/entities/Upload"
+          },
+          "description": "Stores file upload metadata. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who uploaded the file."
+            },
+            {
+              "name": "uploadId",
+              "description": "The unique identifier of the uploaded file."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/analyses/{analysisId}",
+        "definition": {
+          "entityName": "Analysis",
+          "schema": {
+            "$ref": "#/backend/entities/Analysis"
+          },
+          "description": "Stores AI analysis results for uploaded files. Includes denormalized 'userId' for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns the analysis."
+            },
+            {
+              "name": "analysisId",
+              "description": "The unique identifier of the AI analysis."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/logs/{logId}",
+        "definition": {
+          "entityName": "Log",
+          "schema": {
+            "$ref": "#/backend/entities/Log"
+          },
+          "description": "Stores user-specific log entries.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user associated with the log entry."
+            },
+            {
+              "name": "logId",
+              "description": "The unique identifier of the log entry."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/logs/{logId}",
+        "definition": {
+          "entityName": "Log",
+          "schema": {
+            "$ref": "#/backend/entities/Log"
+          },
+          "description": "Stores system-wide log entries.",
+          "params": [
+            {
+              "name": "logId",
+              "description": "The unique identifier of the log entry."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "This Firestore structure is designed to support the EMA application's data storage needs, focusing on user data, exam information, uploads, AI analysis results, and logging. The structure prioritizes Authorization Independence, DBAC (Database-Based Access Control), and QAPs (Rules are Not Filters). \n\n**Authorization Independence:**\n\n*   The `Upload` and `Analysis` subcollections under `/users/{userId}` denormalize the `userId` to ensure that access can be controlled solely based on path-based ownership, without requiring `get()` calls to parent documents.\n\n**Structural Segregation:**\n\n*   The `users/{userId}` collection is segregated to store private user-related data, ensuring that only the user or admins can access it.\n\n**Access Modeling:**\n\n*   **Path-Based Ownership:** `/users/{userId}/uploads/{uploadId}` and `/users/{userId}/analyses/{analysisId}` establish clear ownership, simplifying security rules.\n*   **Logs Collection:** Logs that are user-specific are placed under `/users/{userId}/logs/{logId}`, maintaining the user context. Global logs (without a specific user) are stored in the `/logs/{logId}` collection.\n\n**Data Clarity and Predictability:**\n\n*   The schema for each entity enforces required fields and specific data types, ensuring data consistency.\n\n**QAPs Support:**\n\n*   The use of path-based ownership (`/users/{userId}/uploads/{uploadId}`) allows secure list operations, as rules can easily filter based on the `userId` in the path.\n\nThis design ensures that security rules can be written clearly and efficiently, minimizing the risk of insecure data access and maximizing the scalability and maintainability of the EMA application."
+  }
+}

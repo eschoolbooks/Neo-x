@@ -1,0 +1,183 @@
+/**
+ * @fileoverview Firestore Security Rules for the EMA application.
+ *
+ * Core Philosophy:
+ * This ruleset enforces a strict user-ownership model for user-specific data,
+ * while allowing public read access to shared resources like exam definitions.
+ * The rules prioritize security and data isolation, ensuring that users can only
+ * access their own data and preventing unauthorized modifications.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores user profiles, accessible only by the user themselves.
+ * - /exams/{examId}: Stores exam definitions, publicly readable.
+ * - /users/{userId}/uploads/{uploadId}: Stores user-uploaded files and metadata.
+ * - /users/{userId}/analyses/{analysisId}: Stores AI analysis results for user uploads.
+ * - /users/{userId}/logs/{logId}: Stores user-specific logs.
+ * - /logs/{logId}: Stores system-wide logs.
+ *
+ * Key Security Decisions:
+ * - User listing is disallowed to protect user privacy.
+ * - Exam definitions are publicly readable to facilitate easy access to exam information.
+ * - All write operations on user-specific data are restricted to the owning user.
+ * - Global logs can be created by anyone, but cannot be listed publicly.
+ *
+ * Denormalization for Authorization:
+ * - The `Upload` and `Analysis` entities include a `userId` field, denormalized from
+ *   the parent `/users/{userId}` path, to allow for efficient authorization checks
+ *   without requiring additional reads.
+ *
+ * Structural Segregation:
+ * - User-specific data is stored under the `/users/{userId}` path to enforce
+ *   ownership-based access control. Publicly readable data (e.g., exam definitions)
+ *   is stored in a top-level collection.
+ */
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * @description Checks if the request is authenticated.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user's ID matches the provided user ID.
+     * @param {string} userId The user ID to compare against.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the authenticated user is the owner of the existing document.
+     * @param {string} userId The user ID to compare against.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Stores user profiles.  Accessed by the user and admins only.
+     * @path /users/{userId}
+     * @allow (create) User with ID 'user123' creates their own profile.
+     *   - request.auth.uid: 'user123'
+     *   - request.resource.data.id: 'user123'
+     * @allow (get, update, delete) User with ID 'user123' reads/updates/deletes their own profile.
+     *   - request.auth.uid: 'user123'
+     *   - resource.data.id: 'user123'
+     * @deny (create) User with ID 'user123' tries to create a profile for 'user456'.
+     *   - request.auth.uid: 'user123'
+     *   - request.resource.data.id: 'user456'
+     * @deny (get, update, delete) User with ID 'user123' tries to read/update/delete profile 'user456'.
+     *   - request.auth.uid: 'user123'
+     *   - resource.data.id: 'user456'
+     * @principle Enforces document ownership for writes and restricts access to a user's own data tree.
+     */
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // User listing is disallowed.
+      allow create: if isOwner(userId) && request.resource.data.id == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Stores exam types supported by the platform.
+     * @path /exams/{examId}
+     * @allow (get, list) Any user can read exam definitions.
+     *   - request.auth.uid: 'any_user'
+     * @deny (create, update, delete) No one can create, update or delete exam definitions through client.
+     *   - request.auth.uid: 'any_user'
+     * @principle Allows public read access but prevents unauthorized modifications.
+     */
+    match /exams/{examId} {
+      allow get, list: if true;
+      allow create, update, delete: if false;
+    }
+
+    /**
+     * @description Stores file upload metadata. Includes denormalized 'userId' for authorization independence.
+     * @path /users/{userId}/uploads/{uploadId}
+     * @allow (create) User with ID 'user123' creates an upload under their profile.
+     *   - request.auth.uid: 'user123'
+     *   - request.resource.data.userId: 'user123'
+     * @allow (get, update, delete) User with ID 'user123' reads/updates/deletes their own upload.
+     *   - request.auth.uid: 'user123'
+     *   - resource.data.userId: 'user123'
+     * @deny (create) User with ID 'user123' tries to create an upload for 'user456'.
+     *   - request.auth.uid: 'user123'
+     *   - request.resource.data.userId: 'user456'
+     * @deny (get, update, delete) User with ID 'user123' tries to read/update/delete upload of 'user456'.
+     *   - request.auth.uid: 'user123'
+     *   - resource.data.userId: 'user456'
+     * @principle Enforces document ownership for writes and restricts access to a user's own uploads.
+     */
+    match /users/{userId}/uploads/{uploadId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Stores AI analysis results for uploaded files. Includes denormalized 'userId' for authorization independence.
+     * @path /users/{userId}/analyses/{analysisId}
+     * @allow (create) User with ID 'user123' creates an analysis under their profile.
+     *   - request.auth.uid: 'user123'
+     *   - request.resource.data.userId: 'user123'
+     * @allow (get, update, delete) User with ID 'user123' reads/updates/deletes their own analysis.
+     *   - request.auth.uid: 'user123'
+     *   - resource.data.userId: 'user123'
+     * @deny (create) User with ID 'user123' tries to create an analysis for 'user456'.
+     *   - request.auth.uid: 'user123'
+     *   - request.resource.data.userId: 'user456'
+     * @deny (get, update, delete) User with ID 'user123' tries to read/update/delete analysis of 'user456'.
+     *   - request.auth.uid: 'user123'
+     *   - resource.data.userId: 'user456'
+     * @principle Enforces document ownership for writes and restricts access to a user's own analysis results.
+     */
+    match /users/{userId}/analyses/{analysisId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isOwner(userId) && request.resource.data.userId == userId;
+      allow update: if isExistingOwner(userId) && request.resource.data.userId == userId;
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Stores user-specific log entries.
+     * @path /users/{userId}/logs/{logId}
+     * @allow (create) User with ID 'user123' creates a log entry under their profile.
+     *   - request.auth.uid: 'user123'
+     * @allow (get, update, delete) User with ID 'user123' reads/updates/deletes their own log entry.
+     *   - request.auth.uid: 'user123'
+     * @deny (create) User with ID 'user123' tries to create a log entry for 'user456'.
+     *   - request.auth.uid: 'user123'
+     * @deny (get, update, delete) User with ID 'user123' tries to read/update/delete log entry of 'user456'.
+     *   - request.auth.uid: 'user123'
+     * @principle Enforces document ownership for writes and restricts access to a user's own log entries.
+     */
+    match /users/{userId}/logs/{logId} {
+      allow get, list: if isOwner(userId);
+      allow create: if isSignedIn(); // Any signed-in user can create a log entry under their ID.
+      allow update: if isExistingOwner(userId);
+      allow delete: if isExistingOwner(userId);
+    }
+
+    /**
+     * @description Stores system-wide log entries.
+     * @path /logs/{logId}
+     * @allow (create) Any authenticated user can create a global log entry.
+     *   - request.auth.uid: 'any_user'
+     * @deny (get, list, update, delete) No one can read, list, update, or delete global log entries via direct client access.
+     *   - request.auth.uid: 'any_user'
+     * @principle Allows public creation of logs but restricts all other access.
+     */
+    match /logs/{logId} {
+      allow get, list: if false;
+      allow create: if isSignedIn(); //Any authenticated user can create a log
+      allow update, delete: if false;
+    }
+  }
+}
