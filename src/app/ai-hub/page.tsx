@@ -32,6 +32,9 @@ import { useFirestore } from '@/firebase/provider';
 
 
 const MAX_DOCUMENTS = 3;
+const MAX_FILE_SIZE_MB = 2;
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 
 function AiHubContent() {
     const [examType, setExamType] = useState('Plus 2');
@@ -85,17 +88,35 @@ function AiHubContent() {
         const availableSlots = MAX_DOCUMENTS - currentFiles.length;
         if (availableSlots <= 0) return;
         
-        const newFiles = Array.from(e.target.files || []);
+        const selectedFiles = Array.from(e.target.files || []);
+        const validFiles: File[] = [];
+        const oversizedFiles: File[] = [];
 
-        if (newFiles.length > availableSlots) {
-             toast({
-                title: 'File Limit Exceeded',
-                description: `You can only upload ${availableSlots} more file(s). ${newFiles.length - availableSlots} file(s) were not added.`,
+        selectedFiles.forEach(file => {
+            if (file.size > MAX_FILE_SIZE_BYTES) {
+                oversizedFiles.push(file);
+            } else {
+                validFiles.push(file);
+            }
+        });
+
+        if (oversizedFiles.length > 0) {
+            toast({
+                title: 'File Too Large',
+                description: `${oversizedFiles.map(f => f.name).join(', ')} is larger than ${MAX_FILE_SIZE_MB}MB.`,
                 variant: 'destructive',
             });
         }
-        
-        const filesToAdd = newFiles.slice(0, availableSlots);
+
+        const filesToAdd = validFiles.slice(0, availableSlots);
+
+        if (validFiles.length > availableSlots) {
+             toast({
+                title: 'File Limit Exceeded',
+                description: `You can only upload ${availableSlots} more file(s). ${validFiles.length - availableSlots} file(s) were not added.`,
+                variant: 'destructive',
+            });
+        }
 
         try {
             const uris = await Promise.all(filesToAdd.map(fileToDataUri));
@@ -107,8 +128,12 @@ function AiHubContent() {
                 description: 'Failed to process files. Please try again.',
                 variant: 'destructive',
             });
+        } finally {
+            // Reset the file input value to allow re-uploading the same file
+            if (e.target) e.target.value = '';
         }
     };
+
 
     const handleRemoveFile = (index: number) => {
         setDocuments(prev => prev.filter((_, i) => i !== index));
@@ -528,7 +553,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                             <>
                                 <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
                                 <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">Up to {MAX_DOCUMENTS} PDF files</p>
+                                <p className="text-xs text-muted-foreground">PDF only, up to {MAX_FILE_SIZE_MB}MB per file</p>
                             </>
                         )}
                     </div>
@@ -961,3 +986,5 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
+
+    
