@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut, Settings, History } from 'lucide-react';
+import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut, Settings, History, File as FileIcon } from 'lucide-react';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -82,6 +82,15 @@ function AiHubContent() {
             reader.readAsDataURL(file);
         });
     };
+    
+    const formatFileSize = (bytes: number): string => {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const currentFiles = documents;
@@ -560,11 +569,17 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                     <input id="documents-input" type="file" className="hidden" multiple accept=".pdf" onChange={onFileChange} disabled={isLimitReached} />
                 </label>
             </div>
-            <div className="space-y-1 pt-2">
-                {files.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
-                        <span className="truncate pr-2">{file.name}</span>
-                        <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => onRemoveFile(index)}><X className="h-4 w-4" /></Button>
+            <div className="space-y-2 pt-2">
+                 {files.map((file, index) => (
+                    <div key={index} className="flex items-start justify-between text-sm p-3 bg-muted rounded-lg border">
+                        <div className="flex items-start gap-3">
+                            <FileIcon className="h-8 w-8 text-muted-foreground flex-shrink-0 mt-1" />
+                            <div className="flex flex-col">
+                                <span className="font-semibold text-foreground truncate max-w-xs">{file.name}</span>
+                                <span className="text-muted-foreground">{formatFileSize(file.size)}</span>
+                            </div>
+                        </div>
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => onRemoveFile(index)}><X className="h-4 w-4" /></Button>
                     </div>
                 ))}
             </div>
