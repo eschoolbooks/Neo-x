@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users } from 'lucide-react';
 import CountUp from 'react-countup';
 import { useUser } from '@/firebase';
-import { ThemeToggle } from '@/components/theme-toggle';
 
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
@@ -57,20 +56,18 @@ export default function Home() {
             <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
-            <a href="#vision" className="hover:text-primary transition-colors">Our Vision</a>
             <a href="/ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
-            <a href="#impact" className="hover:text-primary transition-colors">Impact</a>
+            <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             {user ? (
                 <Button asChild className="rounded-full">
                     <a href="/ai-hub">Go to AI Hub <ArrowRight className="ml-2 h-4 w-4" /></a>
                 </Button>
             ) : (
                 <Button asChild className="rounded-full" variant="secondary">
-                  <a href="/donate">Donate Now</a>
+                  <a href="/auth">Sign In</a>
                 </Button>
             )}
           </div>
