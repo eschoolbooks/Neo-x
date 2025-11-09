@@ -57,9 +57,7 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
             <div className="p-6 space-y-6">
                 <div className='space-y-1'>
                     <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">General</h3>
-                     <div className="text-sm font-normal">
-                        <ThemeToggle />
-                    </div>
+                    <ThemeToggle />
                     <SettingItem href="/donate" icon={<Heart className="h-4 w-4" />}>Donate to Support</SettingItem>
                     <SettingItem href="/upload-qn" icon={<BrainCircuit className="h-4 w-4" />}>AI Training Ground</SettingItem>
                 </div>
