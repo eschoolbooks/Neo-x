@@ -5,3 +5,13 @@ runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
+# Pass the GEMINI_API_KEY secret to the backend.
+# The value of this secret can be set using the Firebase CLI.
+# firebase secrets:set GEMINI_API_KEY
+# You can also specify a version of the secret.
+# firebase secrets:set GEMINI_API_KEY --version=2
+requiredSecrets:
+  - secret: GOOGLE_GEMINI_API_KEY
+    # This environment variable will be available to your backend service.
+    # We are using this in src/ai/genkit.ts
+    env: GOOGLE_GEMINI_API_KEY

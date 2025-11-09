@@ -159,13 +159,17 @@ function AiHubContent() {
             });
 
             if (user && firestore) {
-                const analysisId = doc(collection(firestore, 'dummy')).id;
-                const analysisRef = doc(firestore, 'users', user.uid, 'analyses', analysisId);
+                 // Create a new document reference with a unique ID
+                const analysisRef = doc(collection(firestore, 'users', user.uid, 'analyses'));
+                
                 await setDoc(analysisRef, {
-                    id: analysisId,
+                    id: analysisRef.id,
                     userId: user.uid,
-                    uploadId: 'N/A', // You might want to associate this with a specific upload
                     analysisDate: serverTimestamp(),
+                    // Save the inputs
+                    examType: examType,
+                    documents: documentDataUris,
+                    // Save the results
                     predictionResults: JSON.stringify(result.predictedTopics),
                     studyRecommendations: JSON.stringify(result.studyRecommendations),
                 });
@@ -225,14 +229,19 @@ function AiHubContent() {
 
             if (result.questions.length > 0) {
                 if (user && firestore) {
-                    const quizId = doc(collection(firestore, 'dummy')).id;
-                    const quizRef = doc(firestore, 'users', user.uid, 'quizzes', quizId);
+                    // Create a new document reference with a unique ID
+                    const quizRef = doc(collection(firestore, 'users', user.uid, 'quizzes'));
+                    
                     await setDoc(quizRef, {
-                        id: quizId,
+                        id: quizRef.id,
                         userId: user.uid,
+                        createdAt: serverTimestamp(),
+                         // Save the inputs
+                        numQuestions: numQuestions,
+                        documents: documentDataUris,
+                        // Save the results
                         title: result.title,
                         questions: JSON.stringify(result.questions),
-                        createdAt: serverTimestamp(),
                     });
                 }
                 setQuiz(result);
@@ -952,5 +961,3 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
-
-    
