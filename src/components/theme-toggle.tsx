@@ -14,16 +14,21 @@ import {
 
 export function ThemeToggle() {
   const { setTheme, theme } = useTheme()
+  const [mounted, setMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setMounted(true)
+  }, [])
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="w-full justify-start gap-3 p-2 h-auto text-sm font-normal capitalize">
           <div className="relative h-4 w-4">
-            <Sun className="absolute h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+            <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
             <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           </div>
-          <span className="flex-1 text-left">{theme}</span>
+          <span className="flex-1 text-left">{mounted ? theme : 'system'}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
