@@ -25,9 +25,10 @@ import { cn } from '@/lib/utils';
 import { FirebaseClientProvider, useAuth, useUser } from '@/firebase';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { SettingsSheet } from '@/components/settings-sheet';
 import { HistoryDrawer } from '@/components/history-drawer';
+import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
+import { useFirestore } from '@/firebase/provider';
 
 
 const MAX_DOCUMENTS = 3;
@@ -62,6 +63,7 @@ function AiHubContent() {
     const auth = useAuth();
     const { user } = useUser();
     const router = useRouter();
+    const firestore = useFirestore();
 
     const handleSignOut = async () => {
         await signOut(auth);
@@ -155,6 +157,19 @@ function AiHubContent() {
                 examType,
                 documents: documentDataUris,
             });
+
+            if (user && firestore) {
+                const analysisId = doc(collection(firestore, 'dummy')).id;
+                const analysisRef = doc(firestore, 'users', user.uid, 'analyses', analysisId);
+                await setDoc(analysisRef, {
+                    id: analysisId,
+                    userId: user.uid,
+                    uploadId: 'N/A', // You might want to associate this with a specific upload
+                    analysisDate: serverTimestamp(),
+                    predictionResults: JSON.stringify(result.predictedTopics),
+                    studyRecommendations: JSON.stringify(result.studyRecommendations),
+                });
+            }
             
             setPrediction(result);
             if (!user) setDemoUsed(true);
@@ -208,20 +223,31 @@ function AiHubContent() {
                 documents: documentDataUris,
             });
 
-            if (result.questions.length === 0) {
-                setQuizError("The AI couldn't generate a quiz from the provided documents. Try different files.");
+            if (result.questions.length > 0) {
+                if (user && firestore) {
+                    const quizId = doc(collection(firestore, 'dummy')).id;
+                    const quizRef = doc(firestore, 'users', user.uid, 'quizzes', quizId);
+                    await setDoc(quizRef, {
+                        id: quizId,
+                        userId: user.uid,
+                        title: result.title,
+                        questions: JSON.stringify(result.questions),
+                        createdAt: serverTimestamp(),
+                    });
+                }
+                setQuiz(result);
+                if (!user) setDemoUsed(true);
+                 setTimeout(() => {
+                    resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+            } else {
+                 setQuizError("The AI couldn't generate a quiz from the provided documents. Try different files.");
                 toast({
                     title: 'Quiz Generation Failed',
                     description: "The AI couldn't generate a quiz. Please try different documents.",
                     variant: 'destructive',
                 });
                 setShowUpload(true);
-            } else {
-                setQuiz(result);
-                if (!user) setDemoUsed(true);
-                 setTimeout(() => {
-                    resultsRef.current?.scrollIntoView({ behavior: 'smooth' });
-                }, 100);
             }
         } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unexpected response was received from the server.';
@@ -926,3 +952,5 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
+
+    
