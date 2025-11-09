@@ -18,7 +18,7 @@ import {
   DropdownMenuTrigger,
 } from './ui/dropdown-menu';
 import { useCollection, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy } from 'firebase/firestore';
+import { collection, query, orderBy, Timestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
 import { Skeleton } from './ui/skeleton';
 
@@ -30,7 +30,7 @@ type HistoryDrawerProps = {
 // Represents the structure of an analysis document in Firestore
 type AnalysisHistoryItem = {
     id: string;
-    analysisDate: string; // Assuming it's an ISO string
+    analysisDate: Timestamp; 
     // Add other fields from your Analysis entity if needed
 };
 
@@ -49,9 +49,10 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
 
   const { data: historyItems, isLoading } = useCollection<AnalysisHistoryItem>(analysesQuery);
 
-  const formatDate = (isoString: string) => {
+  const formatDate = (timestamp: Timestamp) => {
     try {
-        return new Date(isoString).toLocaleDateString(undefined, {
+        const date = timestamp.toDate();
+        return date.toLocaleDateString(undefined, {
             year: 'numeric',
             month: 'long',
             day: 'numeric'
@@ -60,6 +61,15 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
         return "Invalid Date";
     }
   };
+  
+    const formatTime = (timestamp: Timestamp) => {
+    try {
+      return timestamp.toDate().toLocaleTimeString();
+    } catch (e) {
+      return "";
+    }
+  };
+
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -89,7 +99,7 @@ export function HistoryDrawer({ isOpen, onClose }: HistoryDrawerProps) {
                             </div>
                             <div className="overflow-hidden">
                                 <p className="text-sm font-semibold truncate">Prediction - {formatDate(item.analysisDate)}</p>
-                                <p className="text-xs text-muted-foreground">{new Date(item.analysisDate).toLocaleTimeString()}</p>
+                                <p className="text-xs text-muted-foreground">{formatTime(item.analysisDate)}</p>
                             </div>
                         </div>
                         <div className='flex items-center gap-1'>
