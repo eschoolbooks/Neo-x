@@ -31,8 +31,8 @@ import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
 
 
-const MAX_DOCUMENTS = 3;
-const MAX_FILE_SIZE_MB = 2;
+const MAX_DOCUMENTS = 1;
+const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 
@@ -93,52 +93,29 @@ function AiHubContent() {
 
 
     const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const currentFiles = documents;
-        const availableSlots = MAX_DOCUMENTS - currentFiles.length;
-        if (availableSlots <= 0) return;
-        
-        const selectedFiles = Array.from(e.target.files || []);
-        const validFiles: File[] = [];
-        const oversizedFiles: File[] = [];
+        const file = e.target.files?.[0];
+        if (!file) return;
 
-        selectedFiles.forEach(file => {
-            if (file.size > MAX_FILE_SIZE_BYTES) {
-                oversizedFiles.push(file);
-            } else {
-                validFiles.push(file);
-            }
-        });
-
-        if (oversizedFiles.length > 0) {
+        if (file.size > MAX_FILE_SIZE_BYTES) {
             toast({
                 title: 'File Too Large',
-                description: `${oversizedFiles.map(f => f.name).join(', ')} is larger than ${MAX_FILE_SIZE_MB}MB.`,
+                description: `The selected file is larger than ${MAX_FILE_SIZE_MB}MB.`,
                 variant: 'destructive',
             });
+            return;
         }
-
-        const filesToAdd = validFiles.slice(0, availableSlots);
-
-        if (validFiles.length > availableSlots) {
-             toast({
-                title: 'File Limit Exceeded',
-                description: `You can only upload ${availableSlots} more file(s). ${validFiles.length - availableSlots} file(s) were not added.`,
-                variant: 'destructive',
-            });
-        }
-
+        
         try {
-            const uris = await Promise.all(filesToAdd.map(fileToDataUri));
-            setDocuments(prev => [...prev, ...filesToAdd]);
-            setDocumentDataUris(prev => [...prev, ...uris]);
+            const uri = await fileToDataUri(file);
+            setDocuments([file]);
+            setDocumentDataUris([uri]);
         } catch (error) {
             toast({
                 title: 'File Upload Error',
-                description: 'Failed to process files. Please try again.',
+                description: 'Failed to process file. Please try again.',
                 variant: 'destructive',
             });
         } finally {
-            // Reset the file input value to allow re-uploading the same file
             if (e.target) e.target.value = '';
         }
     };
@@ -193,9 +170,7 @@ function AiHubContent() {
             });
 
             if (user && firestore) {
-                 // Create a new document reference with a unique ID in the 'analyses' subcollection
                 const analysisRef = doc(collection(firestore, 'users', user.uid, 'analyses'));
-                
                 const predictionDate = new Date();
 
                 const savedData = {
@@ -206,7 +181,7 @@ function AiHubContent() {
                         exam_type: examType,
                         subject: result.predictedTopics[0]?.subject || 'Mixed',
                         grade: result.predictedTopics[0]?.grade || 'General',
-                        prediction_date: predictionDate.toISOString().split('T')[0], // YYYY-MM-DD
+                        prediction_date: predictionDate.toISOString().split('T')[0],
                         source: "NeoX AI",
                         version: "1.0.0"
                     },
@@ -283,16 +258,13 @@ function AiHubContent() {
 
             if (result.questions.length > 0) {
                 if (user && firestore) {
-                    // Create a new document reference with a unique ID
                     const quizRef = doc(collection(firestore, 'users', user.uid, 'quizzes'));
                     
                     await setDoc(quizRef, {
                         id: quizRef.id,
                         userId: user.uid,
                         createdAt: serverTimestamp(),
-                         // Save the inputs
                         numQuestions: numQuestions,
-                        // Save the results
                         title: result.title,
                         questions: JSON.stringify(result.questions),
                     });
@@ -575,7 +547,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                         {isLimitReached ? (
                             <>
                                 <TriangleAlert className="w-8 h-8 mb-2" />
-                                <p className="text-sm font-semibold">You have reached the maximum of {MAX_DOCUMENTS} files.</p>
+                                <p className="text-sm font-semibold">You have reached the maximum of {MAX_DOCUMENTS} file.</p>
                             </>
                         ) : (
                             <>
@@ -585,7 +557,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                             </>
                         )}
                     </div>
-                    <input id="documents-input" type="file" className="hidden" multiple accept=".pdf" onChange={onFileChange} disabled={isLimitReached} />
+                    <input id="documents-input" type="file" className="hidden" accept=".pdf" onChange={onFileChange} disabled={isLimitReached} />
                 </label>
             </div>
             <div className="space-y-2 pt-2">
@@ -646,7 +618,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                     </div>
                     <div id="ai-hub-form" className="grid grid-cols-1 gap-6 mb-8 max-w-4xl mx-auto">
                         <FileUploadArea 
-                            title="Upload Documents"
+                            title="Upload Document"
                             files={documents}
                             onFileChange={handleFileChange}
                             onRemoveFile={handleRemoveFile}
@@ -1020,3 +992,5 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
+
+    
