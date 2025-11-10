@@ -20,7 +20,7 @@ export async function processQuestions(input: ProcessQuestionsInput): Promise<Pr
 
 const processQuestionsPrompt = ai.definePrompt({
   name: 'processQuestionsPrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-2.5-flash-lite',
   input: { schema: ProcessQuestionsInputSchema },
   output: { schema: ProcessedQuestionSchema.array() },
   prompt: `You are a highly intelligent data processing engine. Your task is to analyze the provided document, which is a question paper, and extract every question into a structured JSON format.

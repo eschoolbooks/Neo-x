@@ -21,7 +21,7 @@ export async function generateQuiz(input: GenerateQuizInput): Promise<Quiz> {
 
 const generateQuizPrompt = ai.definePrompt({
   name: 'generateQuizPrompt',
-  model: 'googleai/gemini-1.5-flash-latest',
+  model: 'googleai/gemini-2.5-flash-lite',
   input: {schema: GenerateQuizInputSchema},
   output: {schema: QuizSchema},
   prompt: `You are Neo X, an AI designed to help students learn. Your task is to generate a multiple-choice quiz based on the provided document(s).
