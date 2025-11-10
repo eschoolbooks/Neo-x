@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
@@ -32,7 +33,7 @@ import { useFirestore } from '@/firebase/provider';
 
 
 const MAX_DOCUMENTS = 1;
-const MAX_FILE_SIZE_MB = 10;
+const MAX_FILE_SIZE_MB = 12;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 
@@ -553,7 +554,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                             <>
                                 <FileUp className="w-8 h-8 mb-2 text-muted-foreground" />
                                 <p className="mb-1 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                <p className="text-xs text-muted-foreground">PDF only, up to {MAX_FILE_SIZE_MB}MB per file</p>
+                                <p className="text-xs text-muted-foreground">PDF only, up to {MAX_FILE_SIZE_MB}MB</p>
                             </>
                         )}
                     </div>
