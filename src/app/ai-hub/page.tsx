@@ -193,20 +193,39 @@ function AiHubContent() {
             });
 
             if (user && firestore) {
-                 // Create a new document reference with a unique ID
+                 // Create a new document reference with a unique ID in the 'analyses' subcollection
                 const analysisRef = doc(collection(firestore, 'users', user.uid, 'analyses'));
                 
-                await setDoc(analysisRef, {
-                    id: analysisRef.id,
-                    userId: user.uid,
-                    analysisDate: serverTimestamp(),
-                    // Save the inputs
-                    examType: examType,
-                    documents: documentDataUris,
-                    // Save the results
-                    predictionResults: JSON.stringify(result.predictedTopics),
-                    studyRecommendations: JSON.stringify(result.studyRecommendations),
-                });
+                const predictionDate = new Date();
+
+                const savedData = {
+                    session: {
+                        user_id: user.uid,
+                        report_id: analysisRef.id,
+                        exam_type: examType,
+                        subject: result.predictedTopics[0]?.subject || 'Mixed',
+                        grade: result.predictedTopics[0]?.grade || 'General',
+                        prediction_date: predictionDate.toISOString().split('T')[0], // YYYY-MM-DD
+                        source: "NeoX AI",
+                        version: "1.0.0"
+                    },
+                    predictions: result.predictedTopics.map(p => ({
+                        topic: p.topic,
+                        details: p.reason,
+                        confidence: p.confidence || 0,
+                        tags: [p.subject, p.grade]
+                    })),
+                    study_recommendations: {
+                        recommendations: result.studyRecommendations
+                    },
+                    meta: {
+                        ai_generated: true,
+                        timestamp: predictionDate.toISOString(),
+                        processing_status: "completed"
+                    }
+                };
+
+                await setDoc(analysisRef, savedData);
             }
             
             setPrediction(result);
@@ -272,7 +291,6 @@ function AiHubContent() {
                         createdAt: serverTimestamp(),
                          // Save the inputs
                         numQuestions: numQuestions,
-                        documents: documentDataUris,
                         // Save the results
                         title: result.title,
                         questions: JSON.stringify(result.questions),
@@ -1001,5 +1019,3 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
-
-    
