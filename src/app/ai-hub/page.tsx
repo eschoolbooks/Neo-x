@@ -199,6 +199,7 @@ function AiHubContent() {
                 const predictionDate = new Date();
 
                 const savedData = {
+                    userId: user.uid,
                     session: {
                         user_id: user.uid,
                         report_id: analysisRef.id,
