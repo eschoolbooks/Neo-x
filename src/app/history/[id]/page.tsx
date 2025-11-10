@@ -13,13 +13,22 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { Quiz, QuizQuestion } from '@/ai/flows/generateQuizSchemas';
-import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 
+type Prediction = {
+    topic: string;
+    details: string;
+    confidence: number;
+    tags: string[];
+}
 
-type AnalysisDoc = PredictExamOutput & {
+type AnalysisDoc = {
     session: {
         exam_type: string;
-    }
+    };
+    predictions: Prediction[];
+    study_recommendations: {
+        recommendations: string[];
+    };
 };
 
 type QuizDoc = {
@@ -123,11 +132,11 @@ export default function HistoryPage() {
                             <div className="space-y-4">
                                 <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
                                 <div className="space-y-4">
-                                    {analysisData.predictedTopics?.map((item, index) => (
+                                    {analysisData.predictions?.map((item, index) => (
                                         <Card key={index} className="bg-background">
                                             <CardHeader className='pb-2'>
                                                 <CardTitle className="text-lg">{item.topic}</CardTitle>
-                                                <CardDescription>{item.reason}</CardDescription>
+                                                <CardDescription>{item.details}</CardDescription>
                                             </CardHeader>
                                             <CardContent>
                                                 <div className='flex items-center gap-2'>
@@ -142,7 +151,7 @@ export default function HistoryPage() {
                             <div className="space-y-4">
                                 <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
                                 <ul className="space-y-3">
-                                    {analysisData.studyRecommendations?.map((rec, index) => (
+                                    {analysisData.study_recommendations?.recommendations.map((rec, index) => (
                                         <li key={index} className="flex items-start gap-3">
                                             <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
                                             <span className="text-muted-foreground">{rec}</span>
