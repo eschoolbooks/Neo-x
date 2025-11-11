@@ -187,8 +187,7 @@ function AiHubContent() {
                 const analysisRef = doc(collection(firestore, 'users', user.uid, 'analyses'));
                 const predictionDate = new Date();
 
-                const savedData = {
-                    userId: user.uid,
+                 const savedData = {
                     session: {
                         user_id: user.uid,
                         report_id: analysisRef.id,
@@ -212,7 +211,8 @@ function AiHubContent() {
                         ai_generated: true,
                         timestamp: predictionDate.toISOString(),
                         processing_status: "completed"
-                    }
+                    },
+                    userId: user.uid, // Ensure userId is at the top level for security rules
                 };
 
                 await setDoc(analysisRef, savedData);
@@ -651,10 +651,9 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                     )}
                     <Card className="max-w-4xl mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
                         <Tabs defaultValue="predictor" className="w-full">
-                            <TabsList className="grid w-full grid-cols-3">
+                            <TabsList className="grid w-full grid-cols-2">
                                 <TabsTrigger value="predictor"><BrainCircuit className="w-4 h-4 mr-2"/>Exam Predictor</TabsTrigger>
                                 <TabsTrigger value="quiz"><FileQuestion className="w-4 h-4 mr-2"/>Quiz Generator</TabsTrigger>
-                                <TabsTrigger value="chat"><MessageSquare className="w-4 h-4 mr-2"/>Chat Tutor</TabsTrigger>
                             </TabsList>
                             <TabsContent value="predictor">
                                 <CardHeader>
@@ -733,20 +732,6 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                             {isGeneratingQuiz ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Generating Quiz...</> : 'Start Quiz'}
                                         </Button>
                                     </form>
-                                </CardContent>
-                            </TabsContent>
-                            <TabsContent value="chat">
-                                <CardHeader>
-                                    <CardTitle>Chat with Neo X</CardTitle>
-                                    <CardDescription>Ask questions, clarify doubts, and get instant help with your studies.</CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <p className="text-center text-muted-foreground">
-                                        Use the chat button in the results header to talk with Neo X anytime!
-                                    </p>
-                                    <div className="flex justify-center mt-4">
-                                        <Button onClick={() => setIsChatOpen(true)}>Open Chat</Button>
-                                    </div>
                                 </CardContent>
                             </TabsContent>
                         </Tabs>
