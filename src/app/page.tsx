@@ -305,7 +305,7 @@ export default function Home() {
                 </p>
                 <div className="flex justify-center items-center gap-6 text-muted-foreground">
                     <a href="mailto:info@e-schoolbooks.in" className="flex items-center gap-2 hover:text-primary"><Mail className="h-5 w-5" /> info@e-schoolbooks.in</a>
-                    <a href="tel:+919946882478" className="flex items-center gap-2 hover:text-primary"><Phone className="h-5 w-5" /> +91 9946882478</a>
+                    <a href="tel:+918281543610" className="flex items-center gap-2 hover:text-primary"><Phone className="h-5 w-5" /> +91-8281543610</a>
                 </div>
                 <div className="mt-8 text-sm text-muted-foreground">
                     © {new Date().getFullYear()} E-SchoolBooks Project by Theo. All Rights Reserved.
