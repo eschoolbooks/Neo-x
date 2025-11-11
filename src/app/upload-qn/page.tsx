@@ -8,13 +8,17 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { LoaderCircle, FileUp, X, BrainCircuit, UploadCloud, ChevronDown } from 'lucide-react';
+import { LoaderCircle, FileUp, X, BrainCircuit, UploadCloud, Search, AlertTriangle, Sparkles, CheckCircle } from 'lucide-react';
 import { processQuestions } from '@/ai/flows/processQuestionsFlow';
 import type { ProcessedQuestion } from '@/ai/flows/processQuestionsSchemas';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useTheme } from 'next-themes';
+import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
+import { collection, query, where, getDocs, addDoc, serverTimestamp, DocumentData } from 'firebase/firestore';
+import { Alert, AlertTitle } from '@/components/ui/alert';
+
 
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -27,11 +31,18 @@ export default function UploadQnPage() {
   const [examType, setExamType] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
+  const [isChecking, setIsChecking] = useState(false);
   const [processedData, setProcessedData] = useState<ProcessedQuestion[] | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const [checkDone, setCheckDone] = useState(false);
+  const [duplicate, setDuplicate] = useState<DocumentData | null>(null);
+  const [allowUpload, setAllowUpload] = useState(false);
+
   const { toast } = useToast();
   const { resolvedTheme } = useTheme();
+  const { user } = useUser();
+  const firestore = useFirestore();
 
   const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
 
@@ -58,20 +69,84 @@ export default function UploadQnPage() {
         setFile(selectedFile);
     }
   };
-
-  const handleRemoveFile = () => {
+  
+  const resetForm = () => {
     setFile(null);
+    setSubject('');
+    setYear('');
+    setGrade('');
+    setExamType('');
+    setIsLoading(false);
+    setIsChecking(false);
+    setProcessedData(null);
+    setError(null);
+    setCheckDone(false);
+    setDuplicate(null);
+    setAllowUpload(false);
+  };
+
+  const handleCheckForDuplicate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!subject || !year || !grade || !examType) {
+        toast({
+            title: 'Missing Information',
+            description: 'Please fill out all fields to check for duplicates.',
+            variant: 'destructive',
+        });
+        return;
+    }
+    if (!firestore) {
+        setError("Could not connect to the database.");
+        return;
+    }
+
+    setIsChecking(true);
+    setError(null);
+    setDuplicate(null);
+    
+    try {
+        const q = query(
+            collection(firestore, "questionPapers"),
+            where("subject", "==", subject),
+            where("year", "==", Number(year)),
+            where("grade", "==", grade),
+            where("examType", "==", examType)
+        );
+
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+            const firstDoc = querySnapshot.docs[0];
+            setDuplicate(firstDoc.data());
+        } else {
+            // No duplicate found, allow upload
+            setAllowUpload(true);
+        }
+
+    } catch (err) {
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred while checking.';
+        setError(errorMessage);
+    } finally {
+        setIsChecking(false);
+        setCheckDone(true);
+    }
   }
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file || !subject || !year || !grade || !examType) {
+    if (!file) {
       toast({
-        title: 'Missing Information',
-        description: 'Please fill out all fields and upload a question paper.',
+        title: 'Missing File',
+        description: 'Please upload a question paper.',
         variant: 'destructive',
       });
       return;
+    }
+
+    if (!firestore || !user) {
+        setError("You must be logged in to upload a question paper.");
+        return;
     }
 
     setIsLoading(true);
@@ -87,11 +162,26 @@ export default function UploadQnPage() {
             grade,
             examType,
         });
+
+        const newPaper = {
+            subject,
+            year: Number(year),
+            grade,
+            examType,
+            questions: result,
+            isQlone: !!duplicate, // Flag as Qlone if a duplicate was found and user proceeded
+            uploadedBy: user.uid,
+            uploadedAt: serverTimestamp(),
+        }
+
+        await addDoc(collection(firestore, 'questionPapers'), newPaper);
+
         setProcessedData(result);
         toast({
-            title: 'Processing Complete',
-            description: `Successfully processed ${result.length} questions.`,
+            title: 'Upload & Processing Complete',
+            description: `Successfully processed and saved ${result.length} questions.`,
         });
+
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       setError(errorMessage);
@@ -104,6 +194,41 @@ export default function UploadQnPage() {
       setIsLoading(false);
     }
   };
+  
+  const FormFields = ({disabled}: {disabled: boolean}) => (
+    <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+            <Label htmlFor="subject">Subject</Label>
+            <Input id="subject" placeholder="e.g., Physics" value={subject} onChange={e => setSubject(e.target.value)} required disabled={disabled}/>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="grade">Class / Grade</Label>
+            <Input id="grade" placeholder="e.g., 12th Grade" value={grade} onChange={e => setGrade(e.target.value)} required disabled={disabled}/>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="year">Year</Label>
+            <Input id="year" type="number" placeholder="e.g., 2023" value={year} onChange={e => setYear(Number(e.target.value))} required disabled={disabled}/>
+        </div>
+            <div className="space-y-2">
+            <Label htmlFor="exam-type">Exam Type</Label>
+            <Select onValueChange={setExamType} value={examType} required disabled={disabled}>
+                <SelectTrigger id="exam-type">
+                    <SelectValue placeholder="Select an exam type..." />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="mid-term">Mid-Term</SelectItem>
+                    <SelectItem value="semester">Semester</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="board">Board</SelectItem>
+                    <SelectItem value="competitive-neet">Competitive (NEET)</SelectItem>
+                    <SelectItem value="competitive-jee">Competitive (JEE)</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+    </div>
+  );
+
 
   return (
     <div className="bg-background text-foreground min-h-screen">
@@ -117,7 +242,6 @@ export default function UploadQnPage() {
                <a href="/" className="hover:text-primary transition-colors">Home</a>
                <a href="/ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
                <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
-               <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
             </div>
             <div className="flex items-center gap-4">
                 <Button asChild className="rounded-full">
@@ -135,51 +259,73 @@ export default function UploadQnPage() {
                 </p>
             </div>
 
-            <Card className="shadow-2xl bg-card/80 backdrop-blur-sm mb-8">
+            {!checkDone && (
+                <Card className="shadow-2xl bg-card/80 backdrop-blur-sm mb-8">
+                    <CardHeader>
+                        <CardTitle>Step 1: Check for Existing Paper</CardTitle>
+                        <CardDescription>First, let's see if this question paper already exists in our database to avoid duplicates.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <form onSubmit={handleCheckForDuplicate} className="space-y-6">
+                            <FormFields disabled={isChecking}/>
+                            <Button type="submit" size="lg" className="w-full" disabled={isChecking}>
+                                {isChecking ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Checking...</> : <><Search className="mr-2 h-4 w-4" />Check for Existing Paper</>}
+                            </Button>
+                        </form>
+                    </CardContent>
+                </Card>
+            )}
+
+            {checkDone && duplicate && !allowUpload && (
+                <Card className='border-amber-500'>
+                    <CardHeader>
+                        <CardTitle className='flex items-center gap-2'><AlertTriangle className='text-amber-500'/>Duplicate Found</CardTitle>
+                        <CardDescription>
+                           A question paper with these details was already uploaded on {new Date(duplicate.uploadedAt?.toDate()).toLocaleDateString()}.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className='space-y-4'>
+                         <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto max-h-60">
+                            {JSON.stringify(duplicate.questions, null, 2)}
+                        </pre>
+                        <Alert>
+                           <Sparkles className="h-4 w-4" />
+                           <AlertTitle>Is your paper different?</AlertTitle>
+                           <p className='text-sm text-muted-foreground'>If this is a different version or a mismatch, you can still proceed. This will flag your upload for review.</p>
+                        </Alert>
+                        <div className='flex gap-4'>
+                            <Button variant="outline" className='w-full' onClick={resetForm}>Go Back</Button>
+                            <Button className='w-full' onClick={() => setAllowUpload(true)}>This is a different paper</Button>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
+            {checkDone && allowUpload && (
+            <Card className="shadow-2xl bg-card/80 backdrop-blur-sm mb-8 border-green-500">
                 <CardHeader>
-                    <CardTitle>Upload a Question Paper</CardTitle>
-                    <CardDescription>Provide the document and its details. The AI will process it into a structured format.</CardDescription>
+                    <CardTitle className='flex items-center gap-2'>
+                        {duplicate ? <><AlertTriangle className='text-amber-500'/> Step 2: Upload New Version</> : <><CheckCircle className='text-green-500'/> Step 2: Upload New Paper</>}
+                    </CardTitle>
+                    <CardDescription>
+                        {duplicate 
+                            ? "Proceeding with a new version upload. This will be flagged as a 'Qlone'."
+                            : "No duplicates found! Please upload the document to train the AI."
+                        }
+                    </CardDescription>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="grid md:grid-cols-2 gap-6">
-                            <div className="space-y-2">
-                                <Label htmlFor="subject">Subject</Label>
-                                <Input id="subject" placeholder="e.g., Physics" value={subject} onChange={e => setSubject(e.target.value)} required />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="grade">Class / Grade</Label>
-                                <Input id="grade" placeholder="e.g., 12th Grade" value={grade} onChange={e => setGrade(e.target.value)} required />
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="year">Year</Label>
-                                <Input id="year" type="number" placeholder="e.g., 2023" value={year} onChange={e => setYear(Number(e.target.value))} required />
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="exam-type">Exam Type</Label>
-                                <Select onValueChange={setExamType} value={examType} required>
-                                    <SelectTrigger id="exam-type">
-                                        <SelectValue placeholder="Select an exam type..." />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="mid-term">Mid-Term</SelectItem>
-                                        <SelectItem value="semester">Semester</SelectItem>
-                                        <SelectItem value="yearly">Yearly</SelectItem>
-                                        <SelectItem value="board">Board</SelectItem>
-                                        <SelectItem value="competitive-neet">Competitive (NEET)</SelectItem>
-                                        <SelectItem value="competitive-jee">Competitive (JEE)</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
+                        <fieldset disabled>
+                            <FormFields disabled={true} />
+                        </fieldset>
 
                         <div className="space-y-2">
                             <Label htmlFor="file-upload">Question Paper Document</Label>
                             {file ? (
                                 <div className="flex items-center justify-between text-sm p-2 bg-muted rounded-md">
                                     <span className="truncate pr-2">{file.name}</span>
-                                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={handleRemoveFile}><X className="h-4 w-4" /></Button>
+                                    <Button type="button" variant="ghost" size="icon" className="h-6 w-6 flex-shrink-0" onClick={() => setFile(null)}><X className="h-4 w-4" /></Button>
                                 </div>
                             ) : (
                                 <label htmlFor="file-upload" className={cn(`flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg transition-colors cursor-pointer bg-card/50 hover:bg-muted border-input`)}>
@@ -193,24 +339,20 @@ export default function UploadQnPage() {
                             )}
                         </div>
 
-                        <Button type="submit" size="lg" className="w-full" disabled={isLoading}>
+                        <Button type="submit" size="lg" className="w-full" disabled={isLoading || !file}>
                             {isLoading ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Processing...</> : <><BrainCircuit className="mr-2 h-4 w-4" />Process & Train</>}
                         </Button>
+                        <Button variant="link" className='w-full' onClick={resetForm}>Start Over</Button>
                     </form>
                 </CardContent>
             </Card>
-
-            {isLoading && (
-                <div className="text-center p-8">
-                    <LoaderCircle className="h-12 w-12 mx-auto animate-spin text-primary mb-4" />
-                    <p className="text-muted-foreground">Neo X is analyzing the document... Please wait.</p>
-                </div>
             )}
+
 
             {error && (
                 <Card className="border-destructive">
                     <CardHeader>
-                        <CardTitle className="text-destructive">Processing Failed</CardTitle>
+                        <CardTitle className="text-destructive">An Error Occurred</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <p>{error}</p>
@@ -222,15 +364,16 @@ export default function UploadQnPage() {
               <>
                 <Card>
                     <CardHeader>
-                        <CardTitle>Processed TOON Data</CardTitle>
+                        <CardTitle>Processing Complete!</CardTitle>
                         <CardDescription>
-                            Here is the structured data extracted from the document. This data will be used for training.
+                            Here is the structured TOON data extracted from the document. Thank you for helping train Neo X!
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
                         <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
                             {JSON.stringify(processedData, null, 2)}
                         </pre>
+                        <Button onClick={resetForm} className="w-full mt-4">Upload Another</Button>
                     </CardContent>
                 </Card>
                 <Accordion type="single" collapsible className="w-full mt-8">
