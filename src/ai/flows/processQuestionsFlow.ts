@@ -61,14 +61,11 @@ const processQuestionsFlow = ai.defineFlow(
     if (!output) {
       throw new Error("The AI model did not return a structured question array.");
     }
-    // Augment the output with the metadata provided in the input
-    const augmentedOutput = output.map(q => ({
-      ...q,
-      subject: input.subject,
-      year: input.year,
-      grade: input.grade,
-      examType: input.examType,
-    }));
-    return augmentedOutput;
+    // The AI is already tasked with populating these fields.
+    // This mapping step is redundant if the prompt is followed correctly.
+    // If issues arise, this is where to augment the AI output.
+    return output;
   }
 );
+
+    

@@ -107,6 +107,8 @@ export default function UploadQnPage() {
   const [checkDone, setCheckDone] = useState(false);
   const [duplicate, setDuplicate] = useState<DocumentData | null>(null);
   const [allowUpload, setAllowUpload] = useState(false);
+  const [showDuplicatePreview, setShowDuplicatePreview] = useState(false);
+
 
   const { toast } = useToast();
   const { resolvedTheme } = useTheme();
@@ -153,6 +155,7 @@ export default function UploadQnPage() {
     setCheckDone(false);
     setDuplicate(null);
     setAllowUpload(false);
+    setShowDuplicatePreview(false);
   };
 
   const getFinalExamType = () => {
@@ -245,7 +248,7 @@ export default function UploadQnPage() {
             year: Number(year),
             grade,
             examType: finalExamType,
-            questions: result,
+            questions: JSON.stringify(result), // Store questions as a JSON string
             isQlone: !!duplicate, // Flag as Qlone if a duplicate was found and user proceeded
             uploadedBy: user.uid,
             uploadedAt: serverTimestamp(),
@@ -328,23 +331,58 @@ export default function UploadQnPage() {
                 </Card>
             )}
 
-            {!processedData && checkDone && duplicate && !allowUpload && (
+            {!processedData && checkDone && duplicate && !allowUpload && !showDuplicatePreview && (
                 <Card className='border-amber-500'>
                     <CardHeader>
-                        <CardTitle className='flex items-center gap-2'><AlertTriangle className='text-amber-500'/>Duplicate Found</CardTitle>
+                        <CardTitle className='flex items-center gap-2'><AlertTriangle className='text-amber-500'/>Similar Paper Found</CardTitle>
                         <CardDescription>
-                           A question paper with these details was already uploaded on {new Date(duplicate.uploadedAt?.toDate()).toLocaleDateString()}.
+                           A question paper with these details already exists. Please review it to ensure you are not uploading a duplicate.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className='space-y-4'>
-                        <Alert>
+                    <CardContent className='flex gap-4'>
+                        <Button variant="outline" className='w-full' onClick={resetForm}>Start Over</Button>
+                        <Button className='w-full' onClick={() => setShowDuplicatePreview(true)}>Review Existing Paper</Button>
+                    </CardContent>
+                </Card>
+            )}
+
+            {!processedData && showDuplicatePreview && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Existing Question Paper</CardTitle>
+                        <CardDescription>
+                            This paper was uploaded on {new Date(duplicate.uploadedAt?.toDate()).toLocaleDateString()}. Please review the questions below.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                       <Accordion type="single" collapsible className="w-full max-h-[400px] overflow-y-auto pr-4">
+                            {(typeof duplicate.questions === 'string' ? JSON.parse(duplicate.questions) : duplicate.questions).map((q: ProcessedQuestion, index: number) => (
+                                <AccordionItem value={`item-${index}`} key={index}>
+                                    <AccordionTrigger>{`Question ${index + 1}: ${q.questionText.substring(0, 80)}...`}</AccordionTrigger>
+                                    <AccordionContent className="space-y-4">
+                                        <p className="font-semibold text-foreground">{q.questionText}</p>
+                                        {q.options && q.options.length > 0 && (
+                                            <div>
+                                                <h4 className="font-medium text-sm mb-2">Options:</h4>
+                                                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                                                    {q.options.map((opt, i) => <li key={i}>{opt}</li>)}
+                                                </ul>
+                                            </div>
+                                        )}
+                                        {q.correctAnswer && <p><strong>Correct Answer:</strong> {q.correctAnswer}</p>}
+                                        {q.marks && <p><strong>Marks:</strong> {q.marks}</p>}
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
+                        <Alert className="mt-6">
                            <Sparkles className="h-4 w-4" />
                            <AlertTitle>Is your paper different?</AlertTitle>
-                           <AlertDescription>If this is a different version or a mismatch, you can still proceed. This will flag your upload for review.</AlertDescription>
+                           <AlertDescription>If your paper has different questions, formatting, or is for a different session, please proceed.</AlertDescription>
                         </Alert>
-                        <div className='flex gap-4'>
+                        <div className='flex gap-4 mt-6'>
                             <Button variant="outline" className='w-full' onClick={resetForm}>Start Over</Button>
-                            <Button className='w-full' onClick={() => setAllowUpload(true)}>This is a different paper</Button>
+                            <Button className='w-full' onClick={() => { setAllowUpload(true); setShowDuplicatePreview(false); }}>This is a different paper</Button>
                         </div>
                     </CardContent>
                 </Card>
