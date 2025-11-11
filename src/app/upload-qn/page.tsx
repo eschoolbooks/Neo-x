@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,9 +13,8 @@ import { processQuestions } from '@/ai/flows/processQuestionsFlow';
 import type { ProcessedQuestion } from '@/ai/flows/processQuestionsSchemas';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { useTheme } from 'next-themes';
-import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
+import { useUser, useFirestore } from '@/firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, DocumentData } from 'firebase/firestore';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { motion } from 'framer-motion';
@@ -284,20 +283,17 @@ export default function UploadQnPage() {
             <CardDescription>{description}</CardDescription>
         </CardHeader>
         <CardContent>
-            <ScrollArea className="max-h-[60vh] pr-4">
+            <ScrollArea className="h-[60vh] pr-4">
                 <div className="space-y-6">
                     {questions.map((q: ProcessedQuestion, index: number) => (
-                        <Card key={index} className="bg-muted/50">
+                        <Card key={index} className="bg-muted/50 overflow-hidden">
                             <CardHeader>
-                                <div className="flex justify-between items-start">
-                                    <div className="flex items-start gap-4">
-                                        <div className="flex-shrink-0 h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">{index + 1}</div>
-                                        <p className="font-semibold text-foreground pt-1">{q.questionText}</p>
-                                    </div>
-                                    {q.marks && <Badge variant="secondary">{q.marks} Mark{q.marks > 1 ? 's' : ''}</Badge>}
+                                <div className="flex items-start gap-4">
+                                    <div className="flex-shrink-0 h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">{index + 1}</div>
+                                    <p className="font-semibold text-foreground pt-1">{q.questionText}</p>
                                 </div>
                             </CardHeader>
-                            {q.options && q.options.length > 0 && (
+                            {(q.options && q.options.length > 0) && (
                                 <CardContent>
                                     <div className="space-y-2 mt-2 pl-12">
                                         <h4 className="font-medium text-sm text-muted-foreground">Options:</h4>
@@ -308,6 +304,11 @@ export default function UploadQnPage() {
                                     {q.correctAnswer && <p className="text-sm mt-3 pl-12"><strong>Correct Answer:</strong> {q.correctAnswer}</p>}
                                 </CardContent>
                             )}
+                             {q.marks && (
+                                <CardFooter>
+                                    <Badge variant="secondary">{q.marks} Mark{q.marks > 1 ? 's' : ''}</Badge>
+                                </CardFooter>
+                             )}
                         </Card>
                     ))}
                 </div>
@@ -330,6 +331,7 @@ export default function UploadQnPage() {
                <a href="/" className="hover:text-primary transition-colors">Home</a>
                <a href="/ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
                <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
+                <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
             </div>
             <div className="flex items-center gap-4">
                 <Button asChild className="rounded-full">
@@ -388,7 +390,7 @@ export default function UploadQnPage() {
                 </Card>
             )}
 
-            {!processedData && showDuplicatePreview && (
+            {!processedData && showDuplicatePreview && duplicate && (
                  <Card>
                     <CardHeader>
                         <CardTitle>Existing Question Paper</CardTitle>
@@ -536,7 +538,7 @@ export default function UploadQnPage() {
                         <TabsContent value="json" className="pt-4">
                              <Card>
                                 <CardContent className="p-0">
-                                    <ScrollArea className="max-h-[60vh]">
+                                    <ScrollArea className="h-[60vh]">
                                         <pre className="bg-muted/30 p-4 rounded-lg text-xs overflow-x-auto">
                                             {JSON.stringify(processedData, null, 2)}
                                         </pre>
