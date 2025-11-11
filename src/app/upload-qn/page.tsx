@@ -17,8 +17,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { useTheme } from 'next-themes';
 import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, DocumentData } from 'firebase/firestore';
-import { Alert, AlertTitle } from '@/components/ui/alert';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { motion } from 'framer-motion';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 
 const MAX_FILE_SIZE_MB = 10;
@@ -294,14 +295,16 @@ export default function UploadQnPage() {
       </header>
       <main className="container mx-auto py-10 lg:py-16 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-12">
-                <h1 className="text-4xl font-extrabold tracking-tighter mb-4">AI Training Ground</h1>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                    Upload question papers to train our AI. Your contributions help Neo X become smarter and more accurate for everyone.
-                </p>
-            </div>
+            {!processedData && (
+                <div className="text-center mb-12">
+                    <h1 className="text-4xl font-extrabold tracking-tighter mb-4">AI Training Ground</h1>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Upload question papers to train our AI. Your contributions help Neo X become smarter and more accurate for everyone.
+                    </p>
+                </div>
+            )}
 
-            {!checkDone && (
+            {!processedData && !checkDone && (
                 <Card className="shadow-2xl bg-card/80 backdrop-blur-sm mb-8">
                     <CardHeader>
                         <CardTitle>Step 1: Check for Existing Paper</CardTitle>
@@ -325,7 +328,7 @@ export default function UploadQnPage() {
                 </Card>
             )}
 
-            {checkDone && duplicate && !allowUpload && (
+            {!processedData && checkDone && duplicate && !allowUpload && (
                 <Card className='border-amber-500'>
                     <CardHeader>
                         <CardTitle className='flex items-center gap-2'><AlertTriangle className='text-amber-500'/>Duplicate Found</CardTitle>
@@ -334,23 +337,20 @@ export default function UploadQnPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent className='space-y-4'>
-                         <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto max-h-60">
-                            {JSON.stringify(duplicate.questions, null, 2)}
-                        </pre>
                         <Alert>
                            <Sparkles className="h-4 w-4" />
                            <AlertTitle>Is your paper different?</AlertTitle>
-                           <p className='text-sm text-muted-foreground'>If this is a different version or a mismatch, you can still proceed. This will flag your upload for review.</p>
+                           <AlertDescription>If this is a different version or a mismatch, you can still proceed. This will flag your upload for review.</AlertDescription>
                         </Alert>
                         <div className='flex gap-4'>
-                            <Button variant="outline" className='w-full' onClick={resetForm}>Go Back</Button>
+                            <Button variant="outline" className='w-full' onClick={resetForm}>Start Over</Button>
                             <Button className='w-full' onClick={() => setAllowUpload(true)}>This is a different paper</Button>
                         </div>
                     </CardContent>
                 </Card>
             )}
 
-            {checkDone && allowUpload && (
+            {!processedData && checkDone && allowUpload && (
             <Card className="shadow-2xl bg-card/80 backdrop-blur-sm mb-8 border-green-500">
                 <CardHeader>
                     <CardTitle className='flex items-center gap-2'>
@@ -404,6 +404,22 @@ export default function UploadQnPage() {
             </Card>
             )}
 
+            {isLoading && (
+                 <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><LoaderCircle className="animate-spin" /> Processing...</CardTitle>
+                        <CardDescription>
+                            The AI is analyzing your document. This may take a moment.
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-4">
+                        <Skeleton className="h-24 w-full" />
+                        <Skeleton className="h-16 w-full" />
+                        <Skeleton className="h-20 w-full" />
+                    </CardContent>
+                </Card>
+            )}
+
 
             {error && (
                 <Card className="border-destructive">
@@ -412,66 +428,63 @@ export default function UploadQnPage() {
                     </CardHeader>
                     <CardContent>
                         <p>{error}</p>
+                         <Button onClick={resetForm} className="w-full mt-4">Try Again</Button>
                     </CardContent>
                 </Card>
             )}
 
             {processedData && (
-              <>
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Processing Complete!</CardTitle>
-                        <CardDescription>
-                            Here is the structured TOON data extracted from the document. Thank you for helping train Neo X!
-                        </CardDescription>
+                    <CardHeader className="flex flex-row items-center justify-between">
+                        <div>
+                            <CardTitle>Processing Complete!</CardTitle>
+                            <CardDescription>
+                                Thank you for helping train Neo X! Here is the extracted data.
+                            </CardDescription>
+                        </div>
+                        <Button onClick={resetForm}>Upload Another</Button>
                     </CardHeader>
                     <CardContent>
-                        <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto">
-                            {JSON.stringify(processedData, null, 2)}
-                        </pre>
-                        <Button onClick={resetForm} className="w-full mt-4">Upload Another</Button>
+                       <Tabs defaultValue="formatted" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="formatted">Formatted View</TabsTrigger>
+                                <TabsTrigger value="json">JSON View</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="formatted" className="pt-4">
+                                <Accordion type="single" collapsible className="w-full">
+                                    {processedData.map((q, index) => (
+                                        <AccordionItem value={`item-${index}`} key={index}>
+                                            <AccordionTrigger>{`Question ${index + 1}: ${q.questionText.substring(0, 80)}...`}</AccordionTrigger>
+                                            <AccordionContent className="space-y-4">
+                                                <p className="font-semibold text-foreground">{q.questionText}</p>
+                                                {q.options && q.options.length > 0 && (
+                                                    <div>
+                                                        <h4 className="font-medium text-sm mb-2">Options:</h4>
+                                                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                                                            {q.options.map((opt, i) => <li key={i}>{opt}</li>)}
+                                                        </ul>
+                                                    </div>
+                                                )}
+                                                {q.correctAnswer && <p><strong>Correct Answer:</strong> {q.correctAnswer}</p>}
+                                                {q.marks && <p><strong>Marks:</strong> {q.marks}</p>}
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    ))}
+                                </Accordion>
+                            </TabsContent>
+                            <TabsContent value="json" className="pt-4">
+                                <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto max-h-[600px]">
+                                    {JSON.stringify(processedData, null, 2)}
+                                </pre>
+                            </TabsContent>
+                        </Tabs>
                     </CardContent>
                 </Card>
-                <Accordion type="single" collapsible className="w-full mt-8">
-                  <AccordionItem value="item-1">
-                    <AccordionTrigger>
-                      <span className="font-semibold text-lg flex items-center gap-2">
-                        <BrainCircuit className="h-5 w-5" />
-                        Learn more about what just happened
-                      </span>
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground space-y-4 pt-2">
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-1">What is the AI Training Ground?</h4>
-                        <p>
-                          This page is the heart of our community-driven AI improvement process. By uploading question papers, you are directly contributing valuable data that helps Neo X become more intelligent and more accurate. Each document you provide is a new learning opportunity for our AI.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-1">How is the AI Trained?</h4>
-                        <p>
-                          When you upload a document, our AI (powered by Google's Gemini model) analyzes the content. It doesn't just read the text; it understands the structure of the questions, options, and metadata. It then converts this unstructured information into a perfectly organized format called TOON. This clean, structured data is then used in future training cycles to improve the AI's ability to predict exam questions, generate quizzes, and answer your questions.
-                        </p>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-foreground mb-1">What is TOON?</h4>
-                        <p>
-                          <strong>TOON</strong> stands for <strong>Token Oriented Object Notation</strong>. It's a custom, highly structured data format we designed, similar to JSON. Instead of just raw text, TOON organizes every piece of information into a specific "token"—like `questionText`, `subject`, `year`, and `correctAnswer`.
-                        </p>
-                      </div>
-                       <div>
-                        <h4 className="font-semibold text-foreground mb-1">Why is TOON Important?</h4>
-                        <p>
-                          Computers and AI models thrive on structure. A simple PDF or text file is messy and inconsistent. By converting documents into the strict TOON format, we create a clean, reliable, and standardized dataset. This is the single most important step for effective AI training, as it allows the model to learn patterns and relationships from the data far more efficiently. Your contributions create the high-quality fuel that powers our AI.
-                        </p>
-                      </div>
-                    </AccordionContent>
-                  </AccordionItem>
-                </Accordion>
-              </>
             )}
         </div>
       </main>
     </div>
   );
 }
+
+    
