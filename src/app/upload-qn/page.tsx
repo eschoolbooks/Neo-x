@@ -264,7 +264,7 @@ export default function UploadQnPage() {
             description: `Successfully processed and saved ${result.length} questions.`,
         });
 
-    } catch (err) => {
+    } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       setError(errorMessage);
       toast({
@@ -552,5 +552,3 @@ export default function UploadQnPage() {
     </div>
   );
 }
-
-    
