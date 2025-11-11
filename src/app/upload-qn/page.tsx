@@ -383,7 +383,7 @@ export default function UploadQnPage() {
                            A question paper with these details already exists. Please review it to ensure you are not uploading a duplicate.
                         </CardDescription>
                     </CardHeader>
-                    <CardContent className='flex gap-4'>
+                    <CardContent className='flex flex-col sm:flex-row gap-4'>
                         <Button variant="outline" className='w-full' onClick={resetForm}>Start Over</Button>
                         <Button className='w-full' onClick={() => setShowDuplicatePreview(true)}>Review Existing Paper</Button>
                     </CardContent>
@@ -392,11 +392,14 @@ export default function UploadQnPage() {
 
             {!processedData && showDuplicatePreview && duplicate && (
                  <Card>
-                    <CardHeader>
-                        <CardTitle>Existing Question Paper</CardTitle>
-                        <CardDescription>
-                            This paper was uploaded on {new Date(duplicate.uploadedAt?.toDate()).toLocaleDateString()}. Please review the questions below.
-                        </CardDescription>
+                    <CardHeader className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                        <div>
+                            <CardTitle>Existing Question Paper</CardTitle>
+                            <CardDescription>
+                                This paper was uploaded on {new Date(duplicate.uploadedAt?.toDate()).toLocaleDateString()}. Please review the questions below.
+                            </CardDescription>
+                        </div>
+                         <Button variant="outline" className='w-full sm:w-auto' onClick={resetForm}>Go Back</Button>
                     </CardHeader>
                     <CardContent>
                         <QuestionList
@@ -425,8 +428,7 @@ export default function UploadQnPage() {
                            </AlertDescription>
                         </Alert>
                         <div className='flex flex-col gap-4 mt-6'>
-                            <Button className='w-full' onClick={() => { setAllowUpload(true); setShowDuplicatePreview(false); }}>This is a different paper, let me upload</Button>
-                            <Button variant="outline" className='w-full' onClick={resetForm}>Go Back</Button>
+                            <Button className='w-full' onClick={() => { setAllowUpload(true); setShowDuplicatePreview(false); }}>Upload New Version</Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -554,3 +556,5 @@ export default function UploadQnPage() {
     </div>
   );
 }
+
+    
