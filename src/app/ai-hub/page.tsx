@@ -301,7 +301,7 @@ function AiHubContent() {
                 });
                 setShowUpload(true);
             }
-        } catch (err) => {
+        } catch (err) {
             const errorMessage = err instanceof Error ? err.message : 'An unexpected response was received from the server.';
             setQuizError(errorMessage);
             setShowUpload(true);
