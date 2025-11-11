@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { LoaderCircle, FileUp, X, BrainCircuit, UploadCloud, Search, AlertTriangle, Sparkles, CheckCircle } from 'lucide-react';
+import { LoaderCircle, FileUp, X, BrainCircuit, UploadCloud, Search, AlertTriangle, Sparkles, CheckCircle, Lightbulb } from 'lucide-react';
 import { processQuestions } from '@/ai/flows/processQuestionsFlow';
 import type { ProcessedQuestion } from '@/ai/flows/processQuestionsSchemas';
 import Image from 'next/image';
@@ -20,6 +20,8 @@ import { collection, query, where, getDocs, addDoc, serverTimestamp, DocumentDat
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { motion } from 'framer-motion';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 
 const MAX_FILE_SIZE_MB = 10;
@@ -262,7 +264,7 @@ export default function UploadQnPage() {
             description: `Successfully processed and saved ${result.length} questions.`,
         });
 
-    } catch (err) {
+    } catch (err) => {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
       setError(errorMessage);
       toast({
@@ -274,6 +276,46 @@ export default function UploadQnPage() {
       setIsLoading(false);
     }
   };
+  
+  const QuestionList = ({ questions, title, description }: { questions: ProcessedQuestion[], title: string, description: string }) => (
+    <Card>
+        <CardHeader>
+            <CardTitle>{title}</CardTitle>
+            <CardDescription>{description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+            <ScrollArea className="max-h-[60vh] pr-4">
+                <div className="space-y-6">
+                    {questions.map((q: ProcessedQuestion, index: number) => (
+                        <Card key={index} className="bg-muted/50">
+                            <CardHeader>
+                                <div className="flex justify-between items-start">
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex-shrink-0 h-8 w-8 rounded-md bg-primary text-primary-foreground flex items-center justify-center font-bold">{index + 1}</div>
+                                        <p className="font-semibold text-foreground pt-1">{q.questionText}</p>
+                                    </div>
+                                    {q.marks && <Badge variant="secondary">{q.marks} Mark{q.marks > 1 ? 's' : ''}</Badge>}
+                                </div>
+                            </CardHeader>
+                            {q.options && q.options.length > 0 && (
+                                <CardContent>
+                                    <div className="space-y-2 mt-2 pl-12">
+                                        <h4 className="font-medium text-sm text-muted-foreground">Options:</h4>
+                                        <ul className="list-disc list-inside space-y-1 text-sm">
+                                            {q.options.map((opt, i) => <li key={i}>{opt}</li>)}
+                                        </ul>
+                                    </div>
+                                    {q.correctAnswer && <p className="text-sm mt-3 pl-12"><strong>Correct Answer:</strong> {q.correctAnswer}</p>}
+                                </CardContent>
+                            )}
+                        </Card>
+                    ))}
+                </div>
+            </ScrollArea>
+        </CardContent>
+    </Card>
+);
+
 
 
   return (
@@ -355,34 +397,34 @@ export default function UploadQnPage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                       <Accordion type="single" collapsible className="w-full max-h-[400px] overflow-y-auto pr-4">
-                            {(typeof duplicate.questions === 'string' ? JSON.parse(duplicate.questions) : duplicate.questions).map((q: ProcessedQuestion, index: number) => (
-                                <AccordionItem value={`item-${index}`} key={index}>
-                                    <AccordionTrigger>{`Question ${index + 1}: ${q.questionText.substring(0, 80)}...`}</AccordionTrigger>
-                                    <AccordionContent className="space-y-4">
-                                        <p className="font-semibold text-foreground">{q.questionText}</p>
-                                        {q.options && q.options.length > 0 && (
-                                            <div>
-                                                <h4 className="font-medium text-sm mb-2">Options:</h4>
-                                                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                                                    {q.options.map((opt, i) => <li key={i}>{opt}</li>)}
-                                                </ul>
-                                            </div>
-                                        )}
-                                        {q.correctAnswer && <p><strong>Correct Answer:</strong> {q.correctAnswer}</p>}
-                                        {q.marks && <p><strong>Marks:</strong> {q.marks}</p>}
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
-                        <Alert className="mt-6">
-                           <Sparkles className="h-4 w-4" />
-                           <AlertTitle>Is your paper different?</AlertTitle>
-                           <AlertDescription>If your paper has different questions, formatting, or is for a different session, please proceed.</AlertDescription>
+                        <QuestionList
+                            questions={typeof duplicate.questions === 'string' ? JSON.parse(duplicate.questions) : duplicate.questions}
+                            title=""
+                            description=""
+                        />
+
+                        <Alert className="mt-6 border-blue-500" variant="default">
+                           <Lightbulb className="h-4 w-4" />
+                           <AlertTitle>Re-upload Guidelines</AlertTitle>
+                           <AlertDescription>
+                                <p className="mb-2">Do **not** re-upload if:</p>
+                                <ul className="list-disc list-inside text-xs space-y-1 pl-2">
+                                    <li>Questions are the same but rearranged.</li>
+                                    <li>Only the formatting (font, spacing, numbering) has changed.</li>
+                                    <li>It's just a different file type (e.g., PDF vs. Word) of the same paper.</li>
+                                    <li>There are only minor grammatical corrections.</li>
+                                </ul>
+                                <p className="mt-3 mb-2">You **should** re-upload if:</p>
+                                <ul className="list-disc list-inside text-xs space-y-1 pl-2">
+                                    <li>New or corrected questions have been added.</li>
+                                    <li>There are major content revisions.</li>
+                                    <li>Answer options or the mark scheme have been modified.</li>
+                                </ul>
+                           </AlertDescription>
                         </Alert>
-                        <div className='flex gap-4 mt-6'>
-                            <Button variant="outline" className='w-full' onClick={resetForm}>Start Over</Button>
-                            <Button className='w-full' onClick={() => { setAllowUpload(true); setShowDuplicatePreview(false); }}>This is a different paper</Button>
+                        <div className='flex flex-col gap-4 mt-6'>
+                            <Button className='w-full' onClick={() => { setAllowUpload(true); setShowDuplicatePreview(false); }}>This is a different paper, let me upload</Button>
+                            <Button variant="outline" className='w-full' onClick={resetForm}>Go Back</Button>
                         </div>
                     </CardContent>
                 </Card>
@@ -472,52 +514,38 @@ export default function UploadQnPage() {
             )}
 
             {processedData && (
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between">
-                        <div>
-                            <CardTitle>Processing Complete!</CardTitle>
-                            <CardDescription>
-                                Thank you for helping train Neo X! Here is the extracted data.
-                            </CardDescription>
-                        </div>
+                <div>
+                     <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-2xl font-bold">Processing Complete!</h2>
                         <Button onClick={resetForm}>Upload Another</Button>
-                    </CardHeader>
-                    <CardContent>
-                       <Tabs defaultValue="formatted" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2">
-                                <TabsTrigger value="formatted">Formatted View</TabsTrigger>
-                                <TabsTrigger value="json">JSON View</TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="formatted" className="pt-4">
-                                <Accordion type="single" collapsible className="w-full">
-                                    {processedData.map((q, index) => (
-                                        <AccordionItem value={`item-${index}`} key={index}>
-                                            <AccordionTrigger>{`Question ${index + 1}: ${q.questionText.substring(0, 80)}...`}</AccordionTrigger>
-                                            <AccordionContent className="space-y-4">
-                                                <p className="font-semibold text-foreground">{q.questionText}</p>
-                                                {q.options && q.options.length > 0 && (
-                                                    <div>
-                                                        <h4 className="font-medium text-sm mb-2">Options:</h4>
-                                                        <ul className="list-disc list-inside space-y-1 text-muted-foreground">
-                                                            {q.options.map((opt, i) => <li key={i}>{opt}</li>)}
-                                                        </ul>
-                                                    </div>
-                                                )}
-                                                {q.correctAnswer && <p><strong>Correct Answer:</strong> {q.correctAnswer}</p>}
-                                                {q.marks && <p><strong>Marks:</strong> {q.marks}</p>}
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    ))}
-                                </Accordion>
-                            </TabsContent>
-                            <TabsContent value="json" className="pt-4">
-                                <pre className="bg-muted p-4 rounded-lg text-xs overflow-x-auto max-h-[600px]">
-                                    {JSON.stringify(processedData, null, 2)}
-                                </pre>
-                            </TabsContent>
-                        </Tabs>
-                    </CardContent>
-                </Card>
+                    </div>
+                     <p className="text-muted-foreground mb-4">Thank you for helping train Neo X! Here is the extracted data.</p>
+               
+                    <Tabs defaultValue="formatted" className="w-full">
+                        <TabsList className="grid w-full grid-cols-2">
+                            <TabsTrigger value="formatted">Formatted View</TabsTrigger>
+                            <TabsTrigger value="json">JSON View</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="formatted" className="pt-4">
+                            <QuestionList 
+                                questions={processedData}
+                                title=""
+                                description=""
+                            />
+                        </TabsContent>
+                        <TabsContent value="json" className="pt-4">
+                             <Card>
+                                <CardContent className="p-0">
+                                    <ScrollArea className="max-h-[60vh]">
+                                        <pre className="bg-muted/30 p-4 rounded-lg text-xs overflow-x-auto">
+                                            {JSON.stringify(processedData, null, 2)}
+                                        </pre>
+                                    </ScrollArea>
+                                </CardContent>
+                            </Card>
+                        </TabsContent>
+                    </Tabs>
+                </div>
             )}
         </div>
       </main>
