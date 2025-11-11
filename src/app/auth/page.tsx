@@ -168,7 +168,7 @@ function AuthForm() {
       <Card className="w-full max-w-md mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl flex items-center justify-center gap-2">
-            <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={32} height={32} />
+            <Image src="/NeoX_Logo_Dark.svg" alt="NeoX Logo" width={32} height={32} />
             E-SchoolBooks
           </CardTitle>
           <CardDescription>Sign in or create an account to continue</CardDescription>

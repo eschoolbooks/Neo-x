@@ -106,8 +106,8 @@ export default function UploadQnPage() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
             <a href="/" className="flex items-center gap-2">
-                <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={40} height={40}/>
-                <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
+                <Image src="/NeoX_Logo_Dark.svg" alt="NeoX Logo" width={40} height={40}/>
+                <span className="font-bold text-xl text-foreground">Neo X</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
                <a href="/" className="hover:text-primary transition-colors">Home</a>

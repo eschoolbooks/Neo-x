@@ -600,8 +600,8 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
             <nav className="flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-4">
                 <a href="/" className="flex items-center gap-2">
-                  <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={40} height={40}/>
-                  <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
+                  <Image src="/NeoX_Logo_Dark.svg" alt="NeoX Logo" width={40} height={40}/>
+                  <span className="font-bold text-xl text-foreground">Neo X</span>
                 </a>
               </div>
               <div className="flex items-center gap-2">

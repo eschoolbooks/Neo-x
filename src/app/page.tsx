@@ -52,8 +52,8 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex items-center gap-2">
-            <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={40} height={40} />
-            <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
+            <Image src="/NeoX_Logo_Dark.svg" alt="NeoX Logo" width={40} height={40} />
+            <span className="font-bold text-xl text-foreground">Neo X</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
             <a href="/ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
@@ -298,7 +298,7 @@ export default function Home() {
         {/* Contact Section */}
         <footer id="contact" className="py-16 bg-background border-t border-border/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={80} height={80} className="mx-auto mb-4"/>
+                <Image src="/NeoX_Logo_Dark.svg" alt="NeoX Logo" width={80} height={80} className="mx-auto mb-4"/>
                 <h2 className="text-2xl font-bold mb-2">Join Us on This Journey</h2>
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
