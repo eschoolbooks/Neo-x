@@ -298,7 +298,7 @@ export default function Home() {
         {/* Contact Section */}
         <footer id="contact" className="py-16 bg-background border-t border-border/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={80} height={80} className="rounded-full mx-auto mb-4"/>
+                <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={80} height={80} className="mx-auto mb-4"/>
                 <h2 className="text-2xl font-bold mb-2">Join Us on This Journey</h2>
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
