@@ -35,7 +35,7 @@ const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.Re
       }}
       className="text-center"
     >
-      <div className="text-primary mx-auto mb-4">{icon}</div>
+      <div className="text-primary mx-auto mb-4 flex justify-center">{icon}</div>
       <div className="text-4xl md:text-5xl font-extrabold text-foreground">
         {didAnimate && <CountUp end={value} duration={duration} separator="," />}
         {suffix}
