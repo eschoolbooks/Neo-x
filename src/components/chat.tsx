@@ -78,7 +78,7 @@ export function Chat({
             {/* Header */}
             <header className="flex items-center justify-between p-4 border-b border-border/50">
                 <div className="flex items-center gap-3">
-                    {logoUrl && <Image src={logoUrl} alt="Logo" width={32} height={32} className="rounded-full"/>}
+                    {logoUrl && <Image src={logoUrl} alt="Logo" width={32} height={32}/>}
                     <div>
                         <h2 className="font-bold text-lg">{title}</h2>
                         {description && <p className="text-xs text-muted-foreground">{description}</p>}

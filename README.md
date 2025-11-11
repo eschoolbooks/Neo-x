@@ -4,7 +4,7 @@
 **Neo X** is a powerful, experimental AI exam forecasting assistant developed by **E-SchoolBooks**, a non-profit educational ecosystem. Our core mission is to create a world where learning is accessible, sustainable, and free from physical and financial burdens. E-SchoolBooks is a crowdfunded NGO dedicated to helping students achieve high marks, improve their skills, and find pathways to successful careers. Neo X is the technological spearhead of this mission, leveraging generative AI to provide students with intelligent tools to excel in their studies. Unlike other educational tools, our entire initiative is driven by community support, ensuring that our resources remain free for every student, forever.
 
 <div align="center">
-  <a href="https://github.com/sponsors/your-github-username">
+  <a href="https://github.com/sponsors/eschoolbooks">
     <img src="https://img.shields.io/badge/Support%20Our%20Mission-%E2%9D%A4%EF%B8%8F%20Donate-brightgreen?style=for-the-badge&logo=github-sponsors" alt="Donate to E-SchoolBooks">
   </a>
 </div>

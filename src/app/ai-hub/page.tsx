@@ -411,7 +411,7 @@ function AiHubContent() {
                 }
             };
             
-            const logo = "https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8";
+            const logo = "/NeoX_Logo_Dark.svg";
             pdf.addImage(logo, 'PNG', margin, margin, 30, 30);
             
             pdf.setFontSize(26);
@@ -600,7 +600,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
             <nav className="flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-4">
                 <a href="/" className="flex items-center gap-2">
-                  <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="E-SchoolBooks Logo" width={40} height={40} className="rounded-full"/>
+                  <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={40} height={40}/>
                   <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
                 </a>
               </div>
@@ -984,7 +984,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                     isSending={isChatting}
                     title="Chat with Neo X"
                     description={documents.length > 0 ? "Ask me anything about the uploaded documents!" : "Upload some documents to start chatting."}
-                    logoUrl="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8"
+                    logoUrl="/NeoX_Logo_Dark.svg"
                 />
             </div>
           </main>

@@ -1,8 +1,8 @@
-# **App Name**: EMA: eSchool AI Exam Forecaster
+# **App Name**: ESchoolBooks NeoX
 
 ## Core Features:
 
-- Dashboard UI: Implement a dashboard UI for EMA with a modern, academic-inspired design.
+- Dashboard UI: Implement a dashboard UI for NeoX with a modern, academic-inspired design.
 - File Upload System: Develop a file upload interface allowing users to submit previous year question papers and textbook PDFs.
 - Exam Type Selection: Enable exam type selection, offering presets for Plus 2, PSC, NEET, JEE, and a custom option.
 - AI-Powered Analysis Interface: Create an AI-powered analysis tool to process uploaded materials and identify key patterns.

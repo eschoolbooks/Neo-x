@@ -168,7 +168,7 @@ function AuthForm() {
       <Card className="w-full max-w-md mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl flex items-center justify-center gap-2">
-            <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="E-SchoolBooks Logo" width={32} height={32} className="rounded-full"/>
+            <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={32} height={32} />
             E-SchoolBooks
           </CardTitle>
           <CardDescription>Sign in or create an account to continue</CardDescription>

@@ -106,7 +106,7 @@ export default function UploadQnPage() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
             <a href="/" className="flex items-center gap-2">
-                <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="E-SchoolBooks Logo" width={40} height={40} className="rounded-full"/>
+                <Image src="/NeoX_Logo_Dark.svg" alt="E-SchoolBooks Logo" width={40} height={40}/>
                 <span className="font-bold text-xl text-foreground">E-SchoolBooks</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
