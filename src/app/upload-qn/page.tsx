@@ -23,6 +23,54 @@ import { Alert, AlertTitle } from '@/components/ui/alert';
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
+// Moved FormFields outside the main component to prevent re-renders on state change
+const FormFields = ({
+  subject, setSubject,
+  grade, setGrade,
+  year, setYear,
+  examType, setExamType,
+  disabled
+}: {
+  subject: string, setSubject: (val: string) => void,
+  grade: string, setGrade: (val: string) => void,
+  year: number | '', setYear: (val: number | '') => void,
+  examType: string, setExamType: (val: string) => void,
+  disabled: boolean
+}) => (
+    <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+            <Label htmlFor="subject">Subject</Label>
+            <Input id="subject" placeholder="e.g., Physics" value={subject} onChange={e => setSubject(e.target.value)} required disabled={disabled}/>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="grade">Class / Grade</Label>
+            <Input id="grade" placeholder="e.g., 12th Grade" value={grade} onChange={e => setGrade(e.target.value)} required disabled={disabled}/>
+        </div>
+        <div className="space-y-2">
+            <Label htmlFor="year">Year</Label>
+            <Input id="year" type="number" placeholder="e.g., 2023" value={year} onChange={e => setYear(e.target.value === '' ? '' : Number(e.target.value))} required disabled={disabled}/>
+        </div>
+            <div className="space-y-2">
+            <Label htmlFor="exam-type">Exam Type</Label>
+            <Select onValueChange={setExamType} value={examType} required disabled={disabled}>
+                <SelectTrigger id="exam-type">
+                    <SelectValue placeholder="Select an exam type..." />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="mid-term">Mid-Term</SelectItem>
+                    <SelectItem value="semester">Semester</SelectItem>
+                    <SelectItem value="yearly">Yearly</SelectItem>
+                    <SelectItem value="board">Board</SelectItem>
+                    <SelectItem value="competitive-neet">Competitive (NEET)</SelectItem>
+                    <SelectItem value="competitive-jee">Competitive (JEE)</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+            </Select>
+        </div>
+    </div>
+);
+
+
 export default function UploadQnPage() {
   const [file, setFile] = useState<File | null>(null);
   const [subject, setSubject] = useState('');
@@ -194,40 +242,6 @@ export default function UploadQnPage() {
       setIsLoading(false);
     }
   };
-  
-  const FormFields = ({disabled}: {disabled: boolean}) => (
-    <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-            <Label htmlFor="subject">Subject</Label>
-            <Input id="subject" placeholder="e.g., Physics" value={subject} onChange={e => setSubject(e.target.value)} required disabled={disabled}/>
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="grade">Class / Grade</Label>
-            <Input id="grade" placeholder="e.g., 12th Grade" value={grade} onChange={e => setGrade(e.target.value)} required disabled={disabled}/>
-        </div>
-        <div className="space-y-2">
-            <Label htmlFor="year">Year</Label>
-            <Input id="year" type="number" placeholder="e.g., 2023" value={year} onChange={e => setYear(Number(e.target.value))} required disabled={disabled}/>
-        </div>
-            <div className="space-y-2">
-            <Label htmlFor="exam-type">Exam Type</Label>
-            <Select onValueChange={setExamType} value={examType} required disabled={disabled}>
-                <SelectTrigger id="exam-type">
-                    <SelectValue placeholder="Select an exam type..." />
-                </SelectTrigger>
-                <SelectContent>
-                    <SelectItem value="mid-term">Mid-Term</SelectItem>
-                    <SelectItem value="semester">Semester</SelectItem>
-                    <SelectItem value="yearly">Yearly</SelectItem>
-                    <SelectItem value="board">Board</SelectItem>
-                    <SelectItem value="competitive-neet">Competitive (NEET)</SelectItem>
-                    <SelectItem value="competitive-jee">Competitive (JEE)</SelectItem>
-                    <SelectItem value="other">Other</SelectItem>
-                </SelectContent>
-            </Select>
-        </div>
-    </div>
-  );
 
 
   return (
@@ -267,7 +281,13 @@ export default function UploadQnPage() {
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleCheckForDuplicate} className="space-y-6">
-                            <FormFields disabled={isChecking}/>
+                            <FormFields
+                                subject={subject} setSubject={setSubject}
+                                grade={grade} setGrade={setGrade}
+                                year={year} setYear={setYear}
+                                examType={examType} setExamType={setExamType}
+                                disabled={isChecking}
+                            />
                             <Button type="submit" size="lg" className="w-full" disabled={isChecking}>
                                 {isChecking ? <><LoaderCircle className="mr-2 h-4 w-4 animate-spin" />Checking...</> : <><Search className="mr-2 h-4 w-4" />Check for Existing Paper</>}
                             </Button>
@@ -317,7 +337,13 @@ export default function UploadQnPage() {
                 <CardContent>
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <fieldset disabled>
-                            <FormFields disabled={true} />
+                             <FormFields
+                                subject={subject} setSubject={setSubject}
+                                grade={grade} setGrade={setGrade}
+                                year={year} setYear={setYear}
+                                examType={examType} setExamType={setExamType}
+                                disabled={true}
+                            />
                         </fieldset>
 
                         <div className="space-y-2">
