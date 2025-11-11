@@ -30,15 +30,17 @@ import { SettingsSheet } from '@/components/settings-sheet';
 import { HistoryDrawer } from '@/components/history-drawer';
 import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
+import { Input } from '@/components/ui/input';
 
 
 const MAX_DOCUMENTS = 1;
-const MAX_FILE_SIZE_MB = 25;
+const MAX_FILE_SIZE_MB = 12;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
 
 
 function AiHubContent() {
     const [examType, setExamType] = useState('Plus 2');
+    const [customExamType, setCustomExamType] = useState('');
     const [documents, setDocuments] = useState<File[]>([]);
     const [documentDataUris, setDocumentDataUris] = useState<string[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -152,6 +154,17 @@ function AiHubContent() {
             return;
         }
         
+        const finalExamType = examType === 'Custom' ? customExamType : examType;
+
+        if (!finalExamType) {
+            toast({
+                title: 'Exam Type Required',
+                description: 'Please select or enter an exam type.',
+                variant: 'destructive',
+            });
+            return;
+        }
+
         if (!user && demoUsed) {
             toast({ title: 'Demo Limit Reached', description: 'Please sign up to continue predicting exams.', variant: 'destructive' });
             return;
@@ -166,7 +179,7 @@ function AiHubContent() {
 
         try {
             const result = await predictExam({
-                examType,
+                examType: finalExamType,
                 documents: documentDataUris,
             });
 
@@ -179,7 +192,7 @@ function AiHubContent() {
                     session: {
                         user_id: user.uid,
                         report_id: analysisRef.id,
-                        exam_type: examType,
+                        exam_type: finalExamType,
                         subject: result.predictedTopics[0]?.subject || 'Mixed',
                         grade: result.predictedTopics[0]?.grade || 'General',
                         prediction_date: predictionDate.toISOString().split('T')[0],
@@ -419,8 +432,9 @@ function AiHubContent() {
                 cursorY += 8;
             };
             
+            const finalExamType = examType === 'Custom' ? customExamType : examType;
             const firstPrediction = prediction.predictedTopics[0];
-            addCoverInfo('Exam Type:', examType);
+            addCoverInfo('Exam Type:', finalExamType);
             if (firstPrediction) {
                 addCoverInfo('Subject:', firstPrediction.subject);
                 addCoverInfo('Grade:', firstPrediction.grade);
@@ -512,7 +526,7 @@ function AiHubContent() {
 
             addFooter();
 
-            pdf.save(`E-SchoolBooks-Prediction-${examType}-${new Date().toISOString().split('T')[0]}.pdf`);
+            pdf.save(`E-SchoolBooks-Prediction-${finalExamType}-${new Date().toISOString().split('T')[0]}.pdf`);
 
         } catch (error) {
             console.error("Error generating PDF:", error);
@@ -651,14 +665,34 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                     <form onSubmit={handleSubmitPrediction} className="space-y-6">
                                         <div className="space-y-3">
                                             <Label className="text-lg font-semibold">Select Exam Type</Label>
-                                            <RadioGroup value={examType} onValueChange={setExamType} className="flex flex-wrap gap-4">
+                                            <RadioGroup value={examType} onValueChange={setExamType} className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                                 {['Plus 2', 'PSC', 'NEET', 'JEE', 'Custom'].map(type => (
-                                                    <div key={type} className="flex items-center space-x-2">
-                                                        <RadioGroupItem value={type} id={`r-${type}`} />
-                                                        <Label htmlFor={`r-${type}`}>{type}</Label>
+                                                     <div key={type}>
+                                                        <RadioGroupItem value={type} id={`r-${type}`} className="peer sr-only" />
+                                                        <Label
+                                                          htmlFor={`r-${type}`}
+                                                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                                                        >
+                                                          {type}
+                                                        </Label>
                                                     </div>
                                                 ))}
                                             </RadioGroup>
+                                            {examType === 'Custom' && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0 }}
+                                                    animate={{ opacity: 1, height: 'auto' }}
+                                                    className="pt-4"
+                                                >
+                                                    <Label htmlFor="custom-exam-type">Custom Exam Name</Label>
+                                                    <Input 
+                                                        id="custom-exam-type" 
+                                                        placeholder="e.g., University Entrance Test" 
+                                                        value={customExamType} 
+                                                        onChange={(e) => setCustomExamType(e.target.value)}
+                                                    />
+                                                </motion.div>
+                                            )}
                                         </div>
                                         <div>
                                             <Button type="submit" size="lg" className="w-full" disabled={isLoading || (!user && demoUsed)}>
@@ -680,12 +714,17 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                             <RadioGroup
                                                 value={String(numQuestions)}
                                                 onValueChange={(val) => setNumQuestions(Number(val))}
-                                                className="flex flex-wrap gap-4"
+                                                className="grid grid-cols-2 md:grid-cols-4 gap-4"
                                             >
                                                 {[5, 10, 15, 20].map(num => (
-                                                    <div key={num} className="flex items-center space-x-2">
-                                                        <RadioGroupItem value={String(num)} id={`q-${num}`} />
-                                                        <Label htmlFor={`q-${num}`}>{num}</Label>
+                                                     <div key={num}>
+                                                        <RadioGroupItem value={String(num)} id={`q-${num}`} className="peer sr-only" />
+                                                        <Label
+                                                          htmlFor={`q-${num}`}
+                                                          className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary cursor-pointer"
+                                                        >
+                                                          {num} Questions
+                                                        </Label>
                                                     </div>
                                                 ))}
                                             </RadioGroup>
@@ -735,7 +774,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                       <div>
                                         <CardTitle className="flex items-center gap-3 text-2xl">
                                             <Sparkles className="text-primary"/>
-                                            {(isLoading || isGeneratingQuiz) ? 'Generating...' : (quiz ? "Quiz Results" : `Prediction Results for ${examType}`)}
+                                            {(isLoading || isGeneratingQuiz) ? 'Generating...' : (quiz ? "Quiz Results" : `Prediction Results for ${examType === 'Custom' ? customExamType : examType}`)}
                                         </CardTitle>
                                         <CardDescription>{quiz ? "Test your knowledge." : "Here are the topics and recommendations generated by Neo X."}</CardDescription>
                                       </div>
@@ -994,3 +1033,5 @@ export default function AiHubPage() {
     );
 }
 
+
+    
