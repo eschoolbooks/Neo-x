@@ -18,6 +18,7 @@ import { useTheme } from 'next-themes';
 import { useUser, useFirestore, useMemoFirebase } from '@/firebase';
 import { collection, query, where, getDocs, addDoc, serverTimestamp, DocumentData } from 'firebase/firestore';
 import { Alert, AlertTitle } from '@/components/ui/alert';
+import { motion } from 'framer-motion';
 
 
 const MAX_FILE_SIZE_MB = 10;
@@ -29,12 +30,14 @@ const FormFields = ({
   grade, setGrade,
   year, setYear,
   examType, setExamType,
+  customExamType, setCustomExamType,
   disabled
 }: {
   subject: string, setSubject: (val: string) => void,
   grade: string, setGrade: (val: string) => void,
   year: number | '', setYear: (val: number | '') => void,
   examType: string, setExamType: (val: string) => void,
+  customExamType: string, setCustomExamType: (val: string) => void,
   disabled: boolean
 }) => (
     <div className="grid md:grid-cols-2 gap-6">
@@ -66,6 +69,22 @@ const FormFields = ({
                     <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
             </Select>
+            {examType === 'other' && (
+                <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    className="pt-2"
+                >
+                    <Label htmlFor="custom-exam-type">Specify Exam Type</Label>
+                    <Input
+                        id="custom-exam-type"
+                        placeholder="Optional: e.g., University Entrance"
+                        value={customExamType}
+                        onChange={e => setCustomExamType(e.target.value)}
+                        disabled={disabled}
+                    />
+                </motion.div>
+            )}
         </div>
     </div>
 );
@@ -77,6 +96,7 @@ export default function UploadQnPage() {
   const [year, setYear] = useState<number | ''>('');
   const [grade, setGrade] = useState('');
   const [examType, setExamType] = useState('');
+  const [customExamType, setCustomExamType] = useState('');
   
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(false);
@@ -124,6 +144,7 @@ export default function UploadQnPage() {
     setYear('');
     setGrade('');
     setExamType('');
+    setCustomExamType('');
     setIsLoading(false);
     setIsChecking(false);
     setProcessedData(null);
@@ -133,9 +154,15 @@ export default function UploadQnPage() {
     setAllowUpload(false);
   };
 
+  const getFinalExamType = () => {
+    return examType === 'other' && customExamType.trim() !== '' ? customExamType.trim() : examType;
+  }
+
   const handleCheckForDuplicate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!subject || !year || !grade || !examType) {
+    const finalExamType = getFinalExamType();
+
+    if (!subject || !year || !grade || !finalExamType) {
         toast({
             title: 'Missing Information',
             description: 'Please fill out all fields to check for duplicates.',
@@ -158,7 +185,7 @@ export default function UploadQnPage() {
             where("subject", "==", subject),
             where("year", "==", Number(year)),
             where("grade", "==", grade),
-            where("examType", "==", examType)
+            where("examType", "==", finalExamType)
         );
 
         const querySnapshot = await getDocs(q);
@@ -200,6 +227,7 @@ export default function UploadQnPage() {
     setIsLoading(true);
     setError(null);
     setProcessedData(null);
+    const finalExamType = getFinalExamType();
 
     try {
         const documentDataUri = await fileToDataUri(file);
@@ -208,14 +236,14 @@ export default function UploadQnPage() {
             subject,
             year: Number(year),
             grade,
-            examType,
+            examType: finalExamType,
         });
 
         const newPaper = {
             subject,
             year: Number(year),
             grade,
-            examType,
+            examType: finalExamType,
             questions: result,
             isQlone: !!duplicate, // Flag as Qlone if a duplicate was found and user proceeded
             uploadedBy: user.uid,
@@ -286,6 +314,7 @@ export default function UploadQnPage() {
                                 grade={grade} setGrade={setGrade}
                                 year={year} setYear={setYear}
                                 examType={examType} setExamType={setExamType}
+                                customExamType={customExamType} setCustomExamType={setCustomExamType}
                                 disabled={isChecking}
                             />
                             <Button type="submit" size="lg" className="w-full" disabled={isChecking}>
@@ -342,6 +371,7 @@ export default function UploadQnPage() {
                                 grade={grade} setGrade={setGrade}
                                 year={year} setYear={setYear}
                                 examType={examType} setExamType={setExamType}
+                                customExamType={customExamType} setCustomExamType={setCustomExamType}
                                 disabled={true}
                             />
                         </fieldset>
@@ -414,7 +444,7 @@ export default function UploadQnPage() {
                       <div>
                         <h4 className="font-semibold text-foreground mb-1">What is the AI Training Ground?</h4>
                         <p>
-                          This page is the heart of our community-driven AI improvement process. By uploading question papers, you are directly contributing valuable data that helps Neo X become more intelligent and accurate. Each document you provide is a new learning opportunity for our AI.
+                          This page is the heart of our community-driven AI improvement process. By uploading question papers, you are directly contributing valuable data that helps Neo X become more intelligent and more accurate. Each document you provide is a new learning opportunity for our AI.
                         </p>
                       </div>
                       <div>
