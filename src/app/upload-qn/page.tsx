@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -14,6 +15,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useTheme } from 'next-themes';
 
 const MAX_FILE_SIZE_MB = 10;
 const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
@@ -30,6 +32,9 @@ export default function UploadQnPage() {
   const [error, setError] = useState<string | null>(null);
 
   const { toast } = useToast();
+  const { resolvedTheme } = useTheme();
+
+  const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
 
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -106,7 +111,7 @@ export default function UploadQnPage() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
             <a href="/" className="flex items-center gap-2">
-                <Image src="/NeoX_Logo_Dark.svg" alt="NeoX Logo" width={40} height={40}/>
+                {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40}/>}
                 <span className="font-bold text-xl text-foreground">Neo X</span>
             </a>
             <div className="hidden md:flex items-center gap-8">

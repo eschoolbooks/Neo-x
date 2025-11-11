@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -22,6 +23,7 @@ import {
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { useTheme } from 'next-themes';
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4 mr-2" viewBox="0 0 48 48">
@@ -43,6 +45,9 @@ function AuthForm() {
   const auth = useAuth();
   const firestore = useFirestore();
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+
+  const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
 
   const handleGoogleSignIn = async () => {
     setIsLoading('google');
@@ -168,7 +173,7 @@ function AuthForm() {
       <Card className="w-full max-w-md mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl flex items-center justify-center gap-2">
-            <Image src="/NeoX_Logo_Dark.svg" alt="NeoX Logo" width={32} height={32} />
+            {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={32} height={32} />}
             E-SchoolBooks
           </CardTitle>
           <CardDescription>Sign in or create an account to continue</CardDescription>

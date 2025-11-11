@@ -31,6 +31,7 @@ import { HistoryDrawer } from '@/components/history-drawer';
 import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
 import { Input } from '@/components/ui/input';
+import { useTheme } from 'next-themes';
 
 
 const MAX_DOCUMENTS = 1;
@@ -70,6 +71,9 @@ function AiHubContent() {
     const { user } = useUser();
     const router = useRouter();
     const firestore = useFirestore();
+    const { resolvedTheme } = useTheme();
+
+    const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
 
     const handleSignOut = async () => {
         await signOut(auth);
@@ -297,7 +301,7 @@ function AiHubContent() {
                 });
                 setShowUpload(true);
             }
-        } catch (err) {
+        } catch (err) => {
             const errorMessage = err instanceof Error ? err.message : 'An unexpected response was received from the server.';
             setQuizError(errorMessage);
             setShowUpload(true);
@@ -411,7 +415,7 @@ function AiHubContent() {
                 }
             };
             
-            const logo = "/NeoX_Logo_Dark.svg";
+            const logo = logoSrc;
             pdf.addImage(logo, 'PNG', margin, margin, 30, 30);
             
             pdf.setFontSize(26);
@@ -600,7 +604,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
             <nav className="flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-4">
                 <a href="/" className="flex items-center gap-2">
-                  <Image src="/NeoX_Logo_Dark.svg" alt="NeoX Logo" width={40} height={40}/>
+                  {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40}/>}
                   <span className="font-bold text-xl text-foreground">Neo X</span>
                 </a>
               </div>
@@ -984,7 +988,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                     isSending={isChatting}
                     title="Chat with Neo X"
                     description={documents.length > 0 ? "Ask me anything about the uploaded documents!" : "Upload some documents to start chatting."}
-                    logoUrl="/NeoX_Logo_Dark.svg"
+                    logoUrl={logoSrc}
                 />
             </div>
           </main>

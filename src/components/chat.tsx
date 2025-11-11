@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
@@ -8,6 +9,7 @@ import { Button } from './ui/button';
 import { ScrollArea } from './ui/scroll-area';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
 type Message = {
   role: 'user' | 'model';
@@ -37,6 +39,9 @@ export function Chat({
 }: ChatProps) {
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { resolvedTheme } = useTheme();
+  
+  const currentLogoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
 
   const handleSend = () => {
     if (input.trim()) {
@@ -78,7 +83,7 @@ export function Chat({
             {/* Header */}
             <header className="flex items-center justify-between p-4 border-b border-border/50">
                 <div className="flex items-center gap-3">
-                    {logoUrl && <Image src={logoUrl} alt="Logo" width={32} height={32}/>}
+                    {currentLogoSrc && <Image src={currentLogoSrc} alt="Logo" width={32} height={32}/>}
                     <div>
                         <h2 className="font-bold text-lg">{title}</h2>
                         {description && <p className="text-xs text-muted-foreground">{description}</p>}
