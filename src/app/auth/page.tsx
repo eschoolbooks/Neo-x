@@ -22,7 +22,6 @@ import {
 } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { useTheme } from 'next-themes';
 
 const GoogleIcon = () => (
@@ -167,9 +166,6 @@ function AuthForm() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-grid">
-       <div className="absolute top-4 right-4">
-        <ThemeToggle />
-      </div>
       <Card className="w-full max-w-md mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl flex items-center justify-center gap-2">

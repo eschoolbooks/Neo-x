@@ -12,7 +12,6 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { Heart, Target, Lightbulb, IndianRupee, HandHeart, BookHeart, School, Users, ArrowDown, CheckCircle } from 'lucide-react';
 import CountUp from 'react-countup';
-import { ThemeToggle } from '@/components/theme-toggle';
 import { useTheme } from 'next-themes';
 
 export default function DonatePage() {
@@ -78,11 +77,11 @@ export default function DonatePage() {
           </a>
           <div className="hidden md:flex items-center gap-8">
              <a href="/" className="hover:text-primary transition-colors">Home</a>
-             <a href="#impact" className="hover:text-primary transition-colors">Impact</a>
-             <a href="#mission" className="hover:text-primary transition-colors">Our Mission</a>
+             <a href="/ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
+             <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
+             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
           <div className="flex items-center gap-4">
-            <ThemeToggle />
             <Button variant="secondary" className="rounded-full" onClick={handleScrollToForm}>
                 Donate Now <Heart className="ml-2 h-4 w-4" />
             </Button>
