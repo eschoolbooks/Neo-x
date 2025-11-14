@@ -3,6 +3,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { FirebaseClientProvider } from '@/firebase';
 import { ThemeProvider } from '@/components/theme-provider';
+import Analytics from '@/components/analytics';
 
 export const metadata: Metadata = {
   title: 'E-SchoolBooks | Revolutionizing Education for a Brighter Future',
@@ -34,6 +35,7 @@ export default function RootLayout({
             </FirebaseClientProvider>
             <Toaster />
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
