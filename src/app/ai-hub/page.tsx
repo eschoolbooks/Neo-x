@@ -405,7 +405,7 @@ function AiHubContent() {
             const lightGrayBg = '#F3F4F6';
             
             const addFooter = () => {
-                const pageCount = pdf.internal.getNumberOfPages();
+                const pageCount = pdf.getNumberOfPages();
                 for (let i = 1; i <= pageCount; i++) {
                     pdf.setPage(i);
                     pdf.setFontSize(8);
@@ -1021,6 +1021,3 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
-
-
-    
