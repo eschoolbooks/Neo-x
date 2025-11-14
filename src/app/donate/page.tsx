@@ -72,7 +72,7 @@ export default function DonatePage() {
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${hasScrolled ? 'bg-background/80 backdrop-blur-lg border-b border-border/20' : 'bg-transparent'}`}>
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="/" className="flex items-center gap-2">
-            {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40}/>}
+            {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40} priority />}
             <span className="font-bold text-xl text-foreground">Neo X</span>
           </a>
           <div className="hidden md:flex items-center gap-8">

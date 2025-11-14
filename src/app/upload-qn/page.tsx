@@ -264,13 +264,13 @@ export default function UploadQnPage() {
         });
 
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
-      setError(errorMessage);
-      toast({
-        title: 'Processing Failed',
-        description: errorMessage,
-        variant: 'destructive',
-      });
+        const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+        setError(errorMessage);
+        toast({
+            title: 'Processing Failed',
+            description: errorMessage,
+            variant: 'destructive',
+        });
     } finally {
       setIsLoading(false);
     }
@@ -324,7 +324,7 @@ export default function UploadQnPage() {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
             <a href="/" className="flex items-center gap-2">
-                {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40}/>}
+                {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40} priority />}
                 <span className="font-bold text-xl text-foreground">Neo X</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
