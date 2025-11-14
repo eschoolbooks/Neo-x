@@ -24,8 +24,11 @@ export default function DonatePage() {
   const formRef = useRef<HTMLDivElement>(null);
   const [hasScrolled, setHasScrolled] = useState(false);
   const { resolvedTheme } = useTheme();
+  const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
 
-  const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
+  useEffect(() => {
+    setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
+  }, [resolvedTheme]);
 
   useEffect(() => {
     const handleScroll = () => {

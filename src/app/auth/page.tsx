@@ -45,8 +45,12 @@ function AuthForm() {
   const firestore = useFirestore();
   const router = useRouter();
   const { resolvedTheme } = useTheme();
+  const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
 
-  const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
+  useEffect(() => {
+    setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
+  }, [resolvedTheme]);
+
 
   const handleGoogleSignIn = async () => {
     setIsLoading('google');

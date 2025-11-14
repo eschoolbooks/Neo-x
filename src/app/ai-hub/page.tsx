@@ -72,8 +72,11 @@ function AiHubContent() {
     const router = useRouter();
     const firestore = useFirestore();
     const { resolvedTheme } = useTheme();
+    const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
 
-    const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
+    useEffect(() => {
+        setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
+    }, [resolvedTheme]);
 
     const handleSignOut = async () => {
         await signOut(auth);
@@ -415,7 +418,7 @@ function AiHubContent() {
                 }
             };
             
-            const logo = logoSrc;
+            const logo = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
             pdf.addImage(logo, 'PNG', margin, margin, 30, 30);
             
             pdf.setFontSize(26);
@@ -1026,5 +1029,3 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
-
-    

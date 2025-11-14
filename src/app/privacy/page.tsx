@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,11 @@ const Section = ({ title, children }: { title: string, children: React.ReactNode
 
 export default function PrivacyPage() {
     const { resolvedTheme } = useTheme();
-    const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
+    const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+
+    useEffect(() => {
+        setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
+    }, [resolvedTheme]);
 
     return (
         <div className="bg-background text-foreground">

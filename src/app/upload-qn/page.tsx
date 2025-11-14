@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -115,8 +115,11 @@ export default function UploadQnPage() {
   const { resolvedTheme } = useTheme();
   const { user } = useUser();
   const firestore = useFirestore();
+  const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
 
-  const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
+  useEffect(() => {
+    setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
+  }, [resolvedTheme]);
 
   const fileToDataUri = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -556,5 +559,3 @@ export default function UploadQnPage() {
     </div>
   );
 }
-
-    

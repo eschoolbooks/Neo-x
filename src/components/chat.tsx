@@ -35,13 +35,15 @@ export function Chat({
   isSending,
   title = "Chat",
   description,
-  logoUrl,
 }: ChatProps) {
   const [input, setInput] = useState('');
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { resolvedTheme } = useTheme();
-  
-  const currentLogoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
+  const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+
+  useEffect(() => {
+    setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
+  }, [resolvedTheme]);
 
   const handleSend = () => {
     if (input.trim()) {
@@ -83,7 +85,7 @@ export function Chat({
             {/* Header */}
             <header className="flex items-center justify-between p-4 border-b border-border/50">
                 <div className="flex items-center gap-3">
-                    {currentLogoSrc && <Image src={currentLogoSrc} alt="Logo" width={32} height={32} priority />}
+                    {logoSrc && <Image src={logoSrc} alt="Logo" width={32} height={32} priority />}
                     <div>
                         <h2 className="font-bold text-lg">{title}</h2>
                         {description && <p className="text-xs text-muted-foreground">{description}</p>}
