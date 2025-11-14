@@ -285,7 +285,7 @@ export default function DonatePage() {
                  transition={{ duration: 0.7 }}
                  className="md:order-2"
               >
-                <Image src="https://picsum.photos/seed/vision/600/400" alt="Student looking towards future" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="student future" />
+                <Image src="/img/Our-Vision.png" alt="Student looking towards future" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="student future" />
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, x: 50 }}
