@@ -50,13 +50,12 @@ const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.Re
 export default function Home() {
   const { user } = useUser();
   const { resolvedTheme } = useTheme();
-  const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+  const [logoSrc, setLogoSrc] = useState("https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8");
   const [neoXLogoSrc, setNeoXLogoSrc] = useState('/NeoX_Logo_Light.svg');
 
 
   useEffect(() => {
-    // For main page logo
-    setLogoSrc("https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8");
+    // For main page logo - already set in state
     
     // For theme-aware NeoX logo
     setNeoXLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
@@ -174,7 +173,7 @@ export default function Home() {
                         <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
                         <a href="/neox">Exam Predictor</a>
                         </Button>
-                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6 border-2 border-orange-500 bg-primary hover:bg-primary/90 text-primary-foreground" variant="default">
+                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6 border-2 border-primary bg-primary hover:bg-primary/90 text-primary-foreground" variant="default">
                             <a href="/neox">
                                 Try Beta <ArrowRight className="ml-2 h-5 w-5" />
                             </a>
