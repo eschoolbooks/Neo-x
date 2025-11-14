@@ -61,6 +61,11 @@ service cloud.firestore {
       allow create: if isOwner(userId) && request.resource.data.id == userId;
       allow update: if isExistingOwner(userId) && request.resource.data.id == resource.data.id;
       allow delete: if isExistingOwner(userId);
+      
+      // Admin can read subcollections for stats
+      match /{allPaths=**} {
+        allow get, list: if isAdmin();
+      }
     }
 
     /**
@@ -130,3 +135,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

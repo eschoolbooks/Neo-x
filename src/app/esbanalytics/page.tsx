@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -8,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { LoaderCircle, Shield, Users, BrainCircuit, FileQuestion, BarChart, Eye } from 'lucide-react';
 import { useCollection, useUser, useMemoFirebase } from '@/firebase';
-import { collection, query, orderBy, getCountFromServer, Timestamp } from 'firebase/firestore';
+import { collection, query, orderBy, getCountFromServer, Timestamp, collectionGroup } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -34,20 +35,17 @@ const AdminStats = () => {
             if (!firestore) return;
             try {
                 const usersCol = collection(firestore, 'users');
-                const predictionsCol = collection(firestore, 'users'); // This is a simplification
-                const quizzesCol = collection(firestore, 'quizzes'); // This is a simplification
+                const analysesCol = collectionGroup(firestore, 'analyses');
+                const quizzesCol = collectionGroup(firestore, 'quizzes');
                 
                 const usersSnap = await getCountFromServer(usersCol);
-                // Note: Correctly counting subcollections would require iterating all users.
-                // This is a simplified count of top-level collections for demonstration.
-                const predictionsSnap = await getCountFromServer(collection(firestore, 'analyses'));
-                const quizzesSnap = await getCountFromServer(collection(firestore, 'quizzes'));
-
+                const predictionsSnap = await getCountFromServer(analysesCol);
+                const quizzesSnap = await getCountFromServer(quizzesCol);
 
                 setStats({
                     users: usersSnap.data().count,
-                    predictions: 0, // Placeholder
-                    quizzes: 0, // Placeholder
+                    predictions: predictionsSnap.data().count,
+                    quizzes: quizzesSnap.data().count,
                 });
             } catch (error) {
                 console.error("Error fetching stats:", error);
@@ -84,7 +82,7 @@ const AdminStats = () => {
                         <BrainCircuit className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{isLoading ? <LoaderCircle className="animate-spin h-6 w-6"/> : 'N/A'}</div>
+                        <div className="text-2xl font-bold">{isLoading ? <LoaderCircle className="animate-spin h-6 w-6"/> : stats.predictions}</div>
                         <p className="text-xs text-muted-foreground">Total exam predictions</p>
                     </CardContent>
                 </Card>
@@ -94,7 +92,7 @@ const AdminStats = () => {
                         <FileQuestion className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{isLoading ? <LoaderCircle className="animate-spin h-6 w-6"/> : 'N/A'}</div>
+                        <div className="text-2xl font-bold">{isLoading ? <LoaderCircle className="animate-spin h-6 w-6"/> : stats.quizzes}</div>
                         <p className="text-xs text-muted-foreground">Total quizzes taken by users</p>
                     </CardContent>
                 </Card>
@@ -229,3 +227,5 @@ export default function AdminDashboardPage() {
         </>
     );
 }
+
+    
