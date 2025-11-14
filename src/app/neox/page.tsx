@@ -5,9 +5,24 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Heart } from 'lucide-react';
+import { ArrowRight, BrainCircuit, FileQuestion, MessageSquare, UploadCloud, FileText, CheckCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
+const FeatureCard = ({ icon, title, description, delay = 0 }: { icon: React.ReactNode, title: string, description: string, delay?: number }) => (
+    <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.5 }}
+        transition={{ duration: 0.5, delay }}
+        className="bg-card/50 p-6 rounded-lg border border-border/20 backdrop-blur-sm"
+    >
+        <div className="text-primary mb-4">{icon}</div>
+        <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
+        <p className="text-muted-foreground">{description}</p>
+    </motion.div>
+);
 
 export default function NeoXPage() {
   const { resolvedTheme } = useTheme();
@@ -51,12 +66,11 @@ export default function NeoXPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
                     >
-                         {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={100} height={100} priority className="mx-auto mb-6" />}
                         <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6">
                             The Future of Studying is Here.<br />Meet <span className="text-primary">Neo X</span>.
                         </h1>
                         <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
-                            Leverage the most powerful and accurate AI exam forecaster to analyze materials, predict key topics, generate quizzes, and chat with an AI tutor.
+                           Your personal AI assistant designed to revolutionize how you prepare for exams. Analyze materials, predict key topics, generate quizzes, and get instant answers from an AI tutor.
                         </p>
                         <div className="flex flex-col sm:flex-row justify-center gap-4">
                             <Button size="lg" asChild className="rounded-full text-lg px-10 py-6 bg-primary hover:bg-primary/90 text-primary-foreground" variant="default">
@@ -66,6 +80,93 @@ export default function NeoXPage() {
                             </Button>
                         </div>
                     </motion.div>
+                </div>
+            </section>
+            
+            {/* Features Section */}
+             <section id="features" className="py-20 lg:py-32 bg-card/30">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl sm:text-4xl font-bold mb-4">Your Ultimate Study Companion</h2>
+                        <p className="max-w-3xl mx-auto text-muted-foreground">
+                            Neo X is packed with powerful features to help you study smarter, not harder.
+                        </p>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <FeatureCard
+                            icon={<BrainCircuit className="w-10 h-10" />}
+                            title="AI Exam Predictor"
+                            description="Upload your textbooks and past papers. Our AI analyzes them to forecast the most likely topics and questions for your upcoming exams."
+                            delay={0}
+                        />
+                        <FeatureCard
+                            icon={<FileQuestion className="w-10 h-10" />}
+                            title="Quiz Generator"
+                            description="Instantly create multiple-choice quizzes from your study materials to test your knowledge and identify areas for improvement."
+                            delay={0.2}
+                        />
+                        <FeatureCard
+                            icon={<MessageSquare className="w-10 h-10" />}
+                            title="AI Chat Tutor"
+                            description="Have a question? Chat with Neo X to get instant explanations, clarify doubts, and deepen your understanding of complex subjects."
+                            delay={0.4}
+                        />
+                    </div>
+                     <div className="mt-12 text-center text-muted-foreground">
+                        <p>Supported file types: PDF | Max file size: 15MB</p>
+                    </div>
+                </div>
+            </section>
+
+            {/* How it Works */}
+            <section className="py-20 lg:py-32">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                         <h2 className="text-3xl sm:text-4xl font-bold mb-4">Get Started in 3 Simple Steps</h2>
+                    </div>
+                    <div className="max-w-4xl mx-auto grid md:grid-cols-3 gap-8 text-center">
+                        <FeatureCard icon={<UploadCloud className="w-10 h-10 mx-auto" />} title="1. Upload" description="Securely upload your PDF textbooks and past question papers." />
+                        <FeatureCard icon={<FileText className="w-10 h-10 mx-auto" />} title="2. Analyze" description="Choose a tool—Predictor, Quiz, or Chat—and let the AI work its magic." delay={0.2} />
+                        <FeatureCard icon={<CheckCircle className="w-10 h-10 mx-auto" />} title="3. Excel" description="Use the AI-powered insights and results to focus your studying and ace your exams." delay={0.4} />
+                    </div>
+                </div>
+            </section>
+            
+            {/* FAQ Section */}
+            <section id="faq" className="py-20 lg:py-32 bg-grid">
+                <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl sm:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+                        <p className="max-w-2xl mx-auto text-muted-foreground">Got questions? We've got answers.</p>
+                    </div>
+                    <div className="max-w-3xl mx-auto">
+                        <Accordion type="single" collapsible className="w-full">
+                            <AccordionItem value="item-1">
+                                <AccordionTrigger>Is Neo X really free to use?</AccordionTrigger>
+                                <AccordionContent>
+                                    Yes! Neo X is part of the E-SchoolBooks non-profit mission. We offer a generous free tier for all students. Your account comes with a free trial, and you can continue to use the service for free with some limits.
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-2">
+                                <AccordionTrigger>How accurate are the exam predictions?</AccordionTrigger>
+                                <AccordionContent>
+                                    Our AI is highly advanced, but it's important to remember that predictions are forecasts, not guarantees. They are designed to be a powerful study guide to help you focus on high-probability topics, but you should always study the entire syllabus.
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-3">
+                                <AccordionTrigger>What happens to my uploaded documents?</AccordionTrigger>
+                                <AccordionContent>
+                                    We take your privacy seriously. Your documents are securely uploaded and used solely for the purpose of generating your requested analysis (predictions, quizzes, or chat responses). We do not share your documents or use them for any other purpose. Please see our Privacy Policy for full details.
+                                </AccordionContent>
+                            </AccordionItem>
+                            <AccordionItem value="item-4">
+                                <AccordionTrigger>What kind of files can I upload?</AccordionTrigger>
+                                <AccordionContent>
+                                    Currently, Neo X supports PDF documents (.pdf) up to 15MB in size. We recommend uploading clean, text-based PDFs for the best results.
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Accordion>
+                    </div>
                 </div>
             </section>
         </main>

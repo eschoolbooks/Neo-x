@@ -50,13 +50,11 @@ const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.Re
 export default function Home() {
   const { user } = useUser();
   const { resolvedTheme } = useTheme();
-  const [logoSrc, setLogoSrc] = useState("https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8");
+  const [logoSrc, setLogoSrc] = useState("/ESBlogo.png");
   const [neoXLogoSrc, setNeoXLogoSrc] = useState('/NeoX_Logo_Light.svg');
 
 
   useEffect(() => {
-    // For main page logo - already set in state
-    
     // For theme-aware NeoX logo
     setNeoXLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
   }, [resolvedTheme]);
@@ -94,7 +92,7 @@ export default function Home() {
         <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-background via-orange-950/20 to-background opacity-50"></div>
             <div className="absolute inset-0 bg-grid-slow"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.3),rgba(255,255,255,0))] animate-pulse-strong"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,hsl(var(--primary)_/_0.3),rgba(255,255,255,0))] animate-pulse-strong"></div>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                 <motion.div
