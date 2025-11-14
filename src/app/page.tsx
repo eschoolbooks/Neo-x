@@ -238,7 +238,7 @@ export default function Home() {
                         viewport={{ once: true, amount: 0.5 }}
                         transition={{ duration: 0.7, delay: 0.2 }}
                     >
-                        <Image src="https://picsum.photos/seed/solution/600/400" alt="Student learning with a tablet" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="child happy tablet" />
+                        <Image src="/img/Flipbook Online.png" alt="FLipbook View from a desktop" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="child happy tablet" />
                         <h2 className="text-3xl font-bold mt-6 mb-3 text-accent">A Lighter Path Forward</h2>
                         <p className="text-muted-foreground">E-SchoolBooks provides free digital textbooks. We eliminate heavy loads, promote better health, and create a more sustainable, eco-friendly learning environment for all.</p>
                     </motion.div>
