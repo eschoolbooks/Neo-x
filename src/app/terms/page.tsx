@@ -77,7 +77,7 @@ export default function TermsPage() {
                         </ul>
                     </Section>
 
-                    <Section title="Our Service is "As Is"">
+                    <Section title="Our Service is 'As Is'">
                         <p>Neo X is an experimental AI tool. While we work hard to make it accurate and helpful, we can't guarantee it will always be perfect. The predictions are based on patterns and are not a promise of what will be on your exam. Always use them as a study guide, not a crystal ball!</p>
                     </Section>
 
