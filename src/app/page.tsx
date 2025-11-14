@@ -164,11 +164,11 @@ export default function Home() {
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
-                        <a href="/donate">Donate to Support</a>
+                        <a href="/donate">Exam Predictor</a>
                         </Button>
                         <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="default">
                             <a href="/ai-hub">
-                                Try a Free Demo <ArrowRight className="ml-2 h-5 w-5" />
+                                Try Beta <ArrowRight className="ml-2 h-5 w-5" />
                             </a>
                         </Button>
                     </div>
