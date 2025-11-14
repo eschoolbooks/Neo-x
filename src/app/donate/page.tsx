@@ -269,7 +269,7 @@ export default function DonatePage() {
                  viewport={{ once: true, amount: 0.5 }}
                  transition={{ duration: 0.7, delay: 0.2 }}
               >
-                <Image src="https://picsum.photos/seed/mission/600/400" alt="Students collaborating" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="students collaborating" />
+                <Image src="/img/Our mission.png" alt="Students collaborating" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="students collaborating" />
               </motion.div>
             </div>
           </div>
