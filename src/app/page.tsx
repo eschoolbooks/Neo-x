@@ -35,7 +35,7 @@ const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.Re
       }}
       className="text-center"
     >
-      <div className="text-primary mx-auto mb-4 flex justify-center">{icon}</div>
+      <div className="text-orange-500 mx-auto mb-4 flex justify-center">{icon}</div>
       <div className="text-4xl md:text-5xl font-extrabold text-foreground">
         {didAnimate && <CountUp end={value} duration={duration} separator="," />}
         {suffix}
@@ -60,18 +60,18 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex items-center gap-2">
-            {logoSrc && <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="NeoX Logo" width={32} height={32} className="sm:h-10 sm:w-10" priority />} 
+            {logoSrc && <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="NeoX Logo" width={32} height={32} className="sm:h-10 sm:w-10 rounded-full" priority />} 
             <span className="font-bold text-lg sm:text-xl text-foreground">ESchoolBooks</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
-            <a href="/" className="hover:text-primary transition-colors">Home</a>
-            <a href="/ai-hub" className="hover:text-primary transition-colors">Neo X</a>
-            <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
-            <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
+            <a href="/" className="hover:text-orange-500 transition-colors">Home</a>
+            <a href="/ai-hub" className="hover:text-orange-500 transition-colors">Neo X</a>
+            <a href="/donate" className="hover:text-orange-500 transition-colors">Donate</a>
+            <a href="#contact" className="hover:text-orange-500 transition-colors">Contact</a>
           </div>
           <div className="flex items-center gap-4">
             {user ? (
-                <Button asChild className="rounded-full">
+                <Button asChild className="rounded-full bg-orange-500 hover:bg-orange-600 text-white">
                     <a href="/ai-hub">Go to AI Hub <ArrowRight className="ml-2 h-4 w-4" /></a>
                 </Button>
             ) : (
@@ -86,9 +86,9 @@ export default function Home() {
       <main>
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-950/20 to-background opacity-50"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-background via-orange-950/20 to-background opacity-50"></div>
             <div className="absolute inset-0 bg-grid-slow"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.3),rgba(255,255,255,0))]"></div>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                 <motion.div
@@ -97,13 +97,13 @@ export default function Home() {
                     transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
                 >
                     <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6">
-                        Taking Education<br /><span className="text-primary">beyond Boundaries</span>
+                        Taking Education<br /><span className="text-orange-500">beyond Boundaries</span>
                     </h1>
                     <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
                         A mission to make students able to self-learn, choose their own future, and build a great nation by helping today's generation find their pathway.
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="default">
+                        <Button size="lg" asChild className="rounded-full text-lg px-10 py-6 bg-orange-500 hover:bg-orange-600 text-white" variant="default">
                             <a href="/auth">
                                 Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
                             </a>
@@ -157,7 +157,7 @@ export default function Home() {
              <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12 pt-10">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-2">
-                        <span className="text-primary">NEO X</span>
+                        <span className="text-orange-500">NEO X</span>
                     </h2>
                     <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
                         The most powerful and accurate question prediction AI.
@@ -166,7 +166,7 @@ export default function Home() {
                         <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
                         <a href="/ai-hub">Exam Predictor</a>
                         </Button>
-                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="default">
+                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6 bg-orange-500 hover:bg-orange-600 text-white" variant="default">
                             <a href="/ai-hub">
                                 Try Beta <ArrowRight className="ml-2 h-5 w-5" />
                             </a>
@@ -187,13 +187,13 @@ export default function Home() {
                 >
                     <h2 className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tighter text-foreground mb-6">
                         Lighten their bags.<br/>
-                        <span className="text-primary">Brighten their Future.</span>
+                        <span className="text-orange-500">Brighten their Future.</span>
                     </h2>
                     <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
                         Join our mission to provide free digital textbooks, reduce the physical burden on students, and create an innovative, eco-friendly learning ecosystem for the next generation.
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
-                        <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="default">
+                        <Button size="lg" asChild className="rounded-full text-lg px-10 py-6 bg-orange-500 hover:bg-orange-600 text-white" variant="default">
                             <a href="/donate">
                                 Support US <ArrowRight className="ml-2 h-5 w-5" />
                             </a>
@@ -263,7 +263,7 @@ export default function Home() {
                         <p className="text-lg md:text-xl max-w-2xl mx-auto mb-8 opacity-90">
                             Your small contribution has a massive impact. It helps us digitize another book, save another tree, and ease the burden for another child. Join the movement.
                         </p>
-                        <Button variant="secondary" size="lg" asChild className="rounded-full text-lg px-10 py-6 bg-white text-primary hover:bg-gray-200 inline-flex items-center justify-center mx-auto">
+                        <Button variant="secondary" size="lg" asChild className="rounded-full text-lg px-10 py-6 bg-white text-orange-500 hover:bg-gray-200 inline-flex items-center justify-center mx-auto">
                            <a href="/donate">
                              Donate Securely <Heart className="ml-2 h-5 w-5 fill-current"/>
                            </a>
@@ -278,7 +278,7 @@ export default function Home() {
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
                  <h2 className="text-3xl sm:text-4xl font-bold mb-4">Meet the Hearts Behind the Mission</h2>
                 <p className="max-w-2xl mx-auto text-muted-foreground mb-12">
-                    E-SchoolBooks is a project by <strong className="text-primary">"Theo,"</strong> a non-profit founded by Kevin Anjo. We are a passionate force of 15 educators, technologists, and dreamers united for change.
+                    E-SchoolBooks is a project by <strong className="text-orange-500">"Theo,"</strong> a non-profit founded by Kevin Anjo. We are a passionate force of 15 educators, technologists, and dreamers united for change.
                 </p>
                 <div className="flex justify-center -space-x-4">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -313,8 +313,8 @@ export default function Home() {
                     Together, we can create a world where education knows no boundaries.
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 text-muted-foreground">
-                    <a href="mailto:info@e-schoolbooks.in" className="flex items-center gap-2 hover:text-primary"><Mail className="h-5 w-5" /> info@e-schoolbooks.in</a>
-                    <a href="tel:+918281543610" className="flex items-center gap-2 hover:text-primary"><Phone className="h-5 w-5" /> +91-8281543610</a>
+                    <a href="mailto:info@e-schoolbooks.in" className="flex items-center gap-2 hover:text-orange-500"><Mail className="h-5 w-5" /> info@e-schoolbooks.in</a>
+                    <a href="tel:+918281543610" className="flex items-center gap-2 hover:text-orange-500"><Phone className="h-5 w-5" /> +91-8281543610</a>
                 </div>
                 <div className="mt-8 text-sm text-muted-foreground">
                     © {new Date().getFullYear()} E-SchoolBooks Project by Theo. All Rights Reserved.
@@ -325,3 +325,4 @@ export default function Home() {
     </div>
   );
 }
+
