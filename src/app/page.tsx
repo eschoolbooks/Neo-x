@@ -309,7 +309,7 @@ export default function Home() {
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
                 </p>
-                <div className="flex justify-center items-center gap-6 text-muted-foreground">
+                <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 text-muted-foreground">
                     <a href="mailto:info@e-schoolbooks.in" className="flex items-center gap-2 hover:text-primary"><Mail className="h-5 w-5" /> info@e-schoolbooks.in</a>
                     <a href="tel:+918281543610" className="flex items-center gap-2 hover:text-primary"><Phone className="h-5 w-5" /> +91-8281543610</a>
                 </div>
