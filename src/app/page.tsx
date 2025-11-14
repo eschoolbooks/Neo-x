@@ -249,7 +249,7 @@ export default function Home() {
         {/* Donate Section */}
         <section id="donate" className="py-20 lg:py-32">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="bg-gradient-to-r from-primary to-orange-500 text-primary-foreground rounded-2xl p-8 md:p-16 text-center shadow-2xl">
+                <div className="bg-orange-500 text-primary-foreground rounded-2xl p-8 md:p-16 text-center shadow-2xl">
                     <motion.div
                         initial={{ opacity: 0, scale: 0.5 }}
                         whileInView={{ opacity: 1, scale: 1 }}
