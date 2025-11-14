@@ -140,31 +140,39 @@ export default function NeoXPage() {
                         <p className="max-w-2xl mx-auto text-muted-foreground">Got questions? We've got answers.</p>
                     </div>
                     <div className="max-w-3xl mx-auto">
-                        <Accordion type="single" collapsible className="w-full">
-                            <AccordionItem value="item-1">
-                                <AccordionTrigger>Is Neo X really free to use?</AccordionTrigger>
-                                <AccordionContent>
-                                    Yes! Neo X is part of the E-SchoolBooks non-profit mission. We offer a generous free tier for all students. Your account comes with a free trial, and you can continue to use the service for free with some limits.
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-2">
-                                <AccordionTrigger>How accurate are the exam predictions?</AccordionTrigger>
-                                <AccordionContent>
-                                    Our AI is highly advanced, but it's important to remember that predictions are forecasts, not guarantees. They are designed to be a powerful study guide to help you focus on high-probability topics, but you should always study the entire syllabus.
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-3">
-                                <AccordionTrigger>What happens to my uploaded documents?</AccordionTrigger>
-                                <AccordionContent>
-                                    We take your privacy seriously. Your documents are securely uploaded and used solely for the purpose of generating your requested analysis (predictions, quizzes, or chat responses). We do not share your documents or use them for any other purpose. Please see our Privacy Policy for full details.
-                                </AccordionContent>
-                            </AccordionItem>
-                            <AccordionItem value="item-4">
-                                <AccordionTrigger>What kind of files can I upload?</AccordionTrigger>
-                                <AccordionContent>
-                                    Currently, Neo X supports PDF documents (.pdf) up to 15MB in size. We recommend uploading clean, text-based PDFs for the best results.
-                                </AccordionContent>
-                            </AccordionItem>
+                        <Accordion type="single" collapsible className="w-full space-y-4">
+                            <div className="bg-card p-4 rounded-lg border">
+                                <AccordionItem value="item-1" className="border-b-0">
+                                    <AccordionTrigger>Is Neo X really free to use?</AccordionTrigger>
+                                    <AccordionContent>
+                                        Yes! Neo X is part of the E-SchoolBooks non-profit mission. We offer a generous free tier for all students. Your account comes with a free trial, and you can continue to use the service for free with some limits.
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </div>
+                            <div className="bg-card p-4 rounded-lg border">
+                                <AccordionItem value="item-2" className="border-b-0">
+                                    <AccordionTrigger>How accurate are the exam predictions?</AccordionTrigger>
+                                    <AccordionContent>
+                                        Our AI is highly advanced, but it's important to remember that predictions are forecasts, not guarantees. They are designed to be a powerful study guide to help you focus on high-probability topics, but you should always study the entire syllabus.
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </div>
+                            <div className="bg-card p-4 rounded-lg border">
+                                <AccordionItem value="item-3" className="border-b-0">
+                                    <AccordionTrigger>What happens to my uploaded documents?</AccordionTrigger>
+                                    <AccordionContent>
+                                        We take your privacy seriously. Your documents are securely uploaded and used solely for the purpose of generating your requested analysis (predictions, quizzes, or chat responses). We do not share your documents or use them for any other purpose. Please see our Privacy Policy for full details.
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </div>
+                            <div className="bg-card p-4 rounded-lg border">
+                                <AccordionItem value="item-4" className="border-b-0">
+                                    <AccordionTrigger>What kind of files can I upload?</AccordionTrigger>
+                                    <AccordionContent>
+                                        Currently, Neo X supports PDF documents (.pdf) up to 15MB in size. We recommend uploading clean, text-based PDFs for the best results.
+                                    </AccordionContent>
+                                </AccordionItem>
+                            </div>
                         </Accordion>
                     </div>
                 </div>
@@ -191,3 +199,5 @@ export default function NeoXPage() {
     </div>
   );
 }
+
+    
