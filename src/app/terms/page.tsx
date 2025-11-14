@@ -7,16 +7,16 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 
+const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
+    <div className="mb-8">
+        <h2 className="text-2xl font-bold text-primary mb-3">{title}</h2>
+        <div className="space-y-4 text-muted-foreground">{children}</div>
+    </div>
+);
+
 export default function TermsPage() {
     const { resolvedTheme } = useTheme();
     const logoSrc = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
-
-    const Section = ({ title, children }: { title: string, children: React.ReactNode }) => (
-        <div className="mb-8">
-            <h2 className="text-2xl font-bold text-primary mb-3">{title}</h2>
-            <div className="space-y-4 text-muted-foreground">{children}</div>
-        </div>
-    );
 
     return (
         <div className="bg-background text-foreground">
