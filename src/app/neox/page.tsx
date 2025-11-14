@@ -154,7 +154,7 @@ export default function NeoXPage() {
                                 <AccordionItem value="item-3" className="border-b-0">
                                     <AccordionTrigger>What happens to my uploaded documents?</AccordionTrigger>
                                     <AccordionContent>
-                                        We take your privacy seriously. Your documents are securely uploaded and used solely for the purpose of generating your requested analysis (predictions, quizzes, or chat responses). We do not share your documents or use them for any other purpose. Please see our Privacy Policy for full details.
+                                        We take your privacy seriously. Your documents are securely uploaded and used solely for the purpose of generating your requested analysis (predictions, quizzes, or chat responses). We do not share your documents or use them for any other purpose. Please see our <Link href="/privacy" className="text-primary hover:underline">Privacy Policy</Link> for full details.
                                     </AccordionContent>
                                 </AccordionItem>
                             </div>
@@ -192,5 +192,3 @@ export default function NeoXPage() {
     </div>
   );
 }
-
-    
