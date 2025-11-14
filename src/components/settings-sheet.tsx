@@ -11,7 +11,7 @@ import { Button } from './ui/button';
 import { ThemeToggle } from './theme-toggle';
 import { Separator } from './ui/separator';
 import { useUser } from '@/firebase';
-import { LogOut, FileText, Heart, BrainCircuit, Github, Bug, Lightbulb, User } from 'lucide-react';
+import { LogOut, FileText, Heart, BrainCircuit, Bug, Lightbulb, User } from 'lucide-react';
 import Link from 'next/link';
 import { ScrollArea } from './ui/scroll-area';
 
@@ -66,11 +66,10 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
 
                 <div className='space-y-1'>
                     <h3 className="px-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">About & Help</h3>
-                    <SettingItem href="#" icon={<FileText className="h-4 w-4" />}>Terms & Conditions</SettingItem>
-                    <SettingItem href="#" icon={<FileText className="h-4 w-4" />}>Privacy Policy</SettingItem>
+                    <SettingItem href="/terms" icon={<FileText className="h-4 w-4" />}>Terms & Conditions</SettingItem>
+                    <SettingItem href="/privacy" icon={<FileText className="h-4 w-4" />}>Privacy Policy</SettingItem>
                     <SettingItem href="#" icon={<Lightbulb className="h-4 w-4" />}>Suggest a Feature</SettingItem>
                     <SettingItem href="#" icon={<Bug className="h-4 w-4" />}>Report a Bug</SettingItem>
-                    <SettingItem href="#" icon={<Github className="h-4 w-4" />}>Source Code</SettingItem>
                 </div>
                 
                 <Separator />
