@@ -228,7 +228,7 @@ export default function Home() {
                         viewport={{ once: true, amount: 0.5 }}
                         transition={{ duration: 0.7 }}
                     >
-                        <Image src="https://storage.googleapis.com/project-spark-b24962d2-e516-4af5-8134-927429188e02/r4/user_f2dc9835-149d-43c2-a9b0-37728255b850/665476a6-f288-4447-9759-92c89e211832.png" alt="Student with heavy backpack" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="child sad backpack" />
+                        <Image src="/img/lighten the bag.png" alt="Student with heavy backpack" width={600} height={400} className="rounded-xl shadow-2xl" data-ai-hint="child sad backpack" />
                         <h2 className="text-3xl font-bold mt-6 mb-3 text-destructive">The Unseen Burden</h2>
                         <p className="text-muted-foreground">Millions of students suffer from chronic back pain and spinal issues from carrying heavy backpacks. This physical strain hinders their ability to learn and thrive.</p>
                     </motion.div>
