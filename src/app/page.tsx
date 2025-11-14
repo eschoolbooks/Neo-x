@@ -88,7 +88,7 @@ export default function Home() {
         <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-background via-orange-950/20 to-background opacity-50"></div>
             <div className="absolute inset-0 bg-grid-slow"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.3),rgba(255,255,255,0))]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.3),rgba(255,255,255,0))] animate-pulse-strong"></div>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                 <motion.div
@@ -157,7 +157,7 @@ export default function Home() {
              <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12 pt-10">
                     <h2 className="text-3xl sm:text-4xl font-bold mb-2">
-                        <span className="text-orange-500">NEO X</span>
+                        <span className="text-primary">NEO X</span>
                     </h2>
                     <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
                         The most powerful and accurate question prediction AI.
@@ -166,7 +166,7 @@ export default function Home() {
                         <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
                         <a href="/ai-hub">Exam Predictor</a>
                         </Button>
-                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6 bg-orange-500 hover:bg-orange-600 text-white" variant="default">
+                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6 border-2 border-orange-500" variant="default">
                             <a href="/ai-hub">
                                 Try Beta <ArrowRight className="ml-2 h-5 w-5" />
                             </a>
@@ -325,4 +325,3 @@ export default function Home() {
     </div>
   );
 }
-
