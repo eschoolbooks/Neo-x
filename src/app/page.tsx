@@ -61,11 +61,11 @@ export default function Home() {
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex items-center gap-2">
             {logoSrc && <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="NeoX Logo" width={32} height={32} className="sm:h-10 sm:w-10" priority />} 
-            <span className="font-bold text-lg sm:text-xl text-foreground">Neo X</span>
+            <span className="font-bold text-lg sm:text-xl text-foreground">ESchoolBooks</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
             <a href="/" className="hover:text-primary transition-colors">Home</a>
-            <a href="/ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
+            <a href="/ai-hub" className="hover:text-primary transition-colors">Neo X</a>
             <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
           </div>
