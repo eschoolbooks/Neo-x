@@ -25,19 +25,12 @@ const FeatureCard = ({ icon, title, description, delay = 0 }: { icon: React.Reac
 );
 
 export default function NeoXPage() {
-  const { resolvedTheme } = useTheme();
-  const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
-
-  useEffect(() => {
-    setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
-  }, [resolvedTheme]);
-
   return (
     <div className="bg-background text-foreground overflow-x-hidden">
         <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
             <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
             <a href="/neox" className="flex items-center gap-2">
-                {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40} priority />}
+                <Image src="/ESBlogo.png" alt="E-SchoolBooks Logo" width={40} height={40} priority />
                 <span className="font-bold text-xl text-foreground">Neo X</span>
             </a>
             <div className="hidden md:flex items-center gap-8">
@@ -181,7 +174,7 @@ export default function NeoXPage() {
         
         <footer id="contact" className="py-16 bg-background border-t border-border/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={80} height={80} className="mx-auto mb-4"/>}
+                <Image src="/ESBlogo.png" alt="E-SchoolBooks Logo" width={80} height={80} className="mx-auto mb-4"/>
                 <h2 className="text-2xl font-bold mb-2">Join E-SchoolBooks on This Journey</h2>
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
