@@ -260,7 +260,7 @@ export default function Home() {
                         <p className="text-lg md:text-xl max-w-2xl mx-auto mb-8 opacity-90">
                             Your small contribution has a massive impact. It helps us digitize another book, save another tree, and ease the burden for another child. Join the movement.
                         </p>
-                        <Button variant="secondary" size="lg" asChild className="rounded-full text-lg px-10 py-6 bg-white text-primary hover:bg-gray-200">
+                        <Button variant="secondary" size="lg" asChild className="rounded-full text-lg px-10 py-6 bg-white text-primary hover:bg-gray-200 block sm:inline-block mx-auto">
                            <a href="/donate">
                              Donate Securely <Heart className="ml-2 h-5 w-5 fill-current"/>
                            </a>
