@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Heart, Target, Lightbulb, IndianRupee, HandHeart, BookHeart, School, Users, ArrowDown, CheckCircle } from 'lucide-react';
 import CountUp from 'react-countup';
 import { useTheme } from 'next-themes';
+import Link from 'next/link';
 
 export default function DonatePage() {
   const [name, setName] = useState('');
@@ -338,6 +339,11 @@ export default function DonatePage() {
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
                 </p>
+                <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground mb-8">
+                    <Link href="/terms" className="hover:text-primary">Terms & Conditions</Link>
+                    <span>•</span>
+                    <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
+                </div>
                 <div className="mt-8 text-sm text-muted-foreground">
                     © {new Date().getFullYear()} E-SchoolBooks Project by Theo. All Rights Reserved.
                 </div>

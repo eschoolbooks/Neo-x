@@ -10,6 +10,7 @@ import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users } from 'lucide-react'
 import CountUp from 'react-countup';
 import { useUser } from '@/firebase';
 import { useTheme } from 'next-themes';
+import Link from 'next/link';
 
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
@@ -50,9 +51,15 @@ export default function Home() {
   const { user } = useUser();
   const { resolvedTheme } = useTheme();
   const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+  const [neoXLogoSrc, setNeoXLogoSrc] = useState('/NeoX_Logo_Light.svg');
+
 
   useEffect(() => {
-    setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
+    // For main page logo
+    setLogoSrc("https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8");
+    
+    // For theme-aware NeoX logo
+    setNeoXLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
   }, [resolvedTheme]);
   
   return (
@@ -60,12 +67,12 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex items-center gap-2">
-            {logoSrc && <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="NeoX Logo" width={32} height={32} className="sm:h-10 sm:w-10 rounded-full" priority />} 
+            {logoSrc && <Image src={logoSrc} alt="ESchoolBooks Logo" width={32} height={32} className="sm:h-10 sm:w-10 rounded-full" priority />} 
             <span className="font-bold text-lg sm:text-xl text-foreground">ESchoolBooks</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
             <a href="/" className="hover:text-orange-500 transition-colors">Home</a>
-            <a href="/ai-hub" className="hover:text-orange-500 transition-colors">Neo X</a>
+            <a href="/neox" className="hover:text-orange-500 transition-colors">Neo X</a>
             <a href="/donate" className="hover:text-orange-500 transition-colors">Donate</a>
             <a href="#contact" className="hover:text-orange-500 transition-colors">Contact</a>
           </div>
@@ -156,18 +163,19 @@ export default function Home() {
         <section id="ai-hub" className="py-20 lg:py-32 bg-grid">
              <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12 pt-10">
+                    {neoXLogoSrc && <Image src={neoXLogoSrc} alt="NeoX Logo" width={80} height={80} className="mx-auto mb-4"/>}
                     <h2 className="text-3xl sm:text-4xl font-bold mb-2">
-                        <span className="text-primary">NEO X</span>
+                        <span style={{ color: 'hsl(var(--primary))' }}>NEO X</span>
                     </h2>
                     <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
                         The most powerful and accurate question prediction AI.
                     </p>
                     <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
-                        <a href="/ai-hub">Exam Predictor</a>
+                        <a href="/neox">Exam Predictor</a>
                         </Button>
-                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6 border-2 border-orange-500" variant="default">
-                            <a href="/ai-hub">
+                        <Button size="lg" asChild className="rounded-full text-lg px-8 py-6 border-2 border-orange-500 bg-primary hover:bg-primary/90 text-primary-foreground" variant="default">
+                            <a href="/neox">
                                 Try Beta <ArrowRight className="ml-2 h-5 w-5" />
                             </a>
                         </Button>
@@ -307,7 +315,7 @@ export default function Home() {
         {/* Contact Section */}
         <footer id="contact" className="py-16 bg-background border-t border-border/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                {logoSrc && <Image src="https://media.licdn.com/dms/image/v2/D4E0BAQETuF_JEMo6MQ/company-logo_200_200/company-logo_200_200/0/1685716892227?e=2147483647&v=beta&t=vAW_vkOt-KSxA9tSNdgNszeTgz9l_UX0nkz0S_jDSz8" alt="ESchoolBooks Logo" width={80} height={80} className="mx-auto mb-4"/>}
+                {logoSrc && <Image src={logoSrc} alt="ESchoolBooks Logo" width={80} height={80} className="mx-auto mb-4"/>}
                 <h2 className="text-2xl font-bold mb-2">Join Us on This Journey</h2>
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
@@ -315,6 +323,11 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 text-muted-foreground">
                     <a href="mailto:info@e-schoolbooks.in" className="flex items-center gap-2 hover:text-orange-500"><Mail className="h-5 w-5" /> info@e-schoolbooks.in</a>
                     <a href="tel:+918281543610" className="flex items-center gap-2 hover:text-orange-500"><Phone className="h-5 w-5" /> +91-8281543610</a>
+                </div>
+                 <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground my-8">
+                    <Link href="/terms" className="hover:text-primary">Terms & Conditions</Link>
+                    <span>•</span>
+                    <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
                 </div>
                 <div className="mt-8 text-sm text-muted-foreground">
                     © {new Date().getFullYear()} E-SchoolBooks Project by Theo. All Rights Reserved.
