@@ -16,6 +16,7 @@ export default {
         'float': 'float 6s ease-in-out infinite',
         'fade-in-up': 'fade-in-up 1s ease-out forwards',
         'pulse-strong': 'pulse-strong 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'marquee': 'marquee 15s linear infinite',
       },
       keyframes: {
         'accordion-down': {
@@ -61,7 +62,11 @@ export default {
               opacity: '0.7',
               transform: 'scale(1.05)',
             },
-        }
+        },
+        'marquee': {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
+        },
       },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
@@ -112,3 +117,5 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+
+    

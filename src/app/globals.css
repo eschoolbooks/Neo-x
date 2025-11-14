@@ -63,6 +63,13 @@ body {
   }
 }
 
+@layer utilities {
+    .animate-marquee:hover {
+        animation-play-state: paused;
+    }
+}
+
+
 .bg-grid {
     background-color: hsl(var(--background));
     background-image:
@@ -75,8 +82,11 @@ body {
 .bg-grid-slow {
     background-color: hsl(var(--background));
     background-image:
-        linear-gradient(to right, hsl(var(--border)) 1px, transparent 1px),
+        linear-gradient(to right, hsl(var(--border)) 1px, transparent
+        1px),
         linear-gradient(to bottom, hsl(var(--border)) 1px, transparent 1px);
     background-size: 8rem 8rem;
     animation: grid 30s linear infinite;
 }
+
+    

@@ -529,7 +529,6 @@ function AiHubContent() {
             });
 
             addFooter();
-
             pdf.save(`E-SchoolBooks-Prediction-${finalExamType}-${new Date().toISOString().split('T')[0]}.pdf`);
 
         } catch (error) {
@@ -580,16 +579,22 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                 </label>
             </div>
             <div className="space-y-2 pt-2">
-                 {files.map((file, index) => (
-                    <div key={index} className="flex items-start justify-between text-sm p-3 bg-muted rounded-lg border">
-                        <div className="flex items-start gap-3">
-                            <FileIcon className="h-8 w-8 text-muted-foreground flex-shrink-0 mt-1" />
-                            <div className="flex flex-col">
-                                <span className="font-semibold text-foreground truncate max-w-xs">{file.name}</span>
+                {files.map((file, index) => (
+                    <div key={index} className="flex items-center justify-between text-sm p-3 bg-muted rounded-lg border gap-3">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                            <FileIcon className="h-8 w-8 text-muted-foreground flex-shrink-0" />
+                            <div className="flex flex-col overflow-hidden">
+                                <div className="overflow-hidden whitespace-nowrap">
+                                    <span className="font-semibold text-foreground animate-marquee hover:pause">
+                                        {file.name}
+                                    </span>
+                                </div>
                                 <span className="text-muted-foreground">{formatFileSize(file.size)}</span>
                             </div>
                         </div>
-                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => onRemoveFile(index)}><X className="h-4 w-4" /></Button>
+                        <Button type="button" variant="ghost" size="icon" className="h-7 w-7 flex-shrink-0" onClick={() => onRemoveFile(index)}>
+                            <X className="h-4 w-4" />
+                        </Button>
                     </div>
                 ))}
             </div>
@@ -1021,3 +1026,5 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
+
+    
