@@ -57,8 +57,8 @@ export default function Home() {
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex items-center gap-2">
-            {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40} />}
-            <span className="font-bold text-xl text-foreground">Neo X</span>
+            {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={32} height={32} className="sm:h-10 sm:w-10" />}
+            <span className="font-bold text-lg sm:text-xl text-foreground">Neo X</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
             <a href="/" className="hover:text-primary transition-colors">Home</a>
@@ -99,7 +99,7 @@ export default function Home() {
                     <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
                         A mission to make students able to self-learn, choose their own future, and build a great nation by helping today's generation find their pathway.
                     </p>
-                    <div className="flex justify-center gap-4">
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="default">
                             <a href="/auth">
                                 Get Started Free <ArrowRight className="ml-2 h-5 w-5" />
@@ -159,7 +159,7 @@ export default function Home() {
                     <p className="max-w-3xl mx-auto text-muted-foreground mb-8">
                         The most powerful and accurate question prediction AI.
                     </p>
-                    <div className="flex justify-center gap-4">
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Button size="lg" asChild className="rounded-full text-lg px-8 py-6" variant="secondary">
                         <a href="/donate">Donate to Support</a>
                         </Button>
@@ -189,7 +189,7 @@ export default function Home() {
                     <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
                         Join our mission to provide free digital textbooks, reduce the physical burden on students, and create an innovative, eco-friendly learning ecosystem for the next generation.
                     </p>
-                    <div className="flex justify-center gap-4">
+                    <div className="flex flex-col sm:flex-row justify-center gap-4">
                         <Button size="lg" asChild className="rounded-full text-lg px-10 py-6" variant="default">
                             <a href="/ai-hub">
                                 Explore AI Hub <ArrowRight className="ml-2 h-5 w-5" />
