@@ -302,11 +302,11 @@ export default function Home() {
                             transition={{ duration: 0.5, delay: i * 0.1 }}
                         >
                             <Image
-                                src={`https://picsum.photos/seed/${i+10}/100/100`}
+                                src={`/team/member-${i + 1}.jpg`}
                                 alt={`Team member ${i + 1}`}
                                 width={100}
                                 height={100}
-                                className="rounded-full border-4 border-background"
+                                className="rounded-full border-4 border-background object-cover"
                                 data-ai-hint="person portrait"
                             />
                         </motion.div>
