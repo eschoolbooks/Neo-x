@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users } from 'lucide-react';
+import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users, Sparkles } from 'lucide-react';
 import CountUp from 'react-countup';
 import { useUser } from '@/firebase';
 import { useTheme } from 'next-themes';
@@ -88,6 +88,18 @@ export default function Home() {
       </header>
 
       <main>
+        <div className="pt-20">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                 <Link href="/neox">
+                    <div className="group relative mx-auto flex max-w-fit flex-row items-center justify-center rounded-full border bg-card/80 px-4 py-2 text-sm text-muted-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-muted/60">
+                         <Sparkles className="mr-2 h-4 w-4 text-primary animate-pulse" />
+                        <p className="text-sm font-medium">Be the first to try our beta</p>
+                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </div>
+                </Link>
+            </div>
+        </div>
+
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-background via-orange-950/20 to-background opacity-50"></div>
@@ -335,3 +347,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
