@@ -88,23 +88,11 @@ export default function Home() {
       </header>
 
       <main>
-        <div className="pt-20">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-4">
-                 <Link href="/neox">
-                    <div className="group relative mx-auto flex max-w-fit flex-row items-center justify-center rounded-full border bg-card/80 px-4 py-2 text-sm text-muted-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-muted/60">
-                         <Sparkles className="mr-2 h-4 w-4 text-primary animate-pulse" />
-                        <p className="text-sm font-medium">Be the first to try our beta</p>
-                        <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    </div>
-                </Link>
-            </div>
-        </div>
-
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-background via-orange-950/20 to-background opacity-50"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-background via-blue-950/20 to-background opacity-50"></div>
             <div className="absolute inset-0 bg-grid-slow"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,hsl(var(--primary)_/_0.3),rgba(255,255,255,0))] animate-pulse-strong"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,hsl(var(--primary)_/_0.3),rgba(255,255,255,0))]"></div>
 
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
                 <motion.div
@@ -112,6 +100,13 @@ export default function Home() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
                 >
+                    <Link href="/neox" className="mb-8 inline-block">
+                        <div className="group relative mx-auto flex max-w-fit flex-row items-center justify-center rounded-full border bg-card/80 px-4 py-2 text-sm text-muted-foreground shadow-lg backdrop-blur-sm transition-all hover:bg-muted/60">
+                            <Sparkles className="mr-2 h-4 w-4 text-primary animate-pulse" />
+                            <p className="text-sm font-medium">Be the first to try our beta</p>
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                        </div>
+                    </Link>
                     <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter text-foreground mb-6">
                         Taking Education<br /><span className="text-orange-500">beyond Boundaries</span>
                     </h1>
@@ -347,5 +342,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
