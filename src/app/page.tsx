@@ -293,24 +293,21 @@ export default function Home() {
                     E-SchoolBooks is a project by <strong className="text-orange-500">"Theo,"</strong> a non-profit founded by Kevin Anjo. We are a passionate force of 15 educators, technologists, and dreamers united for change.
                 </p>
                 <div className="flex justify-center -space-x-4">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ opacity: 0, scale: 0.5 }}
-                            whileInView={{ opacity: 1, scale: 1 }}
-                            viewport={{ once: true }}
-                            transition={{ duration: 0.5, delay: i * 0.1 }}
-                        >
-                            <Image
-                                src={`/team/member-${i + 1}.jpg`}
-                                alt={`Team member ${i + 1}`}
-                                width={100}
-                                height={100}
-                                className="rounded-full border-4 border-background object-cover"
-                                data-ai-hint="person portrait"
-                            />
-                        </motion.div>
-                    ))}
+                    <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0 }}>
+                        <Image src="/team/member-1.webp" alt="Team member 1" width={100} height={100} className="rounded-full border-4 border-background object-cover" data-ai-hint="person portrait" />
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
+                        <Image src="/team/member-2.webp" alt="Team member 2" width={100} height={100} className="rounded-full border-4 border-background object-cover" data-ai-hint="person portrait" />
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
+                        <Image src="/team/member-3.webp" alt="Team member 3" width={100} height={100} className="rounded-full border-4 border-background object-cover" data-ai-hint="person portrait" />
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.3 }}>
+                        <Image src="/team/member-4.webp" alt="Team member 4" width={100} height={100} className="rounded-full border-4 border-background object-cover" data-ai-hint="person portrait" />
+                    </motion.div>
+                    <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }}>
+                        <Image src="/team/member-5.webp" alt="Team member 5" width={100} height={100} className="rounded-full border-4 border-background object-cover" data-ai-hint="person portrait" />
+                    </motion.div>
                 </div>
             </div>
         </section>
@@ -342,3 +339,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
