@@ -11,7 +11,7 @@ import CountUp from 'react-countup';
 import { useUser } from '@/firebase';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
-
+import type { Metadata } from 'next';
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
   const controls = useAnimation();
@@ -61,9 +61,6 @@ export default function Home() {
   
   return (
     <div className="bg-background text-foreground overflow-x-hidden">
-        <head>
-            <link rel="icon" href="/ESBlogo.png" sizes="any" />
-        </head>
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="#" className="flex items-center gap-2">
