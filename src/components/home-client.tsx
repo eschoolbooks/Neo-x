@@ -292,19 +292,19 @@ export default function HomeClient() {
                 </p>
                 <div className="flex justify-center -space-x-4">
                     <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0 }}>
-                        <Image src="/team/member-1.jpg" alt="Team member 1" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
+                        <Image src="/Team/Abinbn.JPG" alt="Team member 1" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.1 }}>
-                        <Image src="/team/member-2.jpg" alt="Team member 2" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
+                        <Image src="/Team/Amal.jpeg" alt="Team member 2" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.2 }}>
-                        <Image src="/team/member-3.jpg" alt="Team member 3" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
+                        <Image src="/Team/Kevin.jpeg" alt="Team member 3" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.3 }}>
-                        <Image src="/team/member-4.jpg" alt="Team member 4" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
+                        <Image src="/Team/Sumesh.jpeg" alt="Team member 4" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
                     </motion.div>
                     <motion.div initial={{ opacity: 0, scale: 0.5 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.4 }}>
-                        <Image src="/team/member-5.jpg" alt="Team member 5" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
+                        <Image src="/Team/Milton.jpeg" alt="Team member 5" width={100} height={100} className="rounded-full border-4 border-background" data-ai-hint="person portrait" />
                     </motion.div>
                 </div>
             </div>
