@@ -5,8 +5,8 @@
  *
  * - generateQuiz - A function that analyzes documents and creates a multiple-choice quiz.
  */
-
-import {ai} from '@/ai/genkit';
+import { generate } from 'genkit/ai';
+import { geminiPro } from '@genkit-ai/google-genai';
 import {
   type GenerateQuizInput,
   GenerateQuizInputSchema,
@@ -16,15 +16,13 @@ import {
 
 
 export async function generateQuiz(input: GenerateQuizInput): Promise<Quiz> {
-  return generateQuizFlow(input);
-}
+    if (input.documents.length === 0) {
+      throw new Error("Please upload at least one textbook or question paper.");
+    }
 
-const generateQuizPrompt = ai.definePrompt({
-  name: 'generateQuizPrompt',
-  model: 'googleai/gemini-2.5-flash-lite',
-  input: {schema: GenerateQuizInputSchema},
-  output: {schema: QuizSchema},
-  prompt: `You are Neo X, an AI designed to help students learn. Your task is to generate a multiple-choice quiz based on the provided document(s).
+    const result = await generate({
+        model: geminiPro,
+        prompt: `You are Neo X, an AI designed to help students learn. Your task is to generate a multiple-choice quiz based on the provided document(s).
 
 You must analyze the content of the following document(s) to create the quiz.
 {{#if documents}}
@@ -46,26 +44,18 @@ For each question:
 
 IMPORTANT: Your response MUST be a valid JSON object that strictly adheres to the provided output schema. Do NOT include any extra text, markdown, or explanations outside of the JSON structure.
 `,
-});
+        input: input,
+        output: {
+            schema: QuizSchema,
+        },
+        config: {
+            apiKey: process.env.GOOGLE_GEMINI_API_KEY,
+        },
+    });
 
-
-const generateQuizFlow = ai.defineFlow(
-  {
-    name: 'generateQuizFlow',
-    inputSchema: GenerateQuizInputSchema,
-    outputSchema: QuizSchema,
-    experimentalRetries: 3, // Add retry logic
-  },
-  async (input) => {
-    if (input.documents.length === 0) {
-      throw new Error("Please upload at least one textbook or question paper.");
-    }
-    const {output} = await generateQuizPrompt(input);
+    const output = result.output();
     if (!output) {
         throw new Error("The AI model did not return a quiz.");
     }
     return output;
-  }
-);
-
-    
+}

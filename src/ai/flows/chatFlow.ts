@@ -5,8 +5,8 @@
  * - chatWithNeo - A function that handles the conversational chat with Neo X.
  */
 
-import {ai} from '@/ai/genkit';
-import {z} from 'zod';
+import { generate } from 'genkit/ai';
+import { geminiPro } from '@genkit-ai/google-genai';
 import {
   type ChatWithNeoInput,
   ChatWithNeoInputSchema,
@@ -15,15 +15,9 @@ import {
 } from './chatFlowSchemas';
 
 export async function chatWithNeo(input: ChatWithNeoInput): Promise<ChatWithNeoOutput> {
-  return chatWithNeoFlow(input);
-}
-
-const chatPrompt = ai.definePrompt({
-  name: 'chatWithNeoPrompt',
-  model: 'googleai/gemini-2.5-flash-lite',
-  input: {schema: ChatWithNeoInputSchema},
-  output: {schema: ChatWithNeoOutputSchema},
-  prompt: `You are Neo X, an advanced AI exam assistant from E-SchoolBooks. Your personality is helpful, encouraging, and an expert in educational topics. Your goal is to help the user understand concepts and answer their questions based on the provided documents and your general knowledge.
+    const result = await generate({
+        model: geminiPro,
+        prompt: `You are Neo X, an advanced AI exam assistant from E-SchoolBooks. Your personality is helpful, encouraging, and an expert in educational topics. Your goal is to help the user understand concepts and answer their questions based on the provided documents and your general knowledge.
 
 Keep your answers concise and easy to understand.
 
@@ -44,19 +38,18 @@ These are the primary source of information. Refer to them as much as possible.
 - user: {{{query}}}
 
 Based on the conversation history, the provided documents, and the user's new question, provide a helpful response.`,
-});
-
-const chatWithNeoFlow = ai.defineFlow(
-  {
-    name: 'chatWithNeoFlow',
-    inputSchema: ChatWithNeoInputSchema,
-    outputSchema: ChatWithNeoOutputSchema,
-  },
-  async (input) => {
-    const {output} = await chatPrompt(input);
+        input: input,
+        output: {
+            schema: ChatWithNeoOutputSchema,
+        },
+        config: {
+            apiKey: process.env.GOOGLE_GEMINI_API_KEY,
+        },
+    });
+    
+    const output = result.output();
     if (!output) {
       throw new Error("The AI model did not return an output.");
     }
     return output;
-  }
-);
+}

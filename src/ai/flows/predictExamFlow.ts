@@ -5,25 +5,26 @@
  * - predictExam - A function that analyzes textbooks and past papers to predict exam topics.
  */
 
-import {ai} from '@/ai/genkit';
+import { generate } from 'genkit/ai';
+import { geminiPro } from '@genkit-ai/google-genai';
 import {
   type PredictExamInput,
   PredictExamInputSchema,
   type PredictExamOutput,
   PredictExamOutputSchema,
 } from './predictExamSchemas';
+import { z } from 'zod';
 
 
 export async function predictExam(input: PredictExamInput): Promise<PredictExamOutput> {
-  return predictExamFlow(input);
-}
-
-const predictExamPrompt = ai.definePrompt({
-  name: 'predictExamPrompt',
-  model: 'googleai/gemini-2.5-flash-lite',
-  input: {schema: PredictExamInputSchema},
-  output: {schema: PredictExamOutputSchema},
-  prompt: `You are Neo X, an advanced AI exam forecaster specializing in predicting questions for competitive exams in India. Your goal is to analyze the provided materials and predict the most important topics for the upcoming '{{examType}}' exam.
+  // A safeguard in case no files are provided.
+  if (input.documents.length === 0) {
+    throw new Error("Please upload at least one textbook or question paper.");
+  }
+  
+  const result = await generate({
+      model: geminiPro,
+      prompt: `You are Neo X, an advanced AI exam forecaster specializing in predicting questions for competitive exams in India. Your goal is to analyze the provided materials and predict the most important topics for the upcoming '{{examType}}' exam.
 
 Use the following materials for your analysis. You must analyze the content of all provided documents.
 {{#if documents}}
@@ -43,24 +44,20 @@ Based on a thorough analysis of these documents and your general knowledge of cu
 2.  **Study Recommendations**: A list of actionable study recommendations based on your analysis to help a student focus their preparation effectively.
 
 Your analysis must be sharp, insightful, and tailored to the '{{examType}}' exam.`,
-});
+      input: input,
+      output: {
+        schema: PredictExamOutputSchema,
+      },
+      config: {
+        // Pass the API key at runtime from environment variables
+        apiKey: process.env.GOOGLE_GEMINI_API_KEY,
+      },
+  });
 
+  const output = result.output();
 
-const predictExamFlow = ai.defineFlow(
-  {
-    name: 'predictExamFlow',
-    inputSchema: PredictExamInputSchema,
-    outputSchema: PredictExamOutputSchema,
-  },
-  async (input) => {
-    // A safeguard in case no files are provided.
-    if (input.documents.length === 0) {
-      throw new Error("Please upload at least one textbook or question paper.");
-    }
-    const {output} = await predictExamPrompt(input);
-    if (!output) {
-        throw new Error("The AI model did not return an output.");
-    }
-    return output;
+  if (!output) {
+      throw new Error("The AI model did not return an output.");
   }
-);
+  return output;
+}

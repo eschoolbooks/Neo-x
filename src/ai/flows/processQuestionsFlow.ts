@@ -6,7 +6,8 @@
  * - processQuestions - A function that analyzes a document and extracts questions into a structured "TOON" format.
  */
 
-import { ai } from '@/ai/genkit';
+import { generate } from 'genkit/ai';
+import { geminiPro } from '@genkit-ai/google-genai';
 import {
   type ProcessQuestionsInput,
   ProcessQuestionsInputSchema,
@@ -15,15 +16,9 @@ import {
 } from './processQuestionsSchemas';
 
 export async function processQuestions(input: ProcessQuestionsInput): Promise<ProcessedQuestion[]> {
-  return processQuestionsFlow(input);
-}
-
-const processQuestionsPrompt = ai.definePrompt({
-  name: 'processQuestionsPrompt',
-  model: 'googleai/gemini-2.5-flash-lite',
-  input: { schema: ProcessQuestionsInputSchema },
-  output: { schema: ProcessedQuestionSchema.array() },
-  prompt: `You are a highly intelligent data processing engine. Your task is to analyze the provided document, which is a question paper, and extract every question into a structured JSON format.
+  const result = await generate({
+    model: geminiPro,
+    prompt: `You are a highly intelligent data processing engine. Your task is to analyze the provided document, which is a question paper, and extract every question into a structured JSON format.
 
 You have been given metadata about this question paper:
 - Subject: {{subject}}
@@ -47,25 +42,18 @@ You have been given metadata about this question paper:
 
 IMPORTANT: Your final output MUST be a valid JSON array of question objects and nothing else. Do not include any explanatory text, markdown formatting, or any content outside of the JSON array.
 `,
-});
+    input: input,
+    output: {
+      schema: ProcessedQuestionSchema.array(),
+    },
+    config: {
+      apiKey: process.env.GOOGLE_GEMINI_API_KEY,
+    },
+  });
 
-const processQuestionsFlow = ai.defineFlow(
-  {
-    name: 'processQuestionsFlow',
-    inputSchema: ProcessQuestionsInputSchema,
-    outputSchema: ProcessedQuestionSchema.array(),
-    experimentalRetries: 2,
-  },
-  async (input) => {
-    const { output } = await processQuestionsPrompt(input);
-    if (!output) {
-      throw new Error("The AI model did not return a structured question array.");
-    }
-    // The AI is already tasked with populating these fields.
-    // This mapping step is redundant if the prompt is followed correctly.
-    // If issues arise, this is where to augment the AI output.
-    return output;
+  const output = result.output();
+  if (!output) {
+    throw new Error("The AI model did not return a structured question array.");
   }
-);
-
-    
+  return output;
+}
