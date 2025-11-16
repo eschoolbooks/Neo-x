@@ -35,7 +35,7 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
       {
-        protocol: 'https',
+        protocol: 'https' ,
         hostname: 'storage.googleapis.com',
         port: '',
         pathname: '/**',
@@ -44,6 +44,7 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     allowedDevOrigins: ["https://6000-firebase-studio-1750796956575.cluster-zumahodzirciuujpqvsniawo3o.cloudworkstations.dev"],
+    instrumentationHook: true,
   }
 };
 
