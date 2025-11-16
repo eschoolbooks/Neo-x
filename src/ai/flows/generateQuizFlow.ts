@@ -5,7 +5,7 @@
  *
  * - generateQuiz - A function that analyzes documents and creates a multiple-choice quiz.
  */
-import { generate } from 'genkit/ai';
+import { generate } from 'genkit';
 import { geminiPro } from '@genkit-ai/google-genai';
 import {
   type GenerateQuizInput,

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow for predicting exam topics.
@@ -5,7 +6,7 @@
  * - predictExam - A function that analyzes textbooks and past papers to predict exam topics.
  */
 
-import { generate } from 'genkit/ai';
+import { generate } from 'genkit';
 import { geminiPro } from '@genkit-ai/google-genai';
 import {
   type PredictExamInput,

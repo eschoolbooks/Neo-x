@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A conversational AI flow for chatting with Neo X.
@@ -5,7 +6,7 @@
  * - chatWithNeo - A function that handles the conversational chat with Neo X.
  */
 
-import { generate } from 'genkit/ai';
+import { generate } from 'genkit';
 import { geminiPro } from '@genkit-ai/google-genai';
 import {
   type ChatWithNeoInput,

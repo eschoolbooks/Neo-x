@@ -6,7 +6,7 @@
  * - processQuestions - A function that analyzes a document and extracts questions into a structured "TOON" format.
  */
 
-import { generate } from 'genkit/ai';
+import { generate } from 'genkit';
 import { geminiPro } from '@genkit-ai/google-genai';
 import {
   type ProcessQuestionsInput,
