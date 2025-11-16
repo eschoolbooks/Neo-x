@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut, Settings, History, File as FileIcon } from 'lucide-react';
+import { ArrowRight, BrainCircuit, CheckCircle, Download, FileQuestion, FileUp, GraduationCap, Lightbulb, LoaderCircle, MessageSquare, Plus, Sparkles, TriangleAlert, X, BookCheck, Info, LogOut, Settings, History, File as FileIcon, UploadCloud } from 'lucide-react';
 import { predictExam } from '@/ai/flows/predictExamFlow';
 import type { PredictExamOutput } from '@/ai/flows/predictExamSchemas';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -53,6 +53,7 @@ function AiHubContent() {
     const [isChatting, setIsChatting] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [isHistoryOpen, setIsHistoryOpen] = useState(false);
+    const [isDraggingOver, setIsDraggingOver] = useState(false);
     
     const [prediction, setPrediction] = useState<PredictExamOutput | null>(null);
     const [quiz, setQuiz] = useState<Quiz | null>(null);
@@ -73,10 +74,56 @@ function AiHubContent() {
     const firestore = useFirestore();
     const { resolvedTheme } = useTheme();
     const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+    const dropZoneRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
     }, [resolvedTheme]);
+
+    const handleDragEvents = (e: DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    useEffect(() => {
+        const dragEnter = (e: DragEvent) => {
+            handleDragEvents(e);
+            if (e.dataTransfer?.items && e.dataTransfer.items.length > 0) {
+                setIsDraggingOver(true);
+            }
+        };
+        const dragLeave = (e: DragEvent) => {
+            handleDragEvents(e);
+             // A common issue is dragleave firing on child elements.
+             // This check ensures we only hide the overlay when leaving the window for real.
+            if (e.relatedTarget === null || !dropZoneRef.current?.contains(e.relatedTarget as Node)) {
+                setIsDraggingOver(false);
+            }
+        };
+        const drop = (e: DragEvent) => {
+            handleDragEvents(e);
+            setIsDraggingOver(false);
+            if (e.dataTransfer?.files) {
+                const artificialEvent = {
+                    target: { files: e.dataTransfer.files }
+                } as unknown as React.ChangeEvent<HTMLInputElement>;
+                handleFileChange(artificialEvent);
+            }
+        };
+
+        window.addEventListener('dragenter', dragEnter);
+        window.addEventListener('dragover', handleDragEvents);
+        window.addEventListener('dragleave', dragLeave);
+        window.addEventListener('drop', drop);
+
+        return () => {
+            window.removeEventListener('dragenter', dragEnter);
+            window.removeEventListener('dragover', handleDragEvents);
+            window.removeEventListener('dragleave', dragLeave);
+            window.removeEventListener('drop', drop);
+        };
+    }, []);
+
 
     const handleSignOut = async () => {
         await signOut(auth);
@@ -607,7 +654,13 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
 
     
     return (
-        <div className="bg-background text-foreground min-h-screen">
+        <div ref={dropZoneRef} className="bg-background text-foreground min-h-screen">
+          {isDraggingOver && (
+            <div className="fixed inset-0 bg-primary/20 backdrop-blur-sm z-[99] flex flex-col items-center justify-center pointer-events-none">
+                <UploadCloud className="w-24 h-24 text-primary animate-pulse" />
+                <p className="mt-4 text-2xl font-bold text-primary-foreground">Drop file to upload</p>
+            </div>
+          )}
           <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-lg border-b border-border/20">
             <nav className="flex items-center justify-between h-20 px-4 sm:px-6 lg:px-8">
               <div className="flex items-center gap-4">
@@ -1029,3 +1082,5 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
+
+    
