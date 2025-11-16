@@ -1,0 +1,21 @@
+# Netlify configuration file
+# This file tells Netlify how to build and deploy your Next.js site.
+
+[build]
+  # The command to build your Next.js site
+  command = "next build"
+  
+  # The directory where the build output is placed
+  publish = ".next"
+
+[dev]
+  # Command to run the development server
+  command = "next dev"
+
+  # The port for the development server
+  port = 3000
+
+[[plugins]]
+  # Essential Next.js plugin for Netlify.
+  # This handles server-side rendering, image optimization, and more.
+  package = "@netlify/plugin-nextjs"
