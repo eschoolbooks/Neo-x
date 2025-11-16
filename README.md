@@ -1,5 +1,5 @@
 
-# EMA: Neo X - AI Exam Forecaster
+# ESB: Neo X - AI Exam Predictor
 
 **Neo X** is a powerful, experimental AI exam forecasting assistant developed by **E-SchoolBooks**, a non-profit educational ecosystem. Our core mission is to create a world where learning is accessible, sustainable, and free from physical and financial burdens. E-SchoolBooks is a crowdfunded NGO dedicated to helping students achieve high marks, improve their skills, and find pathways to successful careers. Neo X is the technological spearhead of this mission, leveraging generative AI to provide students with intelligent tools to excel in their studies. Unlike other educational tools, our entire initiative is driven by community support, ensuring that our resources remain free for every student, forever.
 
@@ -67,8 +67,8 @@ To get a local copy up and running, follow these simple steps.
 
 1.  **Clone the repository:**
     ```sh
-    git clone https://github.com/your-repo-url/ema-nextjs.git
-    cd ema-nextjs
+    git clone https://github.com/your-repo-url/Neo-x.git
+    cd Neo-x
     ```
 
 2.  **Install dependencies:**
