@@ -5,11 +5,9 @@
  *
  * - generateQuiz - A function that analyzes documents and creates a multiple-choice quiz.
  */
-import { generate } from 'genkit';
-import { geminiPro } from '@genkit-ai/google-genai';
+import { ai } from '@/ai/genkit';
 import {
   type GenerateQuizInput,
-  GenerateQuizInputSchema,
   type Quiz,
   QuizSchema,
 } from './generateQuizSchemas';
@@ -20,8 +18,7 @@ export async function generateQuiz(input: GenerateQuizInput): Promise<Quiz> {
       throw new Error("Please upload at least one textbook or question paper.");
     }
 
-    const result = await generate({
-        model: geminiPro,
+    const { output } = await ai.generate({
         prompt: `You are Neo X, an AI designed to help students learn. Your task is to generate a multiple-choice quiz based on the provided document(s).
 
 You must analyze the content of the following document(s) to create the quiz.
@@ -53,7 +50,6 @@ IMPORTANT: Your response MUST be a valid JSON object that strictly adheres to th
         },
     });
 
-    const output = result.output();
     if (!output) {
         throw new Error("The AI model did not return a quiz.");
     }

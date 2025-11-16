@@ -6,18 +6,15 @@
  * - processQuestions - A function that analyzes a document and extracts questions into a structured "TOON" format.
  */
 
-import { generate } from 'genkit';
-import { geminiPro } from '@genkit-ai/google-genai';
+import { ai } from '@/ai/genkit';
 import {
   type ProcessQuestionsInput,
-  ProcessQuestionsInputSchema,
   type ProcessedQuestion,
   ProcessedQuestionSchema,
 } from './processQuestionsSchemas';
 
 export async function processQuestions(input: ProcessQuestionsInput): Promise<ProcessedQuestion[]> {
-  const result = await generate({
-    model: geminiPro,
+  const { output } = await ai.generate({
     prompt: `You are a highly intelligent data processing engine. Your task is to analyze the provided document, which is a question paper, and extract every question into a structured JSON format.
 
 You have been given metadata about this question paper:
@@ -51,7 +48,6 @@ IMPORTANT: Your final output MUST be a valid JSON array of question objects and 
     },
   });
 
-  const output = result.output();
   if (!output) {
     throw new Error("The AI model did not return a structured question array.");
   }

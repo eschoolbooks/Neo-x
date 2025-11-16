@@ -6,18 +6,15 @@
  * - chatWithNeo - A function that handles the conversational chat with Neo X.
  */
 
-import { generate } from 'genkit';
-import { geminiPro } from '@genkit-ai/google-genai';
+import { ai } from '@/ai/genkit';
 import {
   type ChatWithNeoInput,
-  ChatWithNeoInputSchema,
   type ChatWithNeoOutput,
   ChatWithNeoOutputSchema,
 } from './chatFlowSchemas';
 
 export async function chatWithNeo(input: ChatWithNeoInput): Promise<ChatWithNeoOutput> {
-    const result = await generate({
-        model: geminiPro,
+    const { output } = await ai.generate({
         prompt: `You are Neo X, an advanced AI exam assistant from E-SchoolBooks. Your personality is helpful, encouraging, and an expert in educational topics. Your goal is to help the user understand concepts and answer their questions based on the provided documents and your general knowledge.
 
 Keep your answers concise and easy to understand.
@@ -48,7 +45,6 @@ Based on the conversation history, the provided documents, and the user's new qu
         },
     });
     
-    const output = result.output();
     if (!output) {
       throw new Error("The AI model did not return an output.");
     }
