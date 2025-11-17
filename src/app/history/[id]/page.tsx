@@ -5,7 +5,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 import { useDoc, useUser, useMemoFirebase } from '@/firebase';
 import { useFirestore } from '@/firebase/provider';
 import { doc, DocumentData } from 'firebase/firestore';
-import { LoaderCircle, ArrowLeft, BrainCircuit, GraduationCap, Lightbulb, CheckCircle, BookCheck, Info, X } from 'lucide-react';
+import { LoaderCircle, ArrowLeft, BrainCircuit, GraduationCap, Lightbulb, CheckCircle, BookCheck, Info, X, FileQuestion } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
@@ -13,6 +13,8 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
 import type { Quiz, QuizQuestion } from '@/ai/flows/generateQuizSchemas';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+
 
 type Prediction = {
     topic: string;
@@ -21,11 +23,17 @@ type Prediction = {
     tags: string[];
 }
 
+type PredictedQuestion = {
+    question: string;
+    answer: string;
+}
+
 type AnalysisDoc = {
     session: {
         exam_type: string;
     };
     predictions: Prediction[];
+    predictedQuestions: PredictedQuestion[];
     study_recommendations: {
         recommendations: string[];
     };
@@ -128,37 +136,54 @@ export default function HistoryPage() {
 
                 <CardContent>
                     {type === 'analysis' && (
-                        <div className="grid md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
+                        <div className="space-y-8">
+                            <div className="grid md:grid-cols-2 gap-8">
                                 <div className="space-y-4">
-                                    {analysisData.predictions?.map((item, index) => (
-                                        <Card key={index} className="bg-background">
-                                            <CardHeader className='pb-2'>
-                                                <CardTitle className="text-lg">{item.topic}</CardTitle>
-                                                <CardDescription>{item.details}</CardDescription>
-                                            </CardHeader>
-                                            <CardContent>
-                                                <div className='flex items-center gap-2'>
-                                                    <Progress value={item.confidence || 0} className="h-2" />
-                                                    <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
+                                    <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Key Topics</h3>
+                                    <div className="space-y-4">
+                                        {analysisData.predictions?.map((item, index) => (
+                                            <Card key={index} className="bg-background">
+                                                <CardHeader className='pb-2'>
+                                                    <CardTitle className="text-lg">{item.topic}</CardTitle>
+                                                    <CardDescription>{item.details}</CardDescription>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <div className='flex items-center gap-2'>
+                                                        <Progress value={item.confidence || 0} className="h-2" />
+                                                        <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
+                                    <ul className="space-y-3">
+                                        {analysisData.study_recommendations?.recommendations.map((rec, index) => (
+                                            <li key={index} className="flex items-start gap-3">
+                                                <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
+                                                <span className="text-muted-foreground">{rec}</span>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </div>
                             </div>
-                            <div className="space-y-4">
-                                <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
-                                <ul className="space-y-3">
-                                    {analysisData.study_recommendations?.recommendations.map((rec, index) => (
-                                        <li key={index} className="flex items-start gap-3">
-                                            <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
-                                            <span className="text-muted-foreground">{rec}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
+                             {analysisData.predictedQuestions && analysisData.predictedQuestions.length > 0 && (
+                                <div className="space-y-4">
+                                    <h3 className="font-bold text-xl flex items-center gap-2"><FileQuestion/> Predicted Questions & Answers</h3>
+                                     <Accordion type="single" collapsible className="w-full space-y-2">
+                                        {analysisData.predictedQuestions.map((qa, index) => (
+                                            <AccordionItem value={`item-${index}`} key={index} className="bg-background rounded-lg border px-4">
+                                                <AccordionTrigger className="text-left hover:no-underline">{qa.question}</AccordionTrigger>
+                                                <AccordionContent className="text-muted-foreground pt-2">
+                                                    {qa.answer}
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        ))}
+                                    </Accordion>
+                                </div>
+                            )}
                         </div>
                     )}
                     

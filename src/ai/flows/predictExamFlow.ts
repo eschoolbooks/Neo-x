@@ -40,7 +40,8 @@ Based on a thorough analysis of these documents and your general knowledge of cu
     - The specific **topic** name.
     - A **confidence score** (from 0 to 100) indicating its likelihood of appearing on the exam.
     - A brief **justification** for your prediction.
-2.  **Study Recommendations**: A list of actionable study recommendations based on your analysis to help a student focus their preparation effectively.
+2.  **Predicted Questions**: A list of up to 10 likely exam questions with their detailed answers.
+3.  **Study Recommendations**: A list of actionable study recommendations based on your analysis to help a student focus their preparation effectively.
 
 Your analysis must be sharp, insightful, and tailored to the '{{examType}}' exam.`,
 });

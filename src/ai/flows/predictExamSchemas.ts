@@ -34,6 +34,12 @@ export const PredictExamOutputSchema = z.object({
         .describe('A brief justification for why this topic was predicted.'),
     })
   ).describe('A list of topics that are likely to appear in the exam.'),
+  predictedQuestions: z.array(
+    z.object({
+        question: z.string().describe("A predicted question that might appear on the exam."),
+        answer: z.string().describe("The detailed answer to the predicted question.")
+    })
+  ).describe('A list of up to 10 predicted questions and answers.'),
   studyRecommendations: z.array(
     z.string()
   ).describe('A list of actionable study recommendations.'),

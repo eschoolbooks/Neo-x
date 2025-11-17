@@ -33,6 +33,7 @@ import { doc, setDoc, serverTimestamp, collection } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
 import { Input } from '@/components/ui/input';
 import { useTheme } from 'next-themes';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 
 const MAX_DOCUMENTS = 1;
@@ -261,6 +262,7 @@ function AiHubContent() {
                         confidence: p.confidence || 0,
                         tags: [p.subject, p.grade]
                     })),
+                    predictedQuestions: result.predictedQuestions, // Save new questions
                     study_recommendations: {
                         recommendations: result.studyRecommendations
                     },
@@ -781,38 +783,56 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
 
                                     {/* Prediction Results */}
                                     {prediction && !quiz && !isLoading && (
-                                    <div className="grid md:grid-cols-2 gap-8">
-                                        <div className="space-y-4">
-                                            <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Topics</h3>
-                                            <div className="space-y-4">
-                                                {prediction.predictedTopics.map((item, index) => (
-                                                    <Card key={index} className="bg-background">
-                                                        <CardHeader className='pb-2'>
-                                                            <CardTitle className="text-lg">{item.topic}</CardTitle>
-                                                            <CardDescription>{item.reason}</CardDescription>
-                                                        </CardHeader>
-                                                        <CardContent>
-                                                            <div className='flex items-center gap-2'>
-                                                                <Progress value={item.confidence || 0} className="h-2" />
-                                                                <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
-                                                            </div>
-                                                        </CardContent>
-                                                    </Card>
-                                                ))}
+                                        <div className="space-y-8">
+                                            <div className="grid md:grid-cols-2 gap-8">
+                                                <div className="space-y-4">
+                                                    <h3 className="font-bold text-xl flex items-center gap-2"><GraduationCap/> Predicted Key Topics</h3>
+                                                    <div className="space-y-4">
+                                                        {prediction.predictedTopics.map((item, index) => (
+                                                            <Card key={index} className="bg-background">
+                                                                <CardHeader className='pb-2'>
+                                                                    <CardTitle className="text-lg">{item.topic}</CardTitle>
+                                                                    <CardDescription>{item.reason}</CardDescription>
+                                                                </CardHeader>
+                                                                <CardContent>
+                                                                    <div className='flex items-center gap-2'>
+                                                                        <Progress value={item.confidence || 0} className="h-2" />
+                                                                        <span className="font-semibold text-sm text-right min-w-[40px]">{item.confidence || 0}%</span>
+                                                                    </div>
+                                                                </CardContent>
+                                                            </Card>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                                <div className="space-y-4">
+                                                    <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
+                                                    <ul className="space-y-3">
+                                                        {prediction.studyRecommendations.map((rec, index) => (
+                                                            <li key={index} className="flex items-start gap-3">
+                                                                <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
+                                                                <span className="text-muted-foreground">{rec}</span>
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
                                             </div>
+
+                                            {prediction.predictedQuestions && prediction.predictedQuestions.length > 0 && (
+                                                <div className="space-y-4">
+                                                    <h3 className="font-bold text-xl flex items-center gap-2"><FileQuestion/> Predicted Questions & Answers</h3>
+                                                     <Accordion type="single" collapsible className="w-full space-y-2">
+                                                        {prediction.predictedQuestions.map((qa, index) => (
+                                                            <AccordionItem value={`item-${index}`} key={index} className="bg-background rounded-lg border px-4">
+                                                                <AccordionTrigger className="text-left hover:no-underline">{qa.question}</AccordionTrigger>
+                                                                <AccordionContent className="text-muted-foreground pt-2">
+                                                                    {qa.answer}
+                                                                </AccordionContent>
+                                                            </AccordionItem>
+                                                        ))}
+                                                    </Accordion>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="space-y-4">
-                                            <h3 className="font-bold text-xl flex items-center gap-2"><Lightbulb/> Study Recommendations</h3>
-                                            <ul className="space-y-3">
-                                                {prediction.studyRecommendations.map((rec, index) => (
-                                                    <li key={index} className="flex items-start gap-3">
-                                                        <CheckCircle className="h-5 w-5 text-accent mt-1 flex-shrink-0" />
-                                                        <span className="text-muted-foreground">{rec}</span>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    </div>
                                     )}
                                 </CardContent>
                                 </div>
