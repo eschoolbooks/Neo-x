@@ -7,13 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { LoaderCircle, Shield, Users, BrainCircuit, FileQuestion, BarChart, Eye } from 'lucide-react';
+import { LoaderCircle, Shield, Users, BrainCircuit, FileQuestion, BarChart, Eye, MessageSquare } from 'lucide-react';
 import { useCollection, useUser, useMemoFirebase } from '@/firebase';
 import { collection, query, orderBy, getCountFromServer, Timestamp, collectionGroup } from 'firebase/firestore';
 import { useFirestore } from '@/firebase/provider';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import type { Metadata } from 'next';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 // This is basic client-side protection. For production, a proper admin auth system is recommended.
 const ADMIN_PASSWORD = '1qaz';
@@ -25,9 +26,18 @@ type UserDoc = {
     createdAt: Timestamp;
 }
 
+type FeedbackDoc = {
+    id: string;
+    name: string;
+    email: string;
+    message: string;
+    createdAt: Timestamp;
+    userId?: string;
+}
+
 const AdminStats = () => {
     const firestore = useFirestore();
-    const [stats, setStats] = useState({ users: 0, predictions: 0, quizzes: 0 });
+    const [stats, setStats] = useState({ users: 0, predictions: 0, quizzes: 0, feedback: 0 });
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
@@ -37,15 +47,18 @@ const AdminStats = () => {
                 const usersCol = collection(firestore, 'users');
                 const analysesCol = collectionGroup(firestore, 'analyses');
                 const quizzesCol = collectionGroup(firestore, 'quizzes');
+                const feedbackCol = collection(firestore, 'feedback');
                 
                 const usersSnap = await getCountFromServer(usersCol);
                 const predictionsSnap = await getCountFromServer(analysesCol);
                 const quizzesSnap = await getCountFromServer(quizzesCol);
+                const feedbackSnap = await getCountFromServer(feedbackCol);
 
                 setStats({
                     users: usersSnap.data().count,
                     predictions: predictionsSnap.data().count,
                     quizzes: quizzesSnap.data().count,
+                    feedback: feedbackSnap.data().count,
                 });
             } catch (error) {
                 console.error("Error fetching stats:", error);
@@ -61,7 +74,13 @@ const AdminStats = () => {
         return query(collection(firestore, 'users'), orderBy('createdAt', 'desc'));
     }, [firestore]);
 
+    const recentFeedbackQuery = useMemoFirebase(() => {
+        if (!firestore) return null;
+        return query(collection(firestore, 'feedback'), orderBy('createdAt', 'desc'));
+    }, [firestore]);
+
     const { data: recentUsers, isLoading: isLoadingUsers } = useCollection<UserDoc>(recentUsersQuery);
+    const { data: recentFeedback, isLoading: isLoadingFeedback } = useCollection<FeedbackDoc>(recentFeedbackQuery);
 
     return (
         <div className="space-y-8">
@@ -98,56 +117,99 @@ const AdminStats = () => {
                 </Card>
                  <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Google Analytics</CardTitle>
-                        <BarChart className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Total Feedback</CardTitle>
+                        <MessageSquare className="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <a href="https://analytics.google.com/" target="_blank" rel="noopener noreferrer">
-                            <Button className="w-full">
-                                <Eye className="mr-2 h-4 w-4" /> View on GA
-                            </Button>
-                        </a>
-                        <p className="text-xs text-muted-foreground mt-2">View detailed traffic data.</p>
+                        <div className="text-2xl font-bold">{isLoading ? <LoaderCircle className="animate-spin h-6 w-6"/> : stats.feedback}</div>
+                        <p className="text-xs text-muted-foreground">Total feedback submissions</p>
                     </CardContent>
                 </Card>
             </div>
-            
-            <Card>
-                <CardHeader>
-                    <CardTitle>Recent User Signups</CardTitle>
-                    <CardDescription>A list of the latest users who have joined the platform.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Joined On</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoadingUsers && Array.from({length: 5}).map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell><LoaderCircle className="animate-spin"/></TableCell>
-                                    <TableCell><LoaderCircle className="animate-spin"/></TableCell>
-                                    <TableCell><LoaderCircle className="animate-spin"/></TableCell>
-                                    <TableCell className="text-right"><LoaderCircle className="animate-spin"/></TableCell>
-                                </TableRow>
-                            ))}
-                            {recentUsers?.map(user => (
-                                <TableRow key={user.id}>
-                                    <TableCell className="font-medium">{user.name}</TableCell>
-                                    <TableCell>{user.email}</TableCell>
-                                    <TableCell><Badge>Active</Badge></TableCell>
-                                    <TableCell className="text-right">{user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString() : 'N/A'}</TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
+
+            <div className="grid gap-8 lg:grid-cols-2">
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent Feedback</CardTitle>
+                        <CardDescription>Latest feedback submitted by users.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-96">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>From</TableHead>
+                                        <TableHead>Message</TableHead>
+                                        <TableHead className="text-right">Date</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                     {isLoadingFeedback && Array.from({length: 5}).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell colSpan={3}><LoaderCircle className="animate-spin"/></TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {recentFeedback?.map(fb => (
+                                        <TableRow key={fb.id}>
+                                            <TableCell>
+                                                <div className="font-medium">{fb.name}</div>
+                                                <div className="text-xs text-muted-foreground">{fb.email}</div>
+                                            </TableCell>
+                                            <TableCell className="max-w-xs truncate">{fb.message}</TableCell>
+                                            <TableCell className="text-right text-xs text-muted-foreground">{fb.createdAt ? new Date(fb.createdAt.toDate()).toLocaleDateString() : 'N/A'}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {!isLoadingFeedback && recentFeedback?.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center">No feedback yet.</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </ScrollArea>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Recent User Signups</CardTitle>
+                        <CardDescription>A list of the latest users who have joined the platform.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <ScrollArea className="h-96">
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Name</TableHead>
+                                        <TableHead>Email</TableHead>
+                                        <TableHead className="text-right">Joined On</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {isLoadingUsers && Array.from({length: 5}).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell><LoaderCircle className="animate-spin"/></TableCell>
+                                            <TableCell><LoaderCircle className="animate-spin"/></TableCell>
+                                            <TableCell className="text-right"><LoaderCircle className="animate-spin"/></TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {recentUsers?.map(user => (
+                                        <TableRow key={user.id}>
+                                            <TableCell className="font-medium">{user.name}</TableCell>
+                                            <TableCell>{user.email}</TableCell>
+                                            <TableCell className="text-right">{user.createdAt ? new Date(user.createdAt.toDate()).toLocaleDateString() : 'N/A'}</TableCell>
+                                        </TableRow>
+                                    ))}
+                                    {!isLoadingUsers && recentUsers?.length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={3} className="text-center">No users yet.</TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                        </ScrollArea>
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 };

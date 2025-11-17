@@ -5,10 +5,11 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BrainCircuit, FileQuestion, MessageSquare, UploadCloud, FileText, CheckCircle } from 'lucide-react';
+import { ArrowRight, BrainCircuit, FileQuestion, MessageSquare, UploadCloud, FileText, CheckCircle, MessageCircle } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { FeedbackDialog } from '@/components/feedback-dialog';
 
 const FeatureCard = ({ icon, title, description, delay = 0 }: { icon: React.ReactNode, title: string, description: string, delay?: number }) => (
     <motion.div
@@ -27,6 +28,8 @@ const FeatureCard = ({ icon, title, description, delay = 0 }: { icon: React.Reac
 export default function NeoXPage() {
     const { resolvedTheme } = useTheme();
     const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+    const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+
 
     useEffect(() => {
         setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
@@ -187,6 +190,10 @@ export default function NeoXPage() {
                     Together, we can create a world where education knows no boundaries.
                 </p>
                 <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground mb-8">
+                    <button onClick={() => setIsFeedbackOpen(true)} className="hover:text-primary transition-colors flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4" /> Give Feedback
+                    </button>
+                    <span>•</span>
                     <Link href="/terms" className="hover:text-primary">Terms & Conditions</Link>
                     <span>•</span>
                     <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
@@ -196,6 +203,9 @@ export default function NeoXPage() {
                 </div>
             </div>
         </footer>
+        <FeedbackDialog isOpen={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
     </div>
   );
 }
+
+    

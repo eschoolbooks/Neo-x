@@ -10,10 +10,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { Heart, Target, Lightbulb, IndianRupee, HandHeart, BookHeart, School, Users, ArrowDown, CheckCircle } from 'lucide-react';
+import { Heart, Target, Lightbulb, IndianRupee, HandHeart, BookHeart, School, Users, ArrowDown, CheckCircle, MessageCircle } from 'lucide-react';
 import CountUp from 'react-countup';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import { FeedbackDialog } from '@/components/feedback-dialog';
 
 export default function DonatePage() {
   const [name, setName] = useState('');
@@ -26,6 +27,7 @@ export default function DonatePage() {
   const [hasScrolled, setHasScrolled] = useState(false);
   const { resolvedTheme } = useTheme();
   const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
   useEffect(() => {
     setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
@@ -340,6 +342,10 @@ export default function DonatePage() {
                     Together, we can create a world where education knows no boundaries.
                 </p>
                 <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground mb-8">
+                     <button onClick={() => setIsFeedbackOpen(true)} className="hover:text-primary transition-colors flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4" /> Give Feedback
+                    </button>
+                    <span>•</span>
                     <Link href="/terms" className="hover:text-primary">Terms & Conditions</Link>
                     <span>•</span>
                     <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
@@ -350,6 +356,9 @@ export default function DonatePage() {
             </div>
         </footer>
       </main>
+      <FeedbackDialog isOpen={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
     </div>
   );
 }
+
+    

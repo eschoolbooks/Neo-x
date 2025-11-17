@@ -264,6 +264,47 @@
         "level",
         "message"
       ]
+    },
+    "Feedback": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Feedback",
+      "type": "object",
+      "description": "Represents a user feedback submission.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Feedback entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the person submitting feedback."
+        },
+        "email": {
+          "type": "string",
+          "description": "Email of the person submitting feedback.",
+          "format": "email"
+        },
+        "message": {
+          "type": "string",
+          "description": "The feedback message content."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the feedback was submitted.",
+          "format": "date-time"
+        },
+        "userId": {
+          "type": "string",
+          "description": "The UID of the user who submitted the feedback, if they were logged in."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "email",
+        "message",
+        "createdAt"
+      ]
     }
   },
   "auth": {
@@ -416,8 +457,24 @@
             }
           ]
         }
+      },
+      {
+        "path": "/feedback/{feedbackId}",
+        "definition": {
+            "entityName": "Feedback",
+            "schema": { "$ref": "#/backend/entities/Feedback" },
+            "description": "Stores user feedback submissions. Writable by anyone, readable by admins.",
+            "params": [
+                {
+                    "name": "feedbackId",
+                    "description": "The unique identifier for the feedback entry."
+                }
+            ]
+        }
       }
     ],
     "reasoning": "This Firestore structure is designed to support the EMA application's data storage needs, focusing on user data, exam information, uploads, AI analysis results, quizzes, and logging. The structure prioritizes Authorization Independence, DBAC (Database-Based Access Control), and QAPs (Rules are Not Filters). \n\n**Authorization Independence:**\n\n*   The `Upload`, `Analysis`, and `Quiz` subcollections under `/users/{userId}` denormalize the `userId` to ensure that access can be controlled solely based on path-based ownership, without requiring `get()` calls to parent documents.\n\n**Structural Segregation:**\n\n*   The `users/{userId}` collection is segregated to store private user-related data, ensuring that only the user or admins can access it.\n\n**Access Modeling:**\n\n*   **Path-Based Ownership:** `/users/{userId}/uploads/{uploadId}`, `/users/{userId}/analyses/{analysisId}`, and `/users/{userId}/quizzes/{quizId}` establish clear ownership, simplifying security rules.\n*   **Logs Collection:** Logs that are user-specific are placed under `/users/{userId}/logs/{logId}`, maintaining the user context. Global logs (without a specific user) are stored in the `/logs/{logId}` collection.\n\n**Data Clarity and Predictability:**\n\n*   The schema for each entity enforces required fields and specific data types, ensuring data consistency.\n\n**QAPs Support:**\n\n*   The use of path-based ownership allows secure list operations, as rules can easily filter based on the `userId` in the path.\n\nThis design ensures that security rules can be written clearly and efficiently, minimizing the risk of insecure data access and maximizing the scalability and maintainability of the EMA application."
   }
 }
+
+    

@@ -6,11 +6,12 @@ import Image from 'next/image';
 import { motion, useAnimation } from 'framer-motion';
 import { useInView } from 'react-intersection-observer';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users, Sparkles } from 'lucide-react';
+import { ArrowRight, Book, Heart, Leaf, Mail, Phone, Users, Sparkles, MessageCircle } from 'lucide-react';
 import CountUp from 'react-countup';
 import { useUser } from '@/firebase';
 import { useTheme } from 'next-themes';
 import Link from 'next/link';
+import { FeedbackDialog } from './feedback-dialog';
 
 const StatCard = ({ icon, value, label, suffix, duration = 2 }: { icon: React.ReactNode; value: number; label: string; suffix?: string; duration?: number }) => {
   const controls = useAnimation();
@@ -50,6 +51,7 @@ export default function HomeClient() {
   const { resolvedTheme } = useTheme();
   const [logoSrc, setLogoSrc] = useState("/ESBlogo.png");
   const [neoXLogoSrc, setNeoXLogoSrc] = useState('/NeoX_Logo_Light.svg');
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
 
 
   useEffect(() => {
@@ -324,6 +326,10 @@ export default function HomeClient() {
                     <a href="tel:+918281543610" className="flex items-center gap-2 hover:text-orange-500"><Phone className="h-5 w-5" /> +91-8281543610</a>
                 </div>
                  <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground my-8">
+                    <button onClick={() => setIsFeedbackOpen(true)} className="hover:text-primary transition-colors flex items-center gap-2">
+                        <MessageCircle className="w-4 h-4" /> Give Feedback
+                    </button>
+                    <span>•</span>
                     <Link href="/terms" className="hover:text-primary">Terms & Conditions</Link>
                     <span>•</span>
                     <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
@@ -334,6 +340,9 @@ export default function HomeClient() {
             </div>
         </footer>
       </main>
+      <FeedbackDialog isOpen={isFeedbackOpen} onOpenChange={setIsFeedbackOpen} />
     </div>
   );
 }
+
+    
