@@ -50,7 +50,7 @@ export default function DonatePage() {
       });
       return;
     }
-    const upiLink = `upi://pay?pa=9946882478-2@ibl&pn=ESchoolBooks&am=${amount}&cu=INR&tn=Donation from ${encodeURIComponent(name)}`;
+    const upiLink = `upi://pay?pa=9946882478@ibl&pn=ESchoolBooks&am=${amount}&cu=INR&tn=Donation from ${encodeURIComponent(name)}`;
     setUpiUrl(upiLink);
   };
 
@@ -355,3 +355,5 @@ export default function DonatePage() {
     </div>
   );
 }
+
+    

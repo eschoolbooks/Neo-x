@@ -323,7 +323,7 @@ export default function HomeClient() {
                 </p>
                 <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-6 text-muted-foreground">
                     <a href="mailto:info@e-schoolbooks.in" className="flex items-center gap-2 hover:text-orange-500"><Mail className="h-5 w-5" /> info@e-schoolbooks.in</a>
-                    <a href="tel:+918281543610" className="flex items-center gap-2 hover:text-orange-500"><Phone className="h-5 w-5" /> +91-8281543610</a>
+                    <a href="tel:+919946882478" className="flex items-center gap-2 hover:text-orange-500"><Phone className="h-5 w-5" /> +91-9946882478</a>
                 </div>
                  <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground my-8">
                     <button onClick={() => setIsFeedbackOpen(true)} className="hover:text-primary transition-colors flex items-center gap-2">
