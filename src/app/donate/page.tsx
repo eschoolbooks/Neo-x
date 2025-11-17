@@ -208,7 +208,7 @@ export default function DonatePage() {
                 >
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">Funds Raised So Far</h2>
                     <p className="text-7xl font-extrabold text-orange-500 mb-2">
-                        <CountUp end={0} duration={2} separator="," prefix="₹" />
+                        <CountUp end={28639} duration={2} separator="," prefix="₹" />
                     </p>
                     <p className="max-w-2xl mx-auto text-muted-foreground">
                         We are just getting started and you can be among the first to contribute to our mission. Every single rupee counts!
@@ -355,5 +355,3 @@ export default function DonatePage() {
     </div>
   );
 }
-
-    
