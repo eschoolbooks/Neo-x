@@ -97,12 +97,10 @@ export function SettingsSheet({ isOpen, onClose, onSignOut }: SettingsSheetProps
                 <p>
                 A part of the <a href="https://varts.org" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary">varts.org</a> initiative.
                 </p>
-                <p>Contact: <a href="mailto:info@e-schoolbooks.in" className="underline hover:text-primary">info@e-schoolbooks.in</a></p>
+                <p>Contact: <a href="mailto:info@eschoolbooks.in" className="underline hover:text-primary">info@eschoolbooks.in</a></p>
             </div>
         </div>
       </SheetContent>
     </Sheet>
   );
 }
-
-    

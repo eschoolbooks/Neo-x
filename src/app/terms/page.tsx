@@ -92,12 +92,10 @@ export default function TermsPage() {
                     </Section>
 
                     <Section title="Questions?">
-                        <p>If you have any questions about these terms, please don't hesitate to reach out to us at <a href="mailto:info@e-schoolbooks.in" className="text-primary underline">info@e-schoolbooks.in</a>. We're here to help!</p>
+                        <p>If you have any questions about these terms, please don't hesitate to reach out to us at <a href="mailto:info@eschoolbooks.in" className="text-primary underline">info@eschoolbooks.in</a>. We're here to help!</p>
                     </Section>
                 </div>
             </main>
         </div>
     );
 }
-
-    

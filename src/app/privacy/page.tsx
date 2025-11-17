@@ -89,12 +89,10 @@ export default function PrivacyPage() {
                     </Section>
 
                     <Section title="Questions?">
-                        <p>Your trust is the most important thing to us. If you have any questions or concerns about our Privacy Policy, please contact us at <a href="mailto:info@e-schoolbooks.in" className="text-primary underline">info@e-schoolbooks.in</a>. We're happy to chat about it!</p>
+                        <p>Your trust is the most important thing to us. If you have any questions or concerns about our Privacy Policy, please contact us at <a href="mailto:info@eschoolbooks.in" className="text-primary underline">info@eschoolbooks.in</a>. We're happy to chat about it!</p>
                     </Section>
                 </div>
             </main>
         </div>
     );
 }
-
-    
