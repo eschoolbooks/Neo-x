@@ -25,13 +25,8 @@ export default function DonatePage() {
   const { toast } = useToast();
   const formRef = useRef<HTMLDivElement>(null);
   const [hasScrolled, setHasScrolled] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+  const [logoSrc] = useState('/ESBlogo.png'); // E-SchoolBooks Logo
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-
-  useEffect(() => {
-    setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
-  }, [resolvedTheme]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,7 +62,7 @@ export default function DonatePage() {
       transition={{ duration: 0.5, delay }}
       className="bg-card/50 p-6 rounded-lg border border-border/20 backdrop-blur-sm"
     >
-      <div className="text-primary mb-4">{icon}</div>
+      <div className="text-orange-500 mb-4">{icon}</div>
       <h3 className="text-xl font-bold text-foreground mb-2">{title}</h3>
       <p className="text-muted-foreground">{description}</p>
     </motion.div>
@@ -78,17 +73,17 @@ export default function DonatePage() {
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${hasScrolled ? 'bg-background/80 backdrop-blur-lg border-b border-border/20' : 'bg-transparent'}`}>
         <nav className="container mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-20">
           <a href="/" className="flex items-center gap-2">
-            {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={40} height={40} priority />}
-            <span className="font-bold text-xl text-foreground">Neo X</span>
+            {logoSrc && <Image src={logoSrc} alt="E-SchoolBooks Logo" width={40} height={40} className="sm:h-10 sm:w-10 bg-white rounded-full shadow-2xl p-1" priority />} 
+            <span className="font-bold text-lg sm:text-xl text-foreground">ESchoolBooks</span>
           </a>
           <div className="hidden md:flex items-center gap-8">
-             <a href="/" className="hover:text-primary transition-colors">Home</a>
-             <a href="/ai-hub" className="hover:text-primary transition-colors">AI Hub</a>
-             <a href="/donate" className="hover:text-primary transition-colors">Donate</a>
-             <a href="#contact" className="hover:text-primary transition-colors">Contact</a>
+             <a href="/" className="hover:text-orange-500 transition-colors">Home</a>
+             <a href="/ai-hub" className="hover:text-orange-500 transition-colors">AI Hub</a>
+             <a href="/donate" className="hover:text-orange-500 transition-colors">Donate</a>
+             <a href="#contact" className="hover:text-orange-500 transition-colors">Contact</a>
           </div>
           <div className="flex items-center gap-4">
-            <Button variant="secondary" className="rounded-full" onClick={handleScrollToForm}>
+            <Button variant="secondary" className="rounded-full bg-orange-500 hover:bg-orange-600 text-white" onClick={handleScrollToForm}>
                 Donate Now <Heart className="ml-2 h-4 w-4" />
             </Button>
           </div>
@@ -98,9 +93,9 @@ export default function DonatePage() {
       <main>
         {/* Hero Section */}
         <section className="relative min-h-screen flex items-center justify-center text-center overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-br from-background via-indigo-950/20 to-background opacity-50"></div>
+            <div className="absolute inset-0 bg-gradient-to-br from-background via-orange-950/20 to-background opacity-50"></div>
             <div className="absolute inset-0 bg-grid-slow"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+            <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(249,115,22,0.3),rgba(255,255,255,0))]"></div>
             <div className="container relative z-10 px-4">
                  <motion.div
                     initial={{ opacity: 0, y: 20 }}
@@ -108,12 +103,12 @@ export default function DonatePage() {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                 >
                     <h1 className="text-4xl sm:text-6xl md:text-7xl font-extrabold tracking-tighter mb-6">
-                        Your Contribution,<br /> <span className="text-primary">Their Tomorrow.</span>
+                        Your Contribution,<br /> <span className="text-orange-500">Their Tomorrow.</span>
                     </h1>
                     <p className="max-w-3xl mx-auto text-lg md:text-xl text-muted-foreground mb-10">
                         Even the smallest donation can rewrite a child's future. Join us in making education accessible, sustainable, and burden-free for every student.
                     </p>
-                    <Button size="lg" className="rounded-full text-lg px-10 py-6" onClick={handleScrollToForm}>
+                    <Button size="lg" className="rounded-full text-lg px-10 py-6 bg-orange-500 hover:bg-orange-600 text-white" onClick={handleScrollToForm}>
                        Make a Donation <HandHeart className="ml-2 h-5 w-5" />
                     </Button>
                 </motion.div>
@@ -161,7 +156,7 @@ export default function DonatePage() {
                         <Label htmlFor="phone">Phone Number</Label>
                         <Input id="phone" type="tel" placeholder="+91-9876543210" value={phone} onChange={(e) => setPhone(e.target.value)} />
                       </div>
-                      <Button type="submit" size="lg" className="w-full" disabled={!!upiUrl}>
+                      <Button type="submit" size="lg" className="w-full bg-orange-500 hover:bg-orange-600 text-white" disabled={!!upiUrl}>
                         {upiUrl ? 'QR Code Generated!' : 'Generate QR Code to Pay'}
                       </Button>
                     </form>
@@ -184,7 +179,7 @@ export default function DonatePage() {
                       <QRCode value={upiUrl} size={192} />
                     </div>
                     <p className="font-bold text-lg">Amount: ₹{amount}</p>
-                    <Button asChild size="lg">
+                    <Button asChild size="lg" className="bg-orange-500 hover:bg-orange-600 text-white">
                       <a href={upiUrl}>
                         Pay with UPI App
                       </a>
@@ -192,7 +187,7 @@ export default function DonatePage() {
                   </div>
                 ) : (
                   <div className="text-center p-8 bg-card/50 rounded-xl">
-                     <HandHeart className="w-20 h-20 mx-auto text-primary animate-pulse" />
+                     <HandHeart className="w-20 h-20 mx-auto text-orange-500 animate-pulse" />
                      <h3 className="text-2xl font-bold mt-4">Your Generosity Matters</h3>
                      <p className="text-muted-foreground mt-2">Fill out the form to generate a secure UPI payment QR code and make a difference.</p>
                   </div>
@@ -212,7 +207,7 @@ export default function DonatePage() {
                     transition={{ duration: 0.7 }}
                 >
                     <h2 className="text-3xl sm:text-4xl font-bold mb-4">Funds Raised So Far</h2>
-                    <p className="text-7xl font-extrabold text-primary mb-2">
+                    <p className="text-7xl font-extrabold text-orange-500 mb-2">
                         <CountUp end={0} duration={2} separator="," prefix="₹" />
                     </p>
                     <p className="max-w-2xl mx-auto text-muted-foreground">
@@ -265,7 +260,7 @@ export default function DonatePage() {
                 viewport={{ once: true, amount: 0.5 }}
                 transition={{ duration: 0.7 }}
               >
-                  <Target className="w-16 h-16 text-primary mb-4"/>
+                  <Target className="w-16 h-16 text-orange-500 mb-4"/>
                   <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Mission</h2>
                   <p className="text-lg text-muted-foreground">To make education accessible, eco-friendly, and burden-free for every student by providing free digital learning resources. We strive to create a future where knowledge has no price tag.</p>
               </motion.div>
@@ -300,7 +295,7 @@ export default function DonatePage() {
                 transition={{ duration: 0.7, delay: 0.2 }}
                  className="md:order-1"
               >
-                  <Lightbulb className="w-16 h-16 text-primary mb-4"/>
+                  <Lightbulb className="w-16 h-16 text-orange-500 mb-4"/>
                   <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Vision</h2>
                   <p className="text-lg text-muted-foreground">To create a self-learning ecosystem where students can choose their own future and build a great nation, unhindered by physical or financial boundaries. A world where curiosity is the only currency.</p>
               </motion.div>
@@ -317,7 +312,7 @@ export default function DonatePage() {
                 viewport={{ once: true, amount: 0.5 }}
                 transition={{ duration: 0.7 }}
               >
-                  <CheckCircle className="w-16 h-16 text-primary mb-4"/>
+                  <CheckCircle className="w-16 h-16 text-orange-500 mb-4"/>
                   <h2 className="text-3xl sm:text-4xl font-bold mb-4">Our Goal</h2>
                   <p className="text-lg text-muted-foreground">To eliminate the need for heavy school bags, save millions of trees by promoting digital resources, and ensure every child—especially girls—has the tools and opportunities to succeed and lead.</p>
               </motion.div>
@@ -336,19 +331,19 @@ export default function DonatePage() {
         {/* Footer */}
         <footer id="contact" className="py-16 bg-background border-t border-border/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={80} height={80} className="mx-auto mb-4"/>}
+                {logoSrc && <Image src={logoSrc} alt="E-SchoolBooks Logo" width={80} height={80} className="mx-auto mb-4 bg-white rounded-full shadow-2xl p-2"/>}
                 <h2 className="text-2xl font-bold mb-2">Join Us on This Journey</h2>
                 <p className="text-muted-foreground mb-8">
                     Together, we can create a world where education knows no boundaries.
                 </p>
                 <div className="flex justify-center items-center gap-4 text-sm text-muted-foreground mb-8">
-                     <button onClick={() => setIsFeedbackOpen(true)} className="hover:text-primary transition-colors flex items-center gap-2">
+                     <button onClick={() => setIsFeedbackOpen(true)} className="hover:text-orange-500 transition-colors flex items-center gap-2">
                         <MessageCircle className="w-4 h-4" /> Give Feedback
                     </button>
                     <span>•</span>
-                    <Link href="/terms" className="hover:text-primary">Terms & Conditions</Link>
+                    <Link href="/terms" className="hover:text-orange-500">Terms & Conditions</Link>
                     <span>•</span>
-                    <Link href="/privacy" className="hover:text-primary">Privacy Policy</Link>
+                    <Link href="/privacy" className="hover:text-orange-500">Privacy Policy</Link>
                 </div>
                 <div className="mt-8 text-sm text-muted-foreground">
                     © {new Date().getFullYear()} E-SchoolBooks Project by Theo. All Rights Reserved.
