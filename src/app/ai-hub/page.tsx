@@ -298,8 +298,8 @@ function AiHubContent() {
         }
     };
 
-    const handleGenerateQuiz = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleGenerateQuiz = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
          
         if (documents.length === 0) {
             toast({
@@ -322,6 +322,7 @@ function AiHubContent() {
         setUserAnswers([]);
         setCurrentQuestionIndex(0);
         setShowUpload(false);
+        setPrediction(null); // Clear prediction to show quiz
 
         try {
             const result = await generateQuiz({
@@ -726,6 +727,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                           className="mt-12"
                         >
                             <div className="flex justify-end items-center gap-4 mb-4">
+                               {prediction && <Button variant="default" onClick={() => handleGenerateQuiz()}><FileQuestion className="mr-2 h-4 w-4"/> Generate Quiz</Button>}
                                <Button variant="outline" onClick={() => setIsChatOpen(true)}><MessageSquare className="mr-2 h-4 w-4"/> Chat with Neo X</Button>
                                <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
                             </div>
@@ -818,7 +820,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                             </div>
 
                                             {prediction.predictedQuestions && prediction.predictedQuestions.length > 0 && (
-                                                <div className="space-y-4">
+                                                <div className="space-y-4 pt-8">
                                                     <h3 className="font-bold text-xl flex items-center gap-2"><FileQuestion/> Predicted Questions & Answers</h3>
                                                      <Accordion type="single" collapsible className="w-full space-y-2">
                                                         {prediction.predictedQuestions.map((qa, index) => (
@@ -830,6 +832,11 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                                             </AccordionItem>
                                                         ))}
                                                     </Accordion>
+                                                    <div className="text-center pt-6">
+                                                        <Button size="lg" onClick={() => handleGenerateQuiz()}>
+                                                            <FileQuestion className="mr-2 h-5 w-5" /> Test Your Knowledge with a Quiz
+                                                        </Button>
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
@@ -1012,5 +1019,3 @@ export default function AiHubPage() {
         </FirebaseClientProvider>
     );
 }
-
-    
