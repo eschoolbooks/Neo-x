@@ -21,6 +21,7 @@ import { generateQuiz } from '@/ai/flows/generateQuizFlow';
 import type { Quiz } from '@/ai/flows/generateQuizSchemas';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { FirebaseClientProvider, useAuth, useUser } from '@/firebase';
@@ -75,6 +76,8 @@ function AiHubContent() {
     const { resolvedTheme } = useTheme();
     const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
     const dropZoneRef = useRef<HTMLDivElement>(null);
+    const reportContentRef = useRef<HTMLDivElement>(null);
+
 
     useEffect(() => {
         setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
@@ -428,159 +431,65 @@ function AiHubContent() {
       }
     }
 
-    const generateUniqueId = () => {
-        const date = new Date();
-        const year = date.getFullYear();
-        const day = String(date.getDate()).padStart(2, '0');
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const alphanumeric = Math.random().toString(36).substring(2, 8).toUpperCase();
-        return `${year}N${day}E${month}O${alphanumeric}X`;
-    };
-
     const handleDownloadPdf = async () => {
-        if (!prediction) return;
+        const reportElement = reportContentRef.current;
+        if (!reportElement || !prediction) return;
+    
         setIsDownloadingPdf(true);
-
+    
         try {
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pageWidth = pdf.internal.pageSize.getWidth();
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            const margin = 15;
-            let cursorY = margin;
-
-            // Colors
-            const primaryColor = '#D97706'; // A darker, more readable orange
-            const textColor = '#333333'; // Dark gray for text
-            const mutedColor = '#666666';
-            const lightGrayBg = '#F3F4F6';
-            
-            const addFooter = () => {
-                const pageCount = pdf.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) {
-                    pdf.setPage(i);
-                    pdf.setFontSize(8);
-                    pdf.setTextColor(mutedColor);
-                    pdf.text(`© ${new Date().getFullYear()} E-SchoolBooks. All Rights Reserved.`, margin, pageHeight - 10);
-                    pdf.text(`Page ${i} of ${pageCount}`, pageWidth - margin, pageHeight - 10, { align: 'right' });
+            const canvas = await html2canvas(reportElement, {
+                scale: 2, // Higher scale for better quality
+                backgroundColor: resolvedTheme === 'dark' ? '#020817' : '#FFFFFF',
+                useCORS: true,
+                onclone: (document) => {
+                    // This allows us to modify the cloned document before rendering
+                    // Here we can ensure dark/light theme styles are applied correctly
+                    document.documentElement.setAttribute('class', resolvedTheme || 'light');
                 }
-            };
-            
-            const logo = resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg';
-            pdf.addImage(logo, 'PNG', margin, margin, 30, 30);
-            
-            pdf.setFontSize(26);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(primaryColor);
-            pdf.text('AI Exam Prediction Report', pageWidth / 2, margin + 40, { align: 'center' });
-
-            cursorY = margin + 70;
-            
-            const addCoverInfo = (label: string, value: string) => {
-                pdf.setFontSize(12);
-                pdf.setFont('helvetica', 'bold');
-                pdf.setTextColor(textColor);
-                pdf.text(label, margin, cursorY);
-                pdf.setFont('helvetica', 'normal');
-                pdf.setTextColor(mutedColor);
-                pdf.text(value, margin + 45, cursorY);
-                cursorY += 8;
-            };
+            });
+    
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = pdf.internal.pageSize.getHeight();
+    
+            const canvasWidth = canvas.width;
+            const canvasHeight = canvas.height;
+            const ratio = canvasWidth / canvasHeight;
+    
+            let imgWidth = pdfWidth - 20; // with margin
+            let imgHeight = imgWidth / ratio;
+    
+            // If the image is too high, we need to split it
+            const pageHeightWithMargin = pdfHeight - 20;
+            let currentHeight = 0;
+    
+            while (currentHeight < canvasHeight) {
+                // Calculate the slice of the canvas to draw
+                const sliceHeight = Math.min(canvasHeight - currentHeight, pageHeightWithMargin * (canvasWidth / imgWidth));
+                const sliceCanvas = document.createElement('canvas');
+                sliceCanvas.width = canvasWidth;
+                sliceCanvas.height = sliceHeight;
+                const sliceCtx = sliceCanvas.getContext('2d');
+    
+                if (sliceCtx) {
+                    sliceCtx.drawImage(canvas, 0, currentHeight, canvasWidth, sliceHeight, 0, 0, canvasWidth, sliceHeight);
+                    const sliceImgData = sliceCanvas.toDataURL('image/png');
+                    const sliceImgHeight = (sliceHeight / canvasWidth) * imgWidth;
+    
+                    if (currentHeight > 0) {
+                        pdf.addPage();
+                    }
+                    pdf.addImage(sliceImgData, 'PNG', 10, 10, imgWidth, sliceImgHeight);
+                }
+    
+                currentHeight += sliceHeight;
+            }
             
             const finalExamType = examType === 'Custom' ? customExamType : examType;
-            const firstPrediction = prediction.predictedTopics[0];
-            addCoverInfo('Exam Type:', finalExamType);
-            if (firstPrediction) {
-                addCoverInfo('Subject:', firstPrediction.subject);
-                addCoverInfo('Grade:', firstPrediction.grade);
-            }
-            addCoverInfo('Prediction Date:', new Date().toLocaleDateString());
-            addCoverInfo('Report ID:', generateUniqueId());
-            
-            pdf.addPage();
-            cursorY = margin;
-            pdf.setFontSize(18);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(primaryColor);
-            pdf.text('Predicted Topics', margin, cursorY);
-            cursorY += 10;
-
-            prediction.predictedTopics.forEach((item) => {
-                const topicLines = pdf.splitTextToSize(item.topic, pageWidth - (margin * 2) - 20);
-                const reasonLines = pdf.splitTextToSize(item.reason, pageWidth - (margin * 2) - 20);
-                
-                const cardHeight = 15 + (topicLines.length * 7) + (reasonLines.length * 5) + 20;
-
-                if (cursorY + cardHeight > pageHeight - 20) {
-                    pdf.addPage();
-                    cursorY = margin;
-                    pdf.setFontSize(18);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setTextColor(primaryColor);
-                    pdf.text('Predicted Topics (cont.)', margin, cursorY);
-                    cursorY += 10;
-                }
-
-                pdf.setDrawColor('#E5E7EB');
-                pdf.setFillColor(lightGrayBg);
-                pdf.roundedRect(margin, cursorY, pageWidth - (margin*2), cardHeight, 3, 3, 'FD');
-                
-                let cardContentY = cursorY + 10;
-                
-                pdf.setFontSize(14);
-                pdf.setFont('helvetica', 'bold');
-                pdf.setTextColor(textColor);
-                pdf.text(topicLines, margin + 10, cardContentY);
-                cardContentY += topicLines.length * 7;
-                
-                pdf.setFontSize(10);
-                pdf.setFont('helvetica', 'normal');
-                pdf.setTextColor(mutedColor);
-                pdf.text(reasonLines, margin + 10, cardContentY);
-                cardContentY += reasonLines.length * 5 + 8;
-
-                const progressBarWidth = 100;
-                pdf.setFillColor('#E5E7EB');
-                pdf.rect(margin + 10, cardContentY, progressBarWidth, 5, 'F');
-                pdf.setFillColor(primaryColor);
-                pdf.rect(margin + 10, cardContentY, progressBarWidth * ((item.confidence || 0) / 100), 5, 'F');
-                
-                pdf.setFontSize(10);
-                pdf.setFont('helvetica', 'bold');
-                pdf.setTextColor(textColor);
-                pdf.text(`${item.confidence || 0}% Confidence`, margin + 15 + progressBarWidth, cardContentY + 4);
-
-                cursorY += cardHeight + 10;
-            });
-
-            pdf.addPage();
-            cursorY = margin;
-            pdf.setFontSize(18);
-            pdf.setFont('helvetica', 'bold');
-            pdf.setTextColor(primaryColor);
-            pdf.text('Study Recommendations', margin, cursorY);
-            cursorY += 10;
-            
-            prediction.studyRecommendations.forEach((rec) => {
-                const recLines = pdf.splitTextToSize(`• ${rec}`, pageWidth - margin * 2 - 5);
-                const recHeight = recLines.length * 5 + 3; 
-                if (cursorY + recHeight > pageHeight - 20) {
-                    pdf.addPage();
-                    cursorY = margin;
-                    pdf.setFontSize(18);
-                    pdf.setFont('helvetica', 'bold');
-                    pdf.setTextColor(primaryColor);
-                    pdf.text('Study Recommendations (cont.)', margin, cursorY);
-                    cursorY += 10;
-                }
-                pdf.setFontSize(11);
-                pdf.setTextColor(textColor);
-                pdf.text(recLines, margin + 5, cursorY);
-                cursorY += recHeight;
-            });
-
-            addFooter();
             pdf.save(`E-SchoolBooks-Prediction-${finalExamType}-${new Date().toISOString().split('T')[0]}.pdf`);
-
+    
         } catch (error) {
             console.error("Error generating PDF:", error);
             toast({
@@ -592,6 +501,7 @@ function AiHubContent() {
             setIsDownloadingPdf(false);
         }
     };
+
     
 const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: string, files: File[], onFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void, onRemoveFile: (index: number) => void}) => {
     const fileCount = files.length;
@@ -818,7 +728,7 @@ const FileUploadArea = ({title, files, onFileChange, onRemoveFile}: {title: stri
                                <Button onClick={handleNewPrediction}><Plus className="mr-2 h-4 w-4" /> New Prediction</Button>
                             </div>
                             <Card className="shadow-2xl overflow-hidden">
-                                <div className="bg-card">
+                                <div ref={reportContentRef} className="bg-card p-6">
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
                                       <div>
