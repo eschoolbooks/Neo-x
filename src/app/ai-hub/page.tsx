@@ -157,23 +157,43 @@ function AiHubContent() {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        // Validate file type
+        if (!file.type.includes('pdf')) {
+            toast({
+                title: 'Invalid File Type',
+                description: 'Please upload a PDF file only.',
+                variant: 'destructive',
+            });
+            if (e.target) e.target.value = '';
+            return;
+        }
+
         if (file.size > MAX_FILE_SIZE_BYTES) {
             toast({
                 title: 'File Too Large',
-                description: `The selected file is larger than ${MAX_FILE_SIZE_MB}MB.`,
+                description: `The selected file is larger than ${MAX_FILE_SIZE_MB}MB. Current size: ${formatFileSize(file.size)}`,
                 variant: 'destructive',
             });
+            if (e.target) e.target.value = '';
             return;
         }
-        
+
+        console.log('Processing file:', file.name, 'Size:', formatFileSize(file.size), 'Type:', file.type);
+
         try {
             const uri = await fileToDataUri(file);
+            console.log('File converted to data URI, length:', uri.length);
             setDocuments([file]);
             setDocumentDataUris([uri]);
+            toast({
+                title: 'File Uploaded',
+                description: `${file.name} (${formatFileSize(file.size)}) ready for analysis.`,
+            });
         } catch (error) {
+            console.error('File upload error:', error);
             toast({
                 title: 'File Upload Error',
-                description: 'Failed to process file. Please try again.',
+                description: error instanceof Error ? error.message : 'Failed to process file. Please try again.',
                 variant: 'destructive',
             });
         } finally {
@@ -285,7 +305,11 @@ function AiHubContent() {
             }, 100);
 
         } catch (err) {
+            console.error('Prediction error:', err);
             const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred.';
+            const errorDetails = err instanceof Error && err.stack ? err.stack : JSON.stringify(err);
+            console.error('Error details:', errorDetails);
+
             setError(errorMessage);
             setShowUpload(true);
             toast({
