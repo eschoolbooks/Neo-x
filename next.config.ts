@@ -1,46 +1,17 @@
-import type {NextConfig} from 'next';
+import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
+  reactStrictMode: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.imgur.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'media.licdn.com',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https' ,
-        hostname: 'storage.googleapis.com',
-        port: '',
-        pathname: '/**',
-      }
-    ],
+    domains: [
+      // Allow Supabase storage domains
+      process.env.NEXT_PUBLIC_SUPABASE_URL?.replace('https://', '') || '',
+    ].filter(Boolean),
+  },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '15mb', // Allow larger uploads
+    },
   },
 };
 

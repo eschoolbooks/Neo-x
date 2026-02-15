@@ -1,271 +1,244 @@
-
 'use client';
 
-import { useState, useEffect } from 'react';
-import Image from 'next/image';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { signIn, signUp, signInWithGoogle } from '@/lib/supabase/auth';
 import { useToast } from '@/hooks/use-toast';
-import { LoaderCircle, LogIn } from 'lucide-react';
-import { FirebaseClientProvider, useAuth, useUser } from '@/firebase';
-import {
-  GoogleAuthProvider,
-  signInWithPopup,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  sendPasswordResetEmail,
-  updateProfile,
-} from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { useFirestore } from '@/firebase/provider';
-import { useTheme } from 'next-themes';
+import { Sparkles, ArrowRight, Mail } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
 
-const GoogleIcon = () => (
-  <svg className="w-4 h-4 mr-2" viewBox="0 0 48 48">
-    <path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12s5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path>
-    <path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path>
-    <path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.222,0-9.519-3.317-11.28-7.946l-6.522,5.025C9.505,39.556,16.227,44,24,44z"></path>
-    <path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.571l6.19,5.238C42.022,35.638,44,30.138,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path>
-  </svg>
-);
-
-function AuthForm() {
-  const [emailLogin, setEmailLogin] = useState('');
-  const [passwordLogin, setPasswordLogin] = useState('');
-  const [nameSignUp, setNameSignUp] = useState('');
-  const [emailSignUp, setEmailSignUp] = useState('');
-  const [passwordSignUp, setPasswordSignUp] = useState('');
-  const [isLoading, setIsLoading] = useState<null | 'google' | 'email' | 'signup' | 'reset'>(null);
-  const { toast } = useToast();
-  const auth = useAuth();
-  const firestore = useFirestore();
+export default function AuthPage() {
   const router = useRouter();
-  const { resolvedTheme } = useTheme();
-  const [logoSrc, setLogoSrc] = useState('/NeoX_Logo_Light.svg');
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
 
-  useEffect(() => {
-    setLogoSrc(resolvedTheme === 'dark' ? '/NeoX_Logo_Dark.svg' : '/NeoX_Logo_Light.svg');
-  }, [resolvedTheme]);
+  const handleSignIn = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
 
+    try {
+      await signIn(email, password);
+      toast({
+        title: "Welcome back!",
+        description: "Redirecting to your dashboard...",
+      });
+      router.push('/dashboard');
+    } catch (error) {
+      toast({
+        title: "Sign in failed",
+        description: error instanceof Error ? error.message : "Invalid credentials",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSignUp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await signUp(email, password, fullName);
+      toast({
+        title: "Account created!",
+        description: "Please check your email to verify your account.",
+      });
+      setEmail('');
+      setPassword('');
+      setFullName('');
+    } catch (error) {
+      toast({
+        title: "Sign up failed",
+        description: error instanceof Error ? error.message : "Could not create account",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleGoogleSignIn = async () => {
-    setIsLoading('google');
+    setLoading(true);
     try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
-
-      // Create user profile in Firestore if it's a new user
-      if (user && firestore) {
-        const userRef = doc(firestore, 'users', user.uid);
-        await setDoc(userRef, {
-          id: user.uid,
-          name: user.displayName,
-          email: user.email,
-          createdAt: serverTimestamp(),
-        }, { merge: true });
-      }
-
+      await signInWithGoogle();
+    } catch (error) {
       toast({
-        title: 'Signed In',
-        description: `Welcome back, ${result.user.displayName}!`,
+        title: "Authentication failed",
+        description: error instanceof Error ? error.message : "Could not sign in with Google",
+        variant: "destructive",
       });
-      router.push('/ai-hub');
-    } catch (error: any) {
-      toast({
-        title: 'Authentication Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(null);
-    }
-  };
-
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading('email');
-    try {
-      const result = await signInWithEmailAndPassword(auth, emailLogin, passwordLogin);
-      toast({
-        title: 'Signed In',
-        description: `Welcome back, ${result.user.displayName || result.user.email}!`,
-      });
-      router.push('/ai-hub');
-    } catch (error: any) {
-      toast({
-        title: 'Login Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(null);
-    }
-  };
-
-  const handleEmailSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading('signup');
-    try {
-      const result = await createUserWithEmailAndPassword(auth, emailSignUp, passwordSignUp);
-      await updateProfile(result.user, { displayName: nameSignUp });
-
-       // Create user profile in Firestore
-      if(firestore) {
-        const userRef = doc(firestore, 'users', result.user.uid);
-        await setDoc(userRef, {
-            id: result.user.uid,
-            name: nameSignUp,
-            email: emailSignUp,
-            createdAt: serverTimestamp(),
-        });
-      }
-
-      toast({
-        title: 'Account Created',
-        description: 'Welcome! You have been successfully signed up.',
-      });
-       router.push('/ai-hub');
-    } catch (error: any) {
-      toast({
-        title: 'Sign Up Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(null);
-    }
-  };
-
-  const handlePasswordReset = async () => {
-    if (!emailLogin) {
-      toast({
-        title: 'Email Required',
-        description: 'Please enter your email address in the login form to reset your password.',
-        variant: 'destructive',
-      });
-      return;
-    }
-    setIsLoading('reset');
-    try {
-      await sendPasswordResetEmail(auth, emailLogin);
-      toast({
-        title: 'Password Reset Email Sent',
-        description: 'Please check your inbox for instructions to reset your password.',
-      });
-    } catch (error: any) {
-      toast({
-        title: 'Password Reset Failed',
-        description: error.message,
-        variant: 'destructive',
-      });
-    } finally {
-      setIsLoading(null);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-grid">
-      <Card className="w-full max-w-md mx-auto shadow-2xl bg-card/80 backdrop-blur-sm">
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl flex items-center justify-center gap-2">
-            {logoSrc && <Image src={logoSrc} alt="NeoX Logo" width={32} height={32} priority />}
-            E-SchoolBooks
-          </CardTitle>
-          <CardDescription>Sign in or create an account to continue</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="login">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md text-center mb-8"
+      >
+        <Link href="/" className="inline-flex items-center gap-2 mb-4">
+          <Image src="/NeoX_Logo_Light.svg" alt="Neo X" width={40} height={40} />
+          <span className="text-2xl font-bold">Neo X</span>
+        </Link>
+        <p className="text-muted-foreground">
+          Your AI-powered exam preparation assistant
+        </p>
+      </motion.div>
+
+      {/* Auth Form */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="w-full max-w-md"
+      >
+        <div className="bg-card border border-border rounded-2xl p-8">
+          <Tabs defaultValue="signin" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 mb-6">
+              <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
-            <TabsContent value="login">
-              <form onSubmit={handleEmailSignIn} className="space-y-4 pt-4">
+
+            <TabsContent value="signin">
+              <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email-login">Email</Label>
-                  <Input id="email-login" type="email" placeholder="m@example.com" value={emailLogin} onChange={e => setEmailLogin(e.target.value)} required />
+                  <Label htmlFor="signin-email">Email</Label>
+                  <Input
+                    id="signin-email"
+                    type="email"
+                    placeholder="student@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password-login">Password</Label>
-                  <Input id="password-login" type="password" value={passwordLogin} onChange={e => setPasswordLogin(e.target.value)} required />
+                  <Label htmlFor="signin-password">Password</Label>
+                  <Input
+                    id="signin-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={!!isLoading}>
-                  {isLoading === 'email' && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                  Sign In
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading}
+                >
+                  {loading ? 'Signing in...' : 'Sign In'}
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </form>
-              <div className="relative my-4">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-                </div>
-              </div>
-              <Button variant="outline" className="w-full" onClick={handleGoogleSignIn} disabled={!!isLoading}>
-                {isLoading === 'google' ? <LoaderCircle className="mr-2 h-4 w-4 animate-spin" /> : <GoogleIcon />}
-                Sign in with Google
-              </Button>
-              <div className="mt-4 text-center text-sm">
-                <button onClick={handlePasswordReset} className="underline" disabled={isLoading === 'reset'}>
-                    {isLoading === 'reset' ? 'Sending...' : 'Forgot your password?'}
-                </button>
-              </div>
             </TabsContent>
+
             <TabsContent value="signup">
-              <form onSubmit={handleEmailSignUp} className="space-y-4 pt-4">
+              <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name-signup">Full Name</Label>
-                  <Input id="name-signup" type="text" placeholder="John Doe" value={nameSignUp} onChange={e => setNameSignUp(e.target.value)} required />
+                  <Label htmlFor="signup-name">Full Name</Label>
+                  <Input
+                    id="signup-name"
+                    type="text"
+                    placeholder="Your name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email</Label>
-                  <Input id="email-signup" type="email" placeholder="m@example.com" value={emailSignUp} onChange={e => setEmailSignUp(e.target.value)} required />
+                  <Label htmlFor="signup-email">Email</Label>
+                  <Input
+                    id="signup-email"
+                    type="email"
+                    placeholder="student@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                    disabled={loading}
+                  />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password-signup">Password</Label>
-                  <Input id="password-signup" type="password" required value={passwordSignUp} onChange={e => setPasswordSignUp(e.target.value)} />
+                  <Label htmlFor="signup-password">Password</Label>
+                  <Input
+                    id="signup-password"
+                    type="password"
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    disabled={loading}
+                    minLength={6}
+                  />
                 </div>
-                <Button type="submit" className="w-full" disabled={!!isLoading}>
-                   {isLoading === 'signup' && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
-                  Create Account
+                <Button
+                  type="submit"
+                  className="w-full"
+                  disabled={loading}
+                >
+                  {loading ? 'Creating account...' : 'Create Account'}
+                  <Sparkles className="ml-2 h-4 w-4" />
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
-        </CardContent>
-      </Card>
+
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <Separator />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              className="w-full mt-4"
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+            >
+              <Mail className="mr-2 h-4 w-4" />
+              Google
+            </Button>
+          </div>
+        </div>
+
+        <p className="text-center text-sm text-muted-foreground mt-4">
+          By continuing, you agree to our{' '}
+          <Link href="/terms" className="underline hover:text-foreground">
+            Terms
+          </Link>{' '}
+          and{' '}
+          <Link href="/privacy" className="underline hover:text-foreground">
+            Privacy Policy
+          </Link>
+        </p>
+      </motion.div>
+
+      {/* Back to home */}
+      <Link href="/" className="mt-8 text-sm text-muted-foreground hover:text-foreground">
+        ← Back to home
+      </Link>
     </div>
   );
-}
-
-export default function AuthPage() {
-    const { user, isUserLoading } = useUser();
-    const router = useRouter();
-
-    useEffect(() => {
-        if (!isUserLoading && user) {
-            router.push('/ai-hub');
-        }
-    }, [user, isUserLoading, router]);
-
-    // Render a loading state while checking for user, or the form if no user.
-    if (isUserLoading || user) {
-       return (
-        <div className="flex items-center justify-center min-h-screen bg-background">
-            <LoaderCircle className="w-10 h-10 animate-spin text-primary" />
-        </div>
-       )
-    }
-
-    return (
-        <FirebaseClientProvider>
-            <AuthForm />
-        </FirebaseClientProvider>
-    );
 }

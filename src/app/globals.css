@@ -54,12 +54,51 @@ body {
 }
 
 @layer base {
-  * {
-    @apply border-border;
-  }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+  }
+
+  /* Remove default focus outlines and add cleaner ones */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2 ring-offset-background;
+  }
+
+  /* Smooth scrolling */
+  html {
     scroll-behavior: smooth;
+  }
+
+  /* Clean scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full hover:bg-muted-foreground/30;
+  }
+
+  /* Minimal card styling - no heavy shadows */
+  .card {
+    @apply bg-card border border-border rounded-lg;
+  }
+
+  /* Clean button hover states */
+  button {
+    @apply transition-colors duration-200;
+  }
+
+  /* Clean animation utilities */
+  .animate-in {
+    animation: animate-in 0.3s ease-out;
+  }
+
+  .fade-in {
+    animation: fade-in 0.5s ease-out;
   }
 }
 
@@ -88,5 +127,3 @@ body {
     background-size: 8rem 8rem;
     animation: grid 30s linear infinite;
 }
-
-    
